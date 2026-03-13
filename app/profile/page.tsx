@@ -117,8 +117,8 @@ export default function ProfilePage() {
         setLoading(true);
         setError("");
 
-        const response = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/profile/${USER_ID}`,
+       const response = await fetch(
+  `${process.env.NEXT_PUBLIC_API_URL}/profile/1f49b570-08ea-4151-9999-825fa0c77d6e`,
   {
     cache: "no-store",
   }

@@ -116,11 +116,14 @@ export default function DashboardPage() {
         setError("");
 
        const response = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/dashboard/${userId}`,
+  `${process.env.NEXT_PUBLIC_API_URL}/dashboard/1f49b570-08ea-4151-9999-825fa0c77d6e`,
   {
     cache: "no-store",
   }
 );
+    
+  
+
 
         const text = await response.text();
         const data = text ? JSON.parse(text) : {};
