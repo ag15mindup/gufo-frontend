@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   description: "GUFO Web App",
 };
 
+const navLinks = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/wallet", label: "Wallet" },
+  { href: "/transactions", label: "Transactions" },
+  { href: "/membership", label: "Membership" },
+  { href: "/profile", label: "Profilo" },
+  { href: "/customer-code", label: "Codice GUFO" },
+  { href: "/partner-demo", label: "Partner Demo" },
+  { href: "/partner-dashboard", label: "Partner Dashboard" },
+];
+
 export default function RootLayout({
   children,
 }: {
@@ -16,90 +27,108 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body style={{ margin: 0 }}>
-        <div style={{ display: "flex", minHeight: "100vh" }}>
-          
-          {/* Sidebar */}
-          <aside
-            style={{
-              width: "220px",
-              background: "#111",
-              color: "white",
-              padding: "20px",
-              flexShrink: 0,
-            }}
-          >
-            <h2 style={{ marginTop: 0 }}>GUFO</h2>
+      <body style={{ margin: 0, backgroundColor: "#0b1220" }}>
+        <div className="gufo-layout">
+          <aside className="gufo-sidebar">
+            <h2 className="gufo-logo">GUFO</h2>
 
-            <Link
-              href="/dashboard"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Dashboard
-            </Link>
-
-            <Link
-              href="/wallet"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Wallet
-            </Link>
-
-            <Link
-              href="/transactions"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Transactions
-            </Link>
-
-            <Link
-              href="/membership"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Membership
-            </Link>
-
-            <Link
-              href="/profile"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Profilo
-            </Link>
-
-            <Link
-              href="/customer-code"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Codice GUFO
-            </Link>
-
-            <Link
-              href="/partner-demo"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Partner Demo
-            </Link>
-
-            <Link
-              href="/partner-dashboard"
-              style={{ color: "white", display: "block", marginTop: "10px", textDecoration: "none" }}
-            >
-              Partner Dashboard
-            </Link>
+            <nav className="gufo-nav">
+              {navLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="gufo-link">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </aside>
 
-          {/* Contenuto principale */}
-          <main
-            style={{
-              flex: 1,
-              background: "#0b1220",
-              padding: "30px",
-            }}
-          >
-            {children}
-          </main>
-
+          <main className="gufo-main">{children}</main>
         </div>
+
+        <style jsx global>{`
+          * {
+            box-sizing: border-box;
+          }
+
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+            font-family: Arial, Helvetica, sans-serif;
+          }
+
+          .gufo-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+          }
+
+          .gufo-sidebar {
+            width: 220px;
+            background: #111;
+            color: white;
+            padding: 20px;
+            flex-shrink: 0;
+          }
+
+          .gufo-logo {
+            margin: 0 0 20px 0;
+            font-size: 32px;
+            line-height: 1.1;
+          }
+
+          .gufo-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .gufo-link {
+            color: white;
+            text-decoration: none;
+            display: block;
+            font-size: 18px;
+            line-height: 1.4;
+            word-break: break-word;
+          }
+
+          .gufo-main {
+            flex: 1;
+            min-width: 0;
+            background: #0b1220;
+            padding: 30px;
+          }
+
+          @media (max-width: 768px) {
+            .gufo-layout {
+              flex-direction: column;
+            }
+
+            .gufo-sidebar {
+              width: 100%;
+              padding: 16px;
+            }
+
+            .gufo-logo {
+              font-size: 28px;
+              margin-bottom: 16px;
+            }
+
+            .gufo-nav {
+              gap: 8px;
+            }
+
+            .gufo-link {
+              font-size: 16px;
+            }
+
+            .gufo-main {
+              width: 100%;
+              padding: 16px;
+            }
+          }
+        `}</style>
       </body>
     </html>
   );
