@@ -195,27 +195,32 @@ export default function PartnerDemoPage() {
     : 0;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 md:p-10">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-bold mb-3">GUFO Partner Demo</h1>
-        <p className="text-slate-300 mb-8">
+    <div className="w-full">
+      <div className="mx-auto w-full max-w-5xl">
+        <h1 className="mb-3 break-words text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl">
+          GUFO Partner Demo
+        </h1>
+
+        <p className="mb-6 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base md:mb-8">
           Cerca il cliente tramite codice GUFO e simula un pagamento partner.
         </p>
 
-        <div className="rounded-3xl bg-slate-900 border border-slate-800 p-6 md:p-8 shadow-lg">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 shadow-lg sm:rounded-3xl sm:p-6 md:p-8">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
             <form onSubmit={handleSearchCustomer} className="space-y-5">
-              <h2 className="text-2xl font-bold">Cerca cliente</h2>
+              <h2 className="text-xl font-bold text-white sm:text-2xl">
+                Cerca cliente
+              </h2>
 
               <div>
-                <label className="block text-sm text-slate-300 mb-2">
+                <label className="mb-2 block text-sm text-slate-300">
                   Codice cliente
                 </label>
                 <input
                   type="text"
                   value={customerCode}
                   onChange={(e) => setCustomerCode(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none"
                   placeholder="Es. GUFO-123456"
                 />
               </div>
@@ -223,54 +228,56 @@ export default function PartnerDemoPage() {
               <button
                 type="submit"
                 disabled={loadingCustomer}
-                className="w-full rounded-2xl bg-indigo-600 hover:bg-indigo-500 transition px-4 py-3 font-semibold disabled:opacity-60"
+                className="w-full rounded-2xl bg-indigo-600 px-4 py-3 font-semibold text-white transition hover:bg-indigo-500 disabled:opacity-60"
               >
                 {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
               </button>
 
               {customer && (
-                <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-5">
-                  <h3 className="text-xl font-bold text-blue-300 mb-4">
+                <div className="rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 sm:p-5">
+                  <h3 className="mb-4 text-lg font-bold text-blue-300 sm:text-xl">
                     Cliente trovato
                   </h3>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-100">
+                  <div className="grid grid-cols-1 gap-4 text-slate-100 sm:grid-cols-2">
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Codice cliente</p>
-                      <p className="text-xl font-bold">{customer.customer_code}</p>
+                      <p className="text-sm text-slate-400">Codice cliente</p>
+                      <p className="break-words text-lg font-bold sm:text-xl">
+                        {customer.customer_code}
+                      </p>
                     </div>
 
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Livello</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-sm text-slate-400">Livello</p>
+                      <p className="text-lg font-bold sm:text-xl">
                         {formatLevel(customer.level)}
                       </p>
                     </div>
 
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Saldo GUFO</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-sm text-slate-400">Saldo GUFO</p>
+                      <p className="break-words text-lg font-bold sm:text-xl">
                         {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
                       </p>
                     </div>
 
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Cashback</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-sm text-slate-400">Cashback</p>
+                      <p className="text-lg font-bold sm:text-xl">
                         {toNumberSafe(customer.cashback_percent).toFixed(2)}%
                       </p>
                     </div>
 
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Saldo €</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-sm text-slate-400">Saldo €</p>
+                      <p className="break-words text-lg font-bold sm:text-xl">
                         €{toNumberSafe(customer.balance_eur).toFixed(2)}
                       </p>
                     </div>
 
                     <div className="rounded-2xl bg-slate-800/70 p-4">
-                      <p className="text-slate-400 text-sm">Spesa stagione</p>
-                      <p className="text-xl font-bold">
+                      <p className="text-sm text-slate-400">Spesa stagione</p>
+                      <p className="break-words text-lg font-bold sm:text-xl">
                         €{toNumberSafe(customer.season_spent).toFixed(2)}
                       </p>
                     </div>
@@ -280,23 +287,25 @@ export default function PartnerDemoPage() {
             </form>
 
             <form onSubmit={handlePayment} className="space-y-5">
-              <h2 className="text-2xl font-bold">Registra pagamento</h2>
+              <h2 className="text-xl font-bold text-white sm:text-2xl">
+                Registra pagamento
+              </h2>
 
               <div>
-                <label className="block text-sm text-slate-300 mb-2">
+                <label className="mb-2 block text-sm text-slate-300">
                   Merchant
                 </label>
                 <input
                   type="text"
                   value={merchantName}
                   onChange={(e) => setMerchantName(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none"
                   placeholder="Es. Adidas"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-slate-300 mb-2">
+                <label className="mb-2 block text-sm text-slate-300">
                   Importo (€)
                 </label>
                 <input
@@ -305,17 +314,18 @@ export default function PartnerDemoPage() {
                   min="0"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 px-4 py-3 text-white outline-none"
+                  className="w-full rounded-2xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none"
                   placeholder="Es. 120"
                 />
               </div>
 
               {customer && previewAmount > 0 && (
                 <div className="rounded-2xl border border-slate-700 bg-slate-800/70 p-4">
-                  <h3 className="text-lg font-semibold mb-3 text-slate-200">
+                  <h3 className="mb-3 text-base font-semibold text-slate-200 sm:text-lg">
                     Riepilogo pagamento
                   </h3>
-                  <div className="space-y-2 text-slate-300">
+
+                  <div className="space-y-2 break-words text-sm text-slate-300 sm:text-base">
                     <p>
                       <span className="text-slate-400">Cliente:</span>{" "}
                       {customer.customer_code}
@@ -343,13 +353,13 @@ export default function PartnerDemoPage() {
               <button
                 type="submit"
                 disabled={loadingPayment || !customer}
-                className="w-full rounded-2xl bg-blue-600 hover:bg-blue-500 transition px-4 py-3 font-semibold disabled:opacity-60"
+                className="w-full rounded-2xl bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-500 disabled:opacity-60"
               >
                 {loadingPayment ? "Pagamento in corso..." : "Esegui pagamento"}
               </button>
 
               {!customer && (
-                <p className="text-slate-400 text-sm">
+                <p className="text-sm text-slate-400">
                   Cerca prima un cliente per abilitare il pagamento.
                 </p>
               )}
@@ -363,29 +373,29 @@ export default function PartnerDemoPage() {
           )}
 
           {result?.success && (
-            <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-5">
-              <h2 className="text-2xl font-bold text-green-300 mb-4">
+            <div className="mt-6 rounded-2xl border border-green-500/30 bg-green-500/10 p-4 sm:p-5">
+              <h2 className="mb-4 text-xl font-bold text-green-300 sm:text-2xl">
                 Pagamento completato
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-slate-100">
+              <div className="grid grid-cols-1 gap-4 text-slate-100 sm:grid-cols-2">
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">Merchant</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">Merchant</p>
+                  <p className="break-words text-lg font-bold">
                     {result.merchant_name || result.transaction?.benefit || "-"}
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">Importo</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">Importo</p>
+                  <p className="break-words text-lg font-bold">
                     €{toNumberSafe(result.transaction?.amount).toFixed(2)}
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">GUFO guadagnati</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">GUFO guadagnati</p>
+                  <p className="break-words text-lg font-bold">
                     {toNumberSafe(
                       result.gufo_earned || result.transaction?.gufo_earned
                     ).toFixed(2)}
@@ -393,22 +403,22 @@ export default function PartnerDemoPage() {
                 </div>
 
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">Nuovo saldo</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">Nuovo saldo</p>
+                  <p className="break-words text-lg font-bold">
                     {toNumberSafe(result.new_balance).toFixed(2)} GUFO
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">Tipo</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">Tipo</p>
+                  <p className="break-words text-lg font-bold">
                     {result.transaction?.tipo || "-"}
                   </p>
                 </div>
 
                 <div className="rounded-2xl bg-slate-800/70 p-4">
-                  <p className="text-slate-400 text-sm">Data</p>
-                  <p className="text-lg font-bold">
+                  <p className="text-sm text-slate-400">Data</p>
+                  <p className="break-words text-lg font-bold">
                     {result.transaction?.created_at
                       ? new Date(result.transaction.created_at).toLocaleString("it-IT")
                       : "-"}
@@ -419,6 +429,6 @@ export default function PartnerDemoPage() {
           )}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

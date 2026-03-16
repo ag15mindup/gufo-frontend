@@ -33,54 +33,100 @@ export default function RootLayout({
           fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
-        <div
-          style={{
-            display: "flex",
-            minHeight: "100vh",
-            width: "100%",
-            flexWrap: "wrap",
-          }}
-        >
-          <aside
-            style={{
-              width: "220px",
-              maxWidth: "100%",
-              background: "#111",
-              color: "white",
-              padding: "20px",
-              flexShrink: 0,
-              boxSizing: "border-box",
-            }}
-          >
-            <h2
-              style={{
-                margin: "0 0 20px 0",
-                fontSize: "32px",
-                lineHeight: 1.1,
-              }}
-            >
-              GUFO
-            </h2>
+        <style>{`
+          * {
+            box-sizing: border-box;
+          }
 
-            <nav
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-              }}
-            >
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+          }
+
+          .gufo-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+          }
+
+          .gufo-sidebar {
+            width: 220px;
+            background: #111;
+            color: white;
+            padding: 20px;
+            flex-shrink: 0;
+          }
+
+          .gufo-logo {
+            margin: 0 0 20px 0;
+            font-size: 32px;
+            line-height: 1.1;
+          }
+
+          .gufo-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          }
+
+          .gufo-link {
+            color: white;
+            text-decoration: none;
+            display: block;
+            font-size: 18px;
+            line-height: 1.4;
+            word-break: break-word;
+          }
+
+          .gufo-main {
+            flex: 1;
+            min-width: 0;
+            background: #0b1220;
+            padding: 20px;
+          }
+
+          @media (max-width: 768px) {
+            .gufo-layout {
+              flex-direction: column;
+            }
+
+            .gufo-sidebar {
+              width: 100%;
+              padding: 20px 16px;
+            }
+
+            .gufo-logo {
+              font-size: 28px;
+              margin-bottom: 16px;
+            }
+
+            .gufo-nav {
+              gap: 8px;
+            }
+
+            .gufo-link {
+              font-size: 16px;
+            }
+
+            .gufo-main {
+              width: 100%;
+              padding: 16px;
+            }
+          }
+        `}</style>
+
+        <div className="gufo-layout">
+          <aside className="gufo-sidebar">
+            <h2 className="gufo-logo">GUFO</h2>
+
+            <nav className="gufo-nav">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  style={{
-                    color: "white",
-                    textDecoration: "none",
-                    display: "block",
-                    fontSize: "18px",
-                    lineHeight: 1.4,
-                    wordBreak: "break-word",
-                  }}
+                  className="gufo-link"
                 >
                   {link.label}
                 </Link>
@@ -88,17 +134,7 @@ export default function RootLayout({
             </nav>
           </aside>
 
-          <main
-            style={{
-              flex: 1,
-              minWidth: 0,
-              background: "#0b1220",
-              padding: "20px",
-              boxSizing: "border-box",
-            }}
-          >
-            {children}
-          </main>
+          <main className="gufo-main">{children}</main>
         </div>
       </body>
     </html>
