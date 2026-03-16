@@ -29,6 +29,7 @@ type ProfileData = {
 };
 
 const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -97,6 +98,25 @@ function sortTransactions(transactions: Transaction[]): Transaction[] {
   });
 }
 
+async function safeJsonFetch(url: string, options?: RequestInit) {
+  const response = await fetch(url, {
+    ...options,
+    cache: "no-store",
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const text = await response.text();
+
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      `L'API non ha restituito JSON. Controlla NEXT_PUBLIC_API_URL: ${API_URL}`
+    );
+  }
+
+  const data = text ? JSON.parse(text) : {};
+  return { response, data };
+}
+
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "Utente GUFO",
@@ -117,15 +137,9 @@ export default function ProfilePage() {
         setLoading(true);
         setError("");
 
-       const response = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/profile/1f49b570-08ea-4151-9999-825fa0c77d6e`,
-  {
-    cache: "no-store",
-  }
-);
-
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
+        const { response, data } = await safeJsonFetch(
+          `${API_URL}/profile/${USER_ID}`
+        );
 
         if (!response.ok || data?.success === false) {
           throw new Error(data?.error || "Errore nel recupero profilo");
@@ -162,11 +176,17 @@ export default function ProfilePage() {
         const cashbackPercent = toNumberSafe(
           stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
         );
-        const level = formatLevel(String(stats?.level ?? wallet?.current_level ?? "basic"));
+        const level = formatLevel(
+          String(stats?.level ?? wallet?.current_level ?? "basic")
+        );
 
         setProfileData({
-          name: "Utente GUFO",
-          email: "email@gufo.app",
+          name:
+            profile?.full_name ??
+            profile?.name ??
+            profile?.username ??
+            "Utente GUFO",
+          email: profile?.email ?? "email@gufo.app",
           balanceGufo,
           totalSpent,
           cashbackPercent,
@@ -214,7 +234,9 @@ export default function ProfilePage() {
             {profileData.name.charAt(0).toUpperCase()}
           </div>
 
-          <h2 className="text-4xl font-bold text-center mb-2">{profileData.name}</h2>
+          <h2 className="text-4xl font-bold text-center mb-2">
+            {profileData.name}
+          </h2>
           <p className="text-slate-200 mb-6">{profileData.email}</p>
 
           <span className="px-5 py-2 rounded-full bg-green-500 text-white font-semibold">
@@ -228,17 +250,23 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div className="rounded-2xl bg-slate-400/30 p-6">
               <p className="text-2xl text-slate-100 mb-2">Saldo GUFO</p>
-              <p className="text-5xl font-bold">{profileData.balanceGufo.toFixed(2)}</p>
+              <p className="text-5xl font-bold">
+                {profileData.balanceGufo.toFixed(2)}
+              </p>
             </div>
 
             <div className="rounded-2xl bg-slate-400/30 p-6">
               <p className="text-2xl text-slate-100 mb-2">Cashback</p>
-              <p className="text-5xl font-bold">{profileData.cashbackPercent}%</p>
+              <p className="text-5xl font-bold">
+                {profileData.cashbackPercent}%
+              </p>
             </div>
 
             <div className="rounded-2xl bg-slate-400/30 p-6">
               <p className="text-2xl text-slate-100 mb-2">Spesa stagione</p>
-              <p className="text-5xl font-bold">€ {profileData.totalSpent.toFixed(2)}</p>
+              <p className="text-5xl font-bold">
+                € {profileData.totalSpent.toFixed(2)}
+              </p>
             </div>
 
             <div className="rounded-2xl bg-slate-400/30 p-6">

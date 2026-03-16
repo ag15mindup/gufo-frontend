@@ -2,18 +2,31 @@
 
 import { useEffect, useState } from "react";
 
+type WalletResponse = {
+  user_id?: string;
+  balance_gufo?: number | string | null;
+  balance_eur?: number | string | null;
+  season_spent?: number | string | null;
+  current_level?: string | null;
+  cashback_percent?: number | string | null;
+  last_season_reset?: string | null;
+};
+
 type Transaction = {
-  transaction_id?: string;
   id?: string;
-  tipo?: string;
+  transaction_id?: string;
   type?: string;
+  tipo?: string;
   merchant_name?: string;
   benefit?: string;
-  amount?: number | string | null;
+  merchant?: string;
   amount_euro?: number | string | null;
-  gufo?: number | string | null;
+  amount?: number | string | null;
+  importo?: number | string | null;
   gufo_earned?: number | string | null;
+  gufo?: number | string | null;
   cashback?: number | string | null;
+  cashback_percent?: number | string | null;
   created_at?: string | null;
   raw?: any;
 };
@@ -21,392 +34,454 @@ type Transaction = {
 type WalletData = {
   balanceGufo: number;
   balanceEuro: number;
-  totalTransactions: number;
-  totalSpent: number;
-  totalGufoEarned: number;
+  seasonSpent: number;
   level: string;
   cashbackPercent: number;
-  nextLevel: string;
-  nextLevelTarget: number;
-  progressPercent: number;
-  missingToNextLevel: number;
+  totalTransactions: number;
+  totalGufoEarned: number;
   transactions: Transaction[];
+  lastSeasonReset: string;
 };
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
-function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number" && !Number.isNaN(value)) return value;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    if (!Number.isNaN(parsed)) return parsed;
+function toNumberSafe(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatLevel(level: string) {
+  if (!level) return "Basic";
+  return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
+}
+
+function getTransactionAmount(tx: any) {
+  return toNumberSafe(
+    tx?.amount_euro ??
+      tx?.amount ??
+      tx?.importo ??
+      tx?.raw?.amount_euro ??
+      tx?.raw?.amount ??
+      tx?.raw?.importo
+  );
+}
+
+function getTransactionGufo(tx: any) {
+  const direct = toNumberSafe(
+    tx?.gufo_earned ??
+      tx?.gufo ??
+      tx?.raw?.gufo_earned ??
+      tx?.raw?.gufo
+  );
+
+  if (direct > 0) return direct;
+
+  const amount = getTransactionAmount(tx);
+  const cashback = toNumberSafe(
+    tx?.cashback_percent ??
+      tx?.cashback ??
+      tx?.raw?.cashback_percent ??
+      tx?.raw?.cashback
+  );
+
+  if (amount > 0 && cashback > 0) {
+    return Number(((amount * cashback) / 100).toFixed(2));
   }
-  return fallback;
+
+  return 0;
 }
 
-function getTransactionAmount(transaction: Transaction): number {
-  return toNumber(
-    transaction.amount_euro ??
-      transaction.amount ??
-      transaction.raw?.amount_euro ??
-      transaction.raw?.amount,
-    0
+function getTransactionMerchant(tx: any) {
+  return (
+    tx?.merchant_name ??
+    tx?.benefit ??
+    tx?.merchant ??
+    tx?.raw?.merchant_name ??
+    tx?.raw?.benefit ??
+    tx?.raw?.merchant ??
+    "-"
   );
 }
 
-function getTransactionGufo(transaction: Transaction): number {
-  return toNumber(
-    transaction.gufo_earned ??
-      transaction.gufo ??
-      transaction.raw?.gufo_earned ??
-      transaction.raw?.gufo ??
-      transaction.cashback,
-    0
+function getTransactionType(tx: any) {
+  return (
+    tx?.type ??
+    tx?.tipo ??
+    tx?.raw?.type ??
+    tx?.raw?.tipo ??
+    "-"
   );
 }
 
-function getTransactionType(transaction: Transaction): string {
-  return String(
-    transaction.type ??
-      transaction.tipo ??
-      transaction.raw?.type ??
-      transaction.raw?.tipo ??
-      "Cashback"
-  );
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("it-IT");
 }
 
-function sortTransactions(transactions: Transaction[]): Transaction[] {
-  return [...transactions].sort((a, b) => {
-    const da = a.created_at ? new Date(a.created_at).getTime() : 0;
-    const db = b.created_at ? new Date(b.created_at).getTime() : 0;
-    return db - da;
+async function safeJsonFetch(url: string, options?: RequestInit) {
+  const response = await fetch(url, {
+    ...options,
+    cache: "no-store",
   });
-}
 
-function getLevelFromSpent(totalSpent: number): string {
-  if (totalSpent >= 50000) return "Millionaire";
-  if (totalSpent >= 10000) return "Elite";
-  if (totalSpent >= 5000) return "VIP";
-  if (totalSpent >= 2500) return "Platinum";
-  if (totalSpent >= 1000) return "Gold";
-  if (totalSpent >= 500) return "Silver";
-  if (totalSpent >= 100) return "Bronze";
-  return "Basic";
-}
+  const contentType = response.headers.get("content-type") || "";
+  const text = await response.text();
 
-function getCashbackFromLevel(level: string): number {
-  switch (level) {
-    case "Bronze":
-      return 3;
-    case "Silver":
-      return 4;
-    case "Gold":
-      return 5;
-    case "Platinum":
-      return 6;
-    case "VIP":
-      return 7;
-    case "Elite":
-      return 8;
-    case "Millionaire":
-      return 10;
-    case "Basic":
-    default:
-      return 2;
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      `L'API non ha restituito JSON. Controlla NEXT_PUBLIC_API_URL: ${API_URL}`
+    );
   }
-}
 
-function getNextLevelInfo(totalSpent: number) {
-  if (totalSpent < 100) return { nextLevel: "Bronze", target: 100 };
-  if (totalSpent < 500) return { nextLevel: "Silver", target: 500 };
-  if (totalSpent < 1000) return { nextLevel: "Gold", target: 1000 };
-  if (totalSpent < 2500) return { nextLevel: "Platinum", target: 2500 };
-  if (totalSpent < 5000) return { nextLevel: "VIP", target: 5000 };
-  if (totalSpent < 10000) return { nextLevel: "Elite", target: 10000 };
-  if (totalSpent < 50000) return { nextLevel: "Millionaire", target: 50000 };
-  return { nextLevel: "Massimo livello", target: 50000 };
-}
-
-function getPreviousTarget(level: string): number {
-  switch (level) {
-    case "Bronze":
-      return 0;
-    case "Silver":
-      return 100;
-    case "Gold":
-      return 500;
-    case "Platinum":
-      return 1000;
-    case "VIP":
-      return 2500;
-    case "Elite":
-      return 5000;
-    case "Millionaire":
-      return 10000;
-    case "Basic":
-    default:
-      return 0;
-  }
+  const data = text ? JSON.parse(text) : {};
+  return { response, data };
 }
 
 export default function WalletPage() {
   const [walletData, setWalletData] = useState<WalletData>({
     balanceGufo: 0,
     balanceEuro: 0,
-    totalTransactions: 0,
-    totalSpent: 0,
-    totalGufoEarned: 0,
+    seasonSpent: 0,
     level: "Basic",
     cashbackPercent: 2,
-    nextLevel: "Bronze",
-    nextLevelTarget: 100,
-    progressPercent: 0,
-    missingToNextLevel: 100,
+    totalTransactions: 0,
+    totalGufoEarned: 0,
     transactions: [],
+    lastSeasonReset: "",
   });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadWallet() {
+    async function loadWalletPage() {
       try {
         setLoading(true);
         setError("");
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard/${USER_ID}`, {
-  cache: "no-store",
-});
+        const [walletRes, transactionsRes] = await Promise.all([
+          safeJsonFetch(`${API_URL}/wallet/${USER_ID}`),
+          safeJsonFetch(`${API_URL}/transactions/${USER_ID}`),
+        ]);
 
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
-
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel recupero wallet");
+        if (!walletRes.response.ok || walletRes.data?.success === false) {
+          throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
         }
 
-        const dashboard = data?.dashboard ?? data ?? {};
-        const profile = dashboard?.profile ?? {};
-        const wallet = profile?.wallet ?? dashboard?.wallet ?? {};
-        const stats = profile?.stats ?? dashboard?.stats ?? {};
-        const membership = profile?.membership ?? dashboard?.membership ?? {};
+        if (
+          !transactionsRes.response.ok ||
+          transactionsRes.data?.success === false
+        ) {
+          throw new Error(
+            transactionsRes.data?.error || "Errore nel recupero transazioni"
+          );
+        }
 
-        const rawTransactions: Transaction[] = Array.isArray(dashboard?.transactions)
-          ? dashboard.transactions
-          : Array.isArray(profile?.transactions)
-          ? profile.transactions
-          : Array.isArray(data?.transactions)
-          ? data.transactions
+        const wallet: WalletResponse = walletRes.data ?? {};
+        const rawTransactions = Array.isArray(transactionsRes.data)
+          ? transactionsRes.data
           : [];
 
-        const transactions = sortTransactions(rawTransactions);
-
-        const totalSpent = toNumber(
-          membership?.total_spent ??
-            stats?.total_spent ??
-            stats?.totalSpent,
-          transactions.reduce((sum, tx) => sum + getTransactionAmount(tx), 0)
+        const normalizedTransactions: Transaction[] = rawTransactions.map(
+          (tx: any) => ({
+            id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
+            transaction_id: tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
+            type: getTransactionType(tx),
+            merchant_name: getTransactionMerchant(tx),
+            amount_euro: getTransactionAmount(tx),
+            gufo_earned: getTransactionGufo(tx),
+            cashback:
+              tx?.cashback ??
+              tx?.cashback_percent ??
+              tx?.raw?.cashback ??
+              tx?.raw?.cashback_percent ??
+              null,
+            created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
+            raw: tx?.raw ?? tx,
+          })
         );
 
-        const totalTransactions = toNumber(
-          stats?.total_transactions ?? stats?.totalTransactions,
-          transactions.length
-        );
-
-        const balanceGufo = toNumber(
-          wallet?.balance_gufo ??
-            profile?.gufo_balance ??
-            profile?.gufoBalance,
+        const totalGufoEarned = normalizedTransactions.reduce(
+          (sum, tx) => sum + getTransactionGufo(tx),
           0
         );
-
-        const balanceEuro = toNumber(
-          membership?.euroBalance ??
-            wallet?.balance_eur ??
-            wallet?.balance_euro ??
-            profile?.euro_balance,
-          0
-        );
-
-        const totalGufoEarned = toNumber(
-          stats?.gufo_earned ??
-            stats?.totalGufoEarned ??
-            profile?.gufo_balance,
-          transactions.reduce((sum, tx) => sum + getTransactionGufo(tx), 0)
-        );
-
-        const backendLevel =
-          membership?.membershipLevel ||
-          membership?.level_name ||
-          membership?.level ||
-          profile?.level_name ||
-          profile?.level ||
-          "";
-
-        const computedLevel = getLevelFromSpent(totalSpent);
-        const level =
-          backendLevel &&
-          !["Basic", "basic", "Orc"].includes(String(backendLevel))
-            ? String(backendLevel)
-            : computedLevel;
-
-        const cashbackPercent = toNumber(
-          membership?.cashbackPercent ?? membership?.cashback_percent,
-          getCashbackFromLevel(level)
-        );
-
-        const { nextLevel, target } = getNextLevelInfo(totalSpent);
-        const previousTarget = getPreviousTarget(level);
-
-        const progressPercent =
-          nextLevel === "Massimo livello"
-            ? 100
-            : target > previousTarget
-            ? Math.min(
-                100,
-                Math.max(
-                  0,
-                  ((totalSpent - previousTarget) / (target - previousTarget)) * 100
-                )
-              )
-            : 100;
-
-        const missingToNextLevel =
-          nextLevel === "Massimo livello" ? 0 : Math.max(0, target - totalSpent);
 
         setWalletData({
-          balanceGufo,
-          balanceEuro,
-          totalTransactions,
-          totalSpent,
-          totalGufoEarned,
-          level,
-          cashbackPercent,
-          nextLevel,
-          nextLevelTarget: target,
-          progressPercent,
-          missingToNextLevel,
-          transactions,
+          balanceGufo: toNumberSafe(wallet?.balance_gufo),
+          balanceEuro: toNumberSafe(wallet?.balance_eur),
+          seasonSpent: toNumberSafe(wallet?.season_spent),
+          level: String(wallet?.current_level ?? "Basic"),
+          cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 2),
+          totalTransactions: normalizedTransactions.length,
+          totalGufoEarned: Number(totalGufoEarned.toFixed(2)),
+          transactions: normalizedTransactions,
+          lastSeasonReset: String(wallet?.last_season_reset ?? ""),
         });
-      } catch (err: unknown) {
-        console.error("Errore caricamento wallet:", err);
-        setError(err instanceof Error ? err.message : "Errore recupero wallet");
+      } catch (err: any) {
+        setError(err?.message || "Errore sconosciuto");
       } finally {
         setLoading(false);
       }
     }
 
-    loadWallet();
+    loadWalletPage();
   }, []);
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-white p-6 md:p-10">
-        <h1 className="text-4xl font-bold text-black mb-6">Wallet GUFO</h1>
-        <div className="text-gray-500">Caricamento wallet...</div>
-      </main>
+      <div style={{ color: "white" }}>
+        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>Wallet</h1>
+        <p>Caricamento wallet...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen bg-white p-6 md:p-10">
-        <h1 className="text-4xl font-bold text-black mb-6">Wallet GUFO</h1>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          {error}
-        </div>
-      </main>
+      <div style={{ color: "white" }}>
+        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>Wallet</h1>
+        <p style={{ color: "#f87171" }}>{error}</p>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-white p-6 md:p-10">
-      <h1 className="text-4xl font-bold text-black mb-8">Wallet GUFO</h1>
+    <div style={{ color: "white" }}>
+      <h1 style={{ fontSize: "48px", fontWeight: "bold", marginBottom: "10px" }}>
+        Wallet
+      </h1>
 
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="rounded-3xl p-6 text-white bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 shadow-sm min-h-[180px] flex flex-col justify-between">
-          <div className="text-sm text-white/80">Saldo disponibile</div>
-          <div className="text-5xl font-bold">{walletData.balanceGufo.toFixed(2)} GUFO</div>
-          <div className="text-sm text-white/80">
-            Saldo EUR: €{walletData.balanceEuro.toFixed(2)}
+      <p style={{ color: "#cbd5e1", marginBottom: "30px" }}>
+        Panoramica saldo, cashback e movimenti.
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          gap: "20px",
+          marginBottom: "24px",
+        }}
+      >
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Saldo GUFO</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            {walletData.balanceGufo.toFixed(2)}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Statistiche</h2>
-          <div className="space-y-4 text-gray-700">
-            <p>Totale transazioni: {walletData.totalTransactions}</p>
-            <p>Totale speso: €{walletData.totalSpent.toFixed(2)}</p>
-            <p>GUFO guadagnati: {walletData.totalGufoEarned.toFixed(2)}</p>
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Saldo Euro</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            € {walletData.balanceEuro.toFixed(2)}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Livello</h2>
-          <div className="text-5xl font-bold text-black mb-3">{walletData.level}</div>
-          <p className="text-gray-600 mb-1">Prossimo livello: {walletData.nextLevel}</p>
-          <p className="text-gray-600 mb-1">
-            Cashback corrente: {walletData.cashbackPercent}%
-          </p>
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Spesa stagione</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            € {walletData.seasonSpent.toFixed(2)}
+          </div>
+        </div>
 
-          {walletData.nextLevel === "Massimo livello" ? (
-            <p className="text-gray-600 mb-3">Hai raggiunto il livello massimo.</p>
-          ) : (
-            <>
-              <p className="text-gray-600 mb-1">
-                Spesa attuale: €{walletData.totalSpent.toFixed(2)} / Obiettivo: €
-                {walletData.nextLevelTarget.toFixed(2)}
-              </p>
-              <p className="text-gray-600 mb-3">
-                Ti mancano €{walletData.missingToNextLevel.toFixed(2)} per salire di livello
-              </p>
-            </>
-          )}
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Cashback attuale</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            {walletData.cashbackPercent}%
+          </div>
+        </div>
 
-          <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-3 bg-blue-600 rounded-full transition-all duration-500"
-              style={{ width: `${walletData.progressPercent}%` }}
-            />
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Livello</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            {formatLevel(walletData.level)}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: "#334155",
+            borderRadius: "16px",
+            padding: "24px",
+          }}
+        >
+          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>GUFO guadagnati</div>
+          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+            {walletData.totalGufoEarned.toFixed(2)}
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: "#1e293b",
+          borderRadius: "16px",
+          padding: "24px",
+          marginBottom: "24px",
+        }}
+      >
+        <h2 style={{ marginTop: 0, marginBottom: "20px", fontSize: "30px" }}>
+          Riepilogo wallet
+        </h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gap: "16px",
+          }}
+        >
+          <div
+            style={{
+              background: "#0f172a",
+              borderRadius: "12px",
+              padding: "18px",
+            }}
+          >
+            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Transazioni</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
+              {walletData.totalTransactions}
+            </div>
           </div>
 
-          <p className="text-sm text-gray-500 mt-2">
-            Progresso: {Math.round(walletData.progressPercent)}%
-          </p>
-        </div>
-      </section>
+          <div
+            style={{
+              background: "#0f172a",
+              borderRadius: "12px",
+              padding: "18px",
+            }}
+          >
+            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Livello attuale</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
+              {formatLevel(walletData.level)}
+            </div>
+          </div>
 
-      <section className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          Ultime transazioni
+          <div
+            style={{
+              background: "#0f172a",
+              borderRadius: "12px",
+              padding: "18px",
+            }}
+          >
+            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Cashback</div>
+            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
+              {walletData.cashbackPercent}%
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "#0f172a",
+              borderRadius: "12px",
+              padding: "18px",
+            }}
+          >
+            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>
+              Ultimo reset stagione
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: "bold" }}>
+              {walletData.lastSeasonReset || "-"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          background: "#1e293b",
+          borderRadius: "16px",
+          padding: "24px",
+        }}
+      >
+        <h2 style={{ marginTop: 0, marginBottom: "20px", fontSize: "30px" }}>
+          Storico transazioni
         </h2>
 
         {walletData.transactions.length === 0 ? (
-          <div className="text-gray-500">Nessuna transazione disponibile</div>
+          <p style={{ color: "#94a3b8" }}>Nessuna transazione disponibile</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
-                <tr className="border-b border-gray-200 text-left">
-                  <th className="py-4 pr-4 text-gray-700 font-semibold">Tipo</th>
-                  <th className="py-4 pr-4 text-gray-700 font-semibold">Importo</th>
-                  <th className="py-4 pr-4 text-gray-700 font-semibold">GUFO</th>
+                <tr
+                  style={{
+                    color: "#94a3b8",
+                    borderBottom: "1px solid #334155",
+                  }}
+                >
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>Tipo</th>
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>Merchant</th>
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>Importo</th>
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>GUFO</th>
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>Cashback</th>
+                  <th style={{ padding: "12px 0", textAlign: "left" }}>Data</th>
                 </tr>
               </thead>
               <tbody>
-                {walletData.transactions.slice(0, 10).map((transaction, index) => (
+                {walletData.transactions.map((tx, index) => (
                   <tr
-                    key={transaction.transaction_id ?? transaction.id ?? index}
-                    className="border-b border-gray-100"
+                    key={tx.id || tx.transaction_id || index}
+                    style={{ borderBottom: "1px solid #334155" }}
                   >
-                    <td className="py-4 pr-4 text-gray-800">
-                      {getTransactionType(transaction)}
+                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
+                      {getTransactionType(tx)}
                     </td>
-                    <td className="py-4 pr-4 font-semibold text-green-700">
-                      €{getTransactionAmount(transaction).toFixed(2)}
+                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
+                      {getTransactionMerchant(tx)}
                     </td>
-                    <td className="py-4 pr-4 text-gray-800">
-                      {getTransactionGufo(transaction).toFixed(2)}
+                    <td style={{ padding: "14px 0", color: "#86efac", fontWeight: "bold" }}>
+                      €{getTransactionAmount(tx).toFixed(2)}
+                    </td>
+                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
+                      {getTransactionGufo(tx).toFixed(2)}
+                    </td>
+                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
+                      {toNumberSafe(
+                        tx?.cashback ??
+                          tx?.cashback_percent ??
+                          tx?.raw?.cashback ??
+                          tx?.raw?.cashback_percent
+                      ).toFixed(2)}
+                      %
+                    </td>
+                    <td style={{ padding: "14px 0", color: "#cbd5e1" }}>
+                      {formatDate(tx.created_at)}
                     </td>
                   </tr>
                 ))}
@@ -414,7 +489,7 @@ export default function WalletPage() {
             </table>
           </div>
         )}
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
