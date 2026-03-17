@@ -31,8 +31,7 @@ type ApiResponse = {
 
 const DEFAULT_CUSTOMER_CODE = "GUFO-123456";
 const PARTNER_API_KEY = "gufo_partner_123456";
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -43,24 +42,7 @@ function formatLevel(level: string) {
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
 
-async function safeJsonFetch(url: string, options?: RequestInit) {
-  const response = await fetch(url, {
-    ...options,
-    cache: "no-store",
-  });
-
-  const contentType = response.headers.get("content-type") || "";
-  const text = await response.text();
-
-  if (!contentType.includes("application/json")) {
-    throw new Error(
-      `L'API non ha restituito JSON. Controlla NEXT_PUBLIC_API_URL: ${API_URL}`
-    );
-  }
-
-  const data = text ? JSON.parse(text) : {};
-  return { response, data };
-}
+import { safeJsonFetch } from "@/lib/api";
 
 export default function PartnerDemoPage() {
   const [customerCode, setCustomerCode] = useState(DEFAULT_CUSTOMER_CODE);

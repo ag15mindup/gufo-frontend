@@ -28,7 +28,7 @@ type DashboardData = {
   monthlyExpenses: number[];
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
 function formatLevel(level: string) {
@@ -101,24 +101,11 @@ function getTransactionType(tx: any) {
   );
 }
 
-async function safeJsonFetch(url: string, options?: RequestInit) {
-  const response = await fetch(url, {
-    ...options,
-    cache: "no-store",
-  });
+import { safeJsonFetch } from "@/lib/api";
+  
 
-  const contentType = response.headers.get("content-type") || "";
-  const text = await response.text();
+ 
 
-  if (!contentType.includes("application/json")) {
-    throw new Error(
-      `L'API non ha restituito JSON. Controlla NEXT_PUBLIC_API_URL: ${API_URL}`
-    );
-  }
-
-  const data = text ? JSON.parse(text) : {};
-  return { response, data };
-}
 
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({

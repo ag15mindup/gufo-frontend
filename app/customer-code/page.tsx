@@ -13,7 +13,7 @@ type CustomerData = {
   season_spent: number;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const CUSTOMER_CODE = "GUFO-123456";
 
 function toNumberSafe(value: unknown) {
@@ -21,22 +21,8 @@ function toNumberSafe(value: unknown) {
   return Number.isFinite(n) ? n : 0;
 }
 
-async function safeJsonFetch(url: string, options?: RequestInit) {
-  const response = await fetch(url, {
-    ...options,
-    cache: "no-store",
-  });
-
-  const contentType = response.headers.get("content-type") || "";
-  const text = await response.text();
-
-  if (!contentType.includes("application/json")) {
-    throw new Error("L'API non ha restituito JSON");
-  }
-
-  const data = text ? JSON.parse(text) : {};
-  return { response, data };
-}
+import { safeJsonFetch } from "@/lib/api";
+  
 
 function formatLevel(level: string) {
   if (!level) return "Basic";

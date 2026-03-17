@@ -18,7 +18,7 @@ type Transaction = {
   raw?: any;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
 function toNumberSafe(value: unknown) {
@@ -77,20 +77,7 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-async function safeJsonFetch(url: string) {
-  const response = await fetch(url, { cache: "no-store" });
-  const contentType = response.headers.get("content-type") || "";
-  const text = await response.text();
-
-  if (!contentType.includes("application/json")) {
-    throw new Error(
-      `L'API non ha restituito JSON. Controlla NEXT_PUBLIC_API_URL: ${API_URL}`
-    );
-  }
-
-  const data = text ? JSON.parse(text) : {};
-  return { response, data };
-}
+import { safeJsonFetch } from "@/lib/api";
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
