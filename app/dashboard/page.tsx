@@ -28,7 +28,7 @@ type DashboardData = {
   monthlyExpenses: number[];
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = "https://gufo-backend1.onrender.com";
 const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
 function formatLevel(level: string) {
