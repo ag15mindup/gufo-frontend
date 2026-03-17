@@ -1,32 +1,32 @@
-export async function safeJsonFetch(
-  url: string,
-  options?: RequestInit,
-  retries = 2
-) {
+export async function safeJsonFetch(url: string, options?: RequestInit) {
+  let response: Response;
+
   try {
-    const response = await fetch(url, {
+    response = await fetch(url, {
       ...options,
       cache: "no-store",
     });
-
-    const contentType = response.headers.get("content-type") || "";
-    const text = await response.text();
-
-    if (!contentType.includes("application/json")) {
-      throw new Error("API non valida");
-    }
-
-    const data = text ? JSON.parse(text) : {};
-
-    return { response, data };
-  } catch (error) {
-    if (retries > 0) {
-      // aspetta 2.5 secondi (Render si "sveglia")
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-
-      return safeJsonFetch(url, options, retries - 1);
-    }
-
-    throw error;
+  } catch (err) {
+    throw new Error("Errore di connessione al server");
   }
+
+  let text = "";
+  try {
+    text = await response.text();
+  } catch {
+    throw new Error("Errore lettura risposta server");
+  }
+
+  let data: any = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error("Risposta non valida dal server");
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error || "Errore API");
+  }
+
+  return { response, data };
 }
