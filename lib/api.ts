@@ -1,32 +1,37 @@
 export async function safeJsonFetch(url: string, options?: RequestInit) {
-  let response: Response;
-
-  try {
-    response = await fetch(url, {
+  async function fetchAndParse() {
+    const response = await fetch(url, {
       ...options,
       cache: "no-store",
     });
-  } catch (err) {
-    throw new Error("Errore di connessione al server");
+
+    const text = await response.text();
+    const cleaned = text.trim();
+
+    let data;
+    try {
+      data = cleaned ? JSON.parse(cleaned) : {};
+    } catch {
+      console.error("RISPOSTA RAW:", text);
+      throw new Error("parse_error");
+    }
+
+    if (!response.ok) {
+      throw new Error(data?.error || "Errore API");
+    }
+
+    return { response, data };
   }
 
-  let text = "";
   try {
-    text = await response.text();
+    return await fetchAndParse();
   } catch {
-    throw new Error("Errore lettura risposta server");
-  }
+    await new Promise((r) => setTimeout(r, 1500));
 
-  let data: any = {};
-  try {
-    data = text ? JSON.parse(text) : {};
-  } catch {
-    throw new Error("Risposta non valida dal server");
+    try {
+      return await fetchAndParse();
+    } catch {
+      throw new Error("Risposta non valida dal server");
+    }
   }
-
-  if (!response.ok) {
-    throw new Error(data?.error || "Errore API");
-  }
-
-  return { response, data };
 }
