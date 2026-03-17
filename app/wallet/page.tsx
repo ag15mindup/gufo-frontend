@@ -114,6 +114,15 @@ function getTransactionType(tx: any) {
   );
 }
 
+function getTransactionCashback(tx: any) {
+  return toNumberSafe(
+    tx?.cashback ??
+      tx?.cashback_percent ??
+      tx?.raw?.cashback ??
+      tx?.raw?.cashback_percent
+  );
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "-";
 
@@ -234,262 +243,447 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div style={{ color: "white" }}>
-        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>Wallet</h1>
-        <p>Caricamento wallet...</p>
+      <div className="wallet-page">
+        <style>{walletStyles}</style>
+        <h1 className="wallet-title">Wallet</h1>
+        <p className="wallet-subtitle">Caricamento wallet...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ color: "white" }}>
-        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>Wallet</h1>
+      <div className="wallet-page">
+        <style>{walletStyles}</style>
+        <h1 className="wallet-title">Wallet</h1>
         <p style={{ color: "#f87171" }}>{error}</p>
       </div>
     );
   }
 
   return (
-    <div style={{ color: "white" }}>
-      <h1 style={{ fontSize: "48px", fontWeight: "bold", marginBottom: "10px" }}>
-        Wallet
-      </h1>
+    <div className="wallet-page">
+      <style>{walletStyles}</style>
 
-      <p style={{ color: "#cbd5e1", marginBottom: "30px" }}>
-        Panoramica saldo, cashback e movimenti.
-      </p>
+      <h1 className="wallet-title">Wallet</h1>
+      <p className="wallet-subtitle">Panoramica saldo, cashback e movimenti.</p>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          gap: "20px",
-          marginBottom: "24px",
-        }}
-      >
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Saldo GUFO</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-            {walletData.balanceGufo.toFixed(2)}
-          </div>
+      <div className="top-stats-grid">
+        <div className="big-stat-card">
+          <div className="big-stat-label">Saldo GUFO</div>
+          <div className="big-stat-value">{walletData.balanceGufo.toFixed(2)}</div>
         </div>
 
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Saldo Euro</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-            € {walletData.balanceEuro.toFixed(2)}
-          </div>
+        <div className="big-stat-card">
+          <div className="big-stat-label">Saldo Euro</div>
+          <div className="big-stat-value">€ {walletData.balanceEuro.toFixed(2)}</div>
         </div>
 
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Spesa stagione</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-            € {walletData.seasonSpent.toFixed(2)}
-          </div>
+        <div className="big-stat-card">
+          <div className="big-stat-label">Spesa stagione</div>
+          <div className="big-stat-value">€ {walletData.seasonSpent.toFixed(2)}</div>
         </div>
 
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Cashback attuale</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-            {walletData.cashbackPercent}%
-          </div>
+        <div className="big-stat-card">
+          <div className="big-stat-label">Cashback attuale</div>
+          <div className="big-stat-value">{walletData.cashbackPercent}%</div>
         </div>
 
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Livello</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-            {formatLevel(walletData.level)}
-          </div>
+        <div className="big-stat-card">
+          <div className="big-stat-label">Livello</div>
+          <div className="big-stat-value">{formatLevel(walletData.level)}</div>
         </div>
 
-        <div
-          style={{
-            background: "#334155",
-            borderRadius: "16px",
-            padding: "24px",
-          }}
-        >
-          <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>GUFO guadagnati</div>
-          <div style={{ fontSize: "48px", fontWeight: "bold" }}>
+        <div className="big-stat-card">
+          <div className="big-stat-label">GUFO guadagnati</div>
+          <div className="big-stat-value">
             {walletData.totalGufoEarned.toFixed(2)}
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          background: "#1e293b",
-          borderRadius: "16px",
-          padding: "24px",
-          marginBottom: "24px",
-        }}
-      >
-        <h2 style={{ marginTop: 0, marginBottom: "20px", fontSize: "30px" }}>
-          Riepilogo wallet
-        </h2>
+      <div className="panel">
+        <h2 className="panel-title">Riepilogo wallet</h2>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-            gap: "16px",
-          }}
-        >
-          <div
-            style={{
-              background: "#0f172a",
-              borderRadius: "12px",
-              padding: "18px",
-            }}
-          >
-            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Transazioni</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
-              {walletData.totalTransactions}
-            </div>
+        <div className="summary-grid">
+          <div className="summary-card">
+            <div className="summary-label">Transazioni</div>
+            <div className="summary-value">{walletData.totalTransactions}</div>
           </div>
 
-          <div
-            style={{
-              background: "#0f172a",
-              borderRadius: "12px",
-              padding: "18px",
-            }}
-          >
-            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Livello attuale</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
-              {formatLevel(walletData.level)}
-            </div>
+          <div className="summary-card">
+            <div className="summary-label">Livello attuale</div>
+            <div className="summary-value">{formatLevel(walletData.level)}</div>
           </div>
 
-          <div
-            style={{
-              background: "#0f172a",
-              borderRadius: "12px",
-              padding: "18px",
-            }}
-          >
-            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>Cashback</div>
-            <div style={{ fontSize: "28px", fontWeight: "bold" }}>
-              {walletData.cashbackPercent}%
-            </div>
+          <div className="summary-card">
+            <div className="summary-label">Cashback</div>
+            <div className="summary-value">{walletData.cashbackPercent}%</div>
           </div>
 
-          <div
-            style={{
-              background: "#0f172a",
-              borderRadius: "12px",
-              padding: "18px",
-            }}
-          >
-            <div style={{ color: "#94a3b8", marginBottom: "8px" }}>
-              Ultimo reset stagione
-            </div>
-            <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-              {walletData.lastSeasonReset || "-"}
+          <div className="summary-card">
+            <div className="summary-label">Ultimo reset stagione</div>
+            <div className="summary-value small">
+              {walletData.lastSeasonReset
+                ? formatDate(walletData.lastSeasonReset)
+                : "-"}
             </div>
           </div>
         </div>
       </div>
 
-      <div
-        style={{
-          background: "#1e293b",
-          borderRadius: "16px",
-          padding: "24px",
-        }}
-      >
-        <h2 style={{ marginTop: 0, marginBottom: "20px", fontSize: "30px" }}>
-          Storico transazioni
-        </h2>
+      <div className="panel">
+        <h2 className="panel-title">Storico transazioni</h2>
 
         {walletData.transactions.length === 0 ? (
           <p style={{ color: "#94a3b8" }}>Nessuna transazione disponibile</p>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr
-                  style={{
-                    color: "#94a3b8",
-                    borderBottom: "1px solid #334155",
-                  }}
-                >
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>Tipo</th>
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>Merchant</th>
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>Importo</th>
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>GUFO</th>
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>Cashback</th>
-                  <th style={{ padding: "12px 0", textAlign: "left" }}>Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {walletData.transactions.map((tx, index) => (
-                  <tr
-                    key={tx.id || tx.transaction_id || index}
-                    style={{ borderBottom: "1px solid #334155" }}
-                  >
-                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                      {getTransactionType(tx)}
-                    </td>
-                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                      {getTransactionMerchant(tx)}
-                    </td>
-                    <td style={{ padding: "14px 0", color: "#86efac", fontWeight: "bold" }}>
-                      €{getTransactionAmount(tx).toFixed(2)}
-                    </td>
-                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                      {getTransactionGufo(tx).toFixed(2)}
-                    </td>
-                    <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                      {toNumberSafe(
-                        tx?.cashback ??
-                          tx?.cashback_percent ??
-                          tx?.raw?.cashback ??
-                          tx?.raw?.cashback_percent
-                      ).toFixed(2)}
-                      %
-                    </td>
-                    <td style={{ padding: "14px 0", color: "#cbd5e1" }}>
-                      {formatDate(tx.created_at)}
-                    </td>
+          <>
+            <div className="table-wrap desktop-only">
+              <table className="transactions-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Merchant</th>
+                    <th>Importo</th>
+                    <th>GUFO</th>
+                    <th>Cashback</th>
+                    <th>Data</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {walletData.transactions.map((tx, index) => (
+                    <tr key={tx.id || tx.transaction_id || index}>
+                      <td>{getTransactionType(tx)}</td>
+                      <td>{getTransactionMerchant(tx)}</td>
+                      <td className="amount-green">
+                        €{getTransactionAmount(tx).toFixed(2)}
+                      </td>
+                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                      <td>{getTransactionCashback(tx).toFixed(2)}%</td>
+                      <td>{formatDate(tx.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mobile-transactions mobile-only">
+              {walletData.transactions.map((tx, index) => (
+                <div
+                  className="tx-card"
+                  key={tx.id || tx.transaction_id || index}
+                >
+                  <div className="tx-row">
+                    <span className="tx-label">Tipo</span>
+                    <span className="tx-value">{getTransactionType(tx)}</span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">Merchant</span>
+                    <span className="tx-value">{getTransactionMerchant(tx)}</span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">Importo</span>
+                    <span className="tx-value amount-green">
+                      €{getTransactionAmount(tx).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">GUFO</span>
+                    <span className="tx-value">
+                      {getTransactionGufo(tx).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">Cashback</span>
+                    <span className="tx-value">
+                      {getTransactionCashback(tx).toFixed(2)}%
+                    </span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">Data</span>
+                    <span className="tx-value">{formatDate(tx.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
   );
 }
+
+const walletStyles = `
+  * {
+    box-sizing: border-box;
+  }
+
+  .wallet-page {
+    color: white;
+    width: 100%;
+  }
+
+  .wallet-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    line-height: 1.1;
+  }
+
+  .wallet-subtitle {
+    color: #cbd5e1;
+    margin: 0 0 30px 0;
+    font-size: 16px;
+  }
+
+  .top-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .big-stat-card {
+    background: #334155;
+    border-radius: 16px;
+    padding: 24px;
+    min-width: 0;
+  }
+
+  .big-stat-label {
+    color: #e2e8f0;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+
+  .big-stat-value {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .panel {
+    background: #1e293b;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .summary-card {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 18px;
+    min-width: 0;
+  }
+
+  .summary-label {
+    color: #94a3b8;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.15;
+    word-break: break-word;
+  }
+
+  .summary-value.small {
+    font-size: 18px;
+  }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .transactions-table th {
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+    padding: 12px 0;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .transactions-table td {
+    padding: 14px 0;
+    color: #e2e8f0;
+    border-bottom: 1px solid #334155;
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  .amount-green {
+    color: #86efac !important;
+    font-weight: 700;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  .mobile-transactions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tx-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .tx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .tx-row:last-child {
+    border-bottom: none;
+  }
+
+  .tx-label {
+    color: #94a3b8;
+    font-size: 13px;
+    flex: 0 0 90px;
+  }
+
+  .tx-value {
+    color: #e2e8f0;
+    font-size: 13px;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  @media (max-width: 1024px) {
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .wallet-title {
+      font-size: 32px;
+    }
+
+    .wallet-subtitle {
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .top-stats-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .big-stat-card {
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .big-stat-label {
+      font-size: 14px;
+    }
+
+    .big-stat-value {
+      font-size: 32px;
+    }
+
+    .panel {
+      padding: 18px 14px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .summary-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .summary-card {
+      padding: 16px;
+    }
+
+    .summary-value {
+      font-size: 24px;
+    }
+
+    .summary-value.small {
+      font-size: 16px;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+
+    .mobile-only {
+      display: block;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .wallet-title {
+      font-size: 28px;
+    }
+
+    .panel-title {
+      font-size: 22px;
+    }
+
+    .big-stat-value {
+      font-size: 28px;
+    }
+
+    .summary-value {
+      font-size: 22px;
+    }
+
+    .tx-label,
+    .tx-value {
+      font-size: 12px;
+    }
+  }
+`;

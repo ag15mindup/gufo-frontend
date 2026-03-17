@@ -9,8 +9,10 @@ type Transaction = {
   type?: string;
   merchant_name?: string;
   benefit?: string;
+  merchant?: string;
   amount_euro?: number | string | null;
   amount?: number | string | null;
+  importo?: number | string | null;
   gufo?: number | string | null;
   gufo_earned?: number | string | null;
   cashback?: number | string | null;
@@ -96,6 +98,15 @@ function sortTransactions(transactions: Transaction[]): Transaction[] {
     const db = b.created_at ? new Date(b.created_at).getTime() : 0;
     return db - da;
   });
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("it-IT");
 }
 
 async function safeJsonFetch(url: string, options?: RequestInit) {
@@ -206,106 +217,107 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-900 p-6 md:p-10 text-white">
-        <h1 className="text-4xl font-bold mb-6">Il tuo profilo</h1>
-        <div className="text-slate-300">Caricamento profilo...</div>
-      </main>
+      <div className="profile-page">
+        <style>{profileStyles}</style>
+        <h1 className="page-title">Il tuo profilo</h1>
+        <p className="page-subtitle">Caricamento profilo...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <main className="min-h-screen bg-slate-900 p-6 md:p-10 text-white">
-        <h1 className="text-4xl font-bold mb-6">Il tuo profilo</h1>
-        <div className="rounded-xl border border-red-400/30 bg-red-500/10 p-4 text-red-300">
-          {error}
-        </div>
-      </main>
+      <div className="profile-page">
+        <style>{profileStyles}</style>
+        <h1 className="page-title">Il tuo profilo</h1>
+        <div className="error-box">{error}</div>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-900 p-6 md:p-10 text-white">
-      <h1 className="text-4xl font-bold mb-8">Il tuo profilo</h1>
+    <div className="profile-page">
+      <style>{profileStyles}</style>
 
-      <section className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-        <div className="rounded-3xl bg-slate-700/70 p-8 shadow-sm flex flex-col items-center justify-center min-h-[320px]">
-          <div className="w-24 h-24 rounded-full bg-yellow-400 text-slate-900 flex items-center justify-center text-4xl mb-6">
+      <h1 className="page-title">Il tuo profilo</h1>
+      <p className="page-subtitle">
+        Panoramica account, livello e ultime attività.
+      </p>
+
+      <div className="profile-layout">
+        <div className="profile-card">
+          <div className="avatar">
             {profileData.name.charAt(0).toUpperCase()}
           </div>
 
-          <h2 className="text-4xl font-bold text-center mb-2">
-            {profileData.name}
-          </h2>
-          <p className="text-slate-200 mb-6">{profileData.email}</p>
+          <h2 className="profile-name">{profileData.name}</h2>
+          <p className="profile-email">{profileData.email}</p>
 
-          <span className="px-5 py-2 rounded-full bg-green-500 text-white font-semibold">
-            {profileData.level}
-          </span>
+          <span className="level-badge">{profileData.level}</span>
         </div>
 
-        <div className="rounded-3xl bg-slate-700/70 p-8 shadow-sm">
-          <h2 className="text-4xl font-bold mb-6">Riepilogo account</h2>
+        <div className="content-area">
+          <div className="panel">
+            <h2 className="panel-title">Riepilogo account</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-            <div className="rounded-2xl bg-slate-400/30 p-6">
-              <p className="text-2xl text-slate-100 mb-2">Saldo GUFO</p>
-              <p className="text-5xl font-bold">
-                {profileData.balanceGufo.toFixed(2)}
-              </p>
-            </div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-label">Saldo GUFO</div>
+                <div className="stat-value">
+                  {profileData.balanceGufo.toFixed(2)}
+                </div>
+              </div>
 
-            <div className="rounded-2xl bg-slate-400/30 p-6">
-              <p className="text-2xl text-slate-100 mb-2">Cashback</p>
-              <p className="text-5xl font-bold">
-                {profileData.cashbackPercent}%
-              </p>
-            </div>
+              <div className="stat-card">
+                <div className="stat-label">Cashback</div>
+                <div className="stat-value">
+                  {profileData.cashbackPercent}%
+                </div>
+              </div>
 
-            <div className="rounded-2xl bg-slate-400/30 p-6">
-              <p className="text-2xl text-slate-100 mb-2">Spesa stagione</p>
-              <p className="text-5xl font-bold">
-                € {profileData.totalSpent.toFixed(2)}
-              </p>
-            </div>
+              <div className="stat-card">
+                <div className="stat-label">Spesa stagione</div>
+                <div className="stat-value">
+                  € {profileData.totalSpent.toFixed(2)}
+                </div>
+              </div>
 
-            <div className="rounded-2xl bg-slate-400/30 p-6">
-              <p className="text-2xl text-slate-100 mb-2">Livello</p>
-              <p className="text-5xl font-bold">{profileData.level}</p>
+              <div className="stat-card">
+                <div className="stat-label">Livello</div>
+                <div className="stat-value">{profileData.level}</div>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-slate-400/30 p-6">
-            <h3 className="text-3xl font-bold mb-4">Transazioni recenti</h3>
+          <div className="panel">
+            <h2 className="panel-title">Transazioni recenti</h2>
 
             {profileData.transactions.length === 0 ? (
-              <p className="text-slate-200">Nessuna transazione trovata.</p>
+              <p className="empty-text">Nessuna transazione trovata.</p>
             ) : (
-              <div className="space-y-3">
+              <div className="transactions-list">
                 {profileData.transactions.slice(0, 5).map((transaction, index) => (
                   <div
                     key={transaction.transaction_id ?? transaction.id ?? index}
-                    className="flex items-center justify-between rounded-xl bg-slate-800/40 px-4 py-3"
+                    className="transaction-card"
                   >
-                    <div>
-                      <p className="font-semibold capitalize">
+                    <div className="transaction-left">
+                      <p className="transaction-type">
                         {getTransactionType(transaction)}
                       </p>
-                      <p className="text-sm text-slate-300">
+                      <p className="transaction-merchant">
                         {getTransactionMerchant(transaction)}
                       </p>
-                      <p className="text-sm text-slate-400">
-                        {transaction.created_at
-                          ? new Date(transaction.created_at).toLocaleString()
-                          : ""}
+                      <p className="transaction-date">
+                        {formatDate(transaction.created_at)}
                       </p>
                     </div>
 
-                    <div className="text-right">
-                      <p className="font-semibold text-green-300">
+                    <div className="transaction-right">
+                      <p className="transaction-amount">
                         €{getTransactionAmount(transaction).toFixed(2)}
                       </p>
-                      <p className="text-sm text-slate-300">
+                      <p className="transaction-gufo">
                         GUFO {getTransactionGufo(transaction).toFixed(2)}
                       </p>
                     </div>
@@ -315,7 +327,312 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }
+
+const profileStyles = `
+  * {
+    box-sizing: border-box;
+  }
+
+  .profile-page {
+    color: white;
+    width: 100%;
+  }
+
+  .page-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    line-height: 1.1;
+  }
+
+  .page-subtitle {
+    color: #cbd5e1;
+    margin: 0 0 30px 0;
+    font-size: 16px;
+  }
+
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .profile-card {
+    background: #1e293b;
+    border-radius: 22px;
+    padding: 28px 22px;
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 999px;
+    background: #facc15;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 22px;
+  }
+
+  .profile-name {
+    font-size: 34px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .profile-email {
+    color: #cbd5e1;
+    margin: 0 0 18px 0;
+    word-break: break-word;
+  }
+
+  .level-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: #22c55e;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .content-area {
+    min-width: 0;
+  }
+
+  .panel {
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.08);
+  }
+
+  .panel-title {
+    margin: 0 0 20px 0;
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .stat-card {
+    background: #334155;
+    border-radius: 18px;
+    padding: 22px;
+    min-width: 0;
+  }
+
+  .stat-label {
+    color: #e2e8f0;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .transaction-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .transaction-left,
+  .transaction-right {
+    min-width: 0;
+  }
+
+  .transaction-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .transaction-type {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: capitalize;
+    color: white;
+  }
+
+  .transaction-merchant {
+    margin: 0 0 4px 0;
+    font-size: 14px;
+    color: #cbd5e1;
+    word-break: break-word;
+  }
+
+  .transaction-date {
+    margin: 0;
+    font-size: 13px;
+    color: #94a3b8;
+    word-break: break-word;
+  }
+
+  .transaction-amount {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #86efac;
+  }
+
+  .transaction-gufo {
+    margin: 0;
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+
+  .empty-text {
+    margin: 0;
+    color: #94a3b8;
+  }
+
+  .error-box {
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  @media (max-width: 1024px) {
+    .profile-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+      min-height: auto;
+      padding: 24px 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 32px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .profile-card {
+      border-radius: 18px;
+      padding: 22px 16px;
+    }
+
+    .avatar {
+      width: 76px;
+      height: 76px;
+      font-size: 30px;
+      margin-bottom: 16px;
+    }
+
+    .profile-name {
+      font-size: 26px;
+    }
+
+    .panel {
+      padding: 18px 14px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .stat-value {
+      font-size: 30px;
+    }
+
+    .transaction-card {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .transaction-right {
+      text-align: left;
+      flex-shrink: 1;
+    }
+
+    .transaction-type {
+      font-size: 15px;
+    }
+
+    .transaction-merchant,
+    .transaction-date,
+    .transaction-gufo {
+      font-size: 13px;
+    }
+
+    .transaction-amount {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 28px;
+    }
+
+    .profile-name {
+      font-size: 22px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+    }
+  }
+`;

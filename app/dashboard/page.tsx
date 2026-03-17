@@ -202,17 +202,19 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ color: "white" }}>
-        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>GUFO Dashboard</h1>
-        <p>Caricamento dashboard...</p>
+      <div className="dashboard-page">
+        <style>{dashboardStyles}</style>
+        <h1 className="dashboard-title">GUFO Dashboard</h1>
+        <p className="dashboard-subtitle">Caricamento dashboard...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ color: "white" }}>
-        <h1 style={{ fontSize: "48px", marginBottom: "12px" }}>GUFO Dashboard</h1>
+      <div className="dashboard-page">
+        <style>{dashboardStyles}</style>
+        <h1 className="dashboard-title">GUFO Dashboard</h1>
         <p style={{ color: "#f87171" }}>{error}</p>
       </div>
     );
@@ -221,244 +223,148 @@ export default function DashboardPage() {
   const maxMonthlyValue = Math.max(...dashboardData.monthlyExpenses, 1);
 
   return (
-    <div style={{ color: "white" }}>
-      <h1 style={{ fontSize: "48px", fontWeight: "bold", marginBottom: "10px" }}>
-        GUFO Dashboard
-      </h1>
-      <p style={{ color: "#cbd5e1", marginBottom: "30px" }}>
-        Panoramica account utente.
-      </p>
+    <div className="dashboard-page">
+      <style>{dashboardStyles}</style>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "260px 1fr",
-          gap: "24px",
-          alignItems: "start",
-        }}
-      >
-        <div
-          style={{
-            background: "#1e293b",
-            borderRadius: "16px",
-            padding: "24px",
-            minHeight: "420px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              width: "72px",
-              height: "72px",
-              borderRadius: "999px",
-              background: "#facc15",
-              color: "#111",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "30px",
-              marginBottom: "20px",
-            }}
-          >
-            U
-          </div>
+      <h1 className="dashboard-title">GUFO Dashboard</h1>
+      <p className="dashboard-subtitle">Panoramica account utente.</p>
 
-          <h2 style={{ margin: 0, fontSize: "34px" }}>Utente GUFO</h2>
-          <p style={{ color: "#cbd5e1", marginTop: "8px" }}>email@gufo.app</p>
+      <div className="dashboard-layout">
+        <div className="profile-card">
+          <div className="profile-avatar">U</div>
 
-          <div
-            style={{
-              marginTop: "16px",
-              background: "#22c55e",
-              color: "white",
-              padding: "8px 16px",
-              borderRadius: "999px",
-              fontWeight: "bold",
-            }}
-          >
-            {formatLevel(dashboardData.level)}
-          </div>
+          <h2 className="profile-name">Utente GUFO</h2>
+          <p className="profile-email">email@gufo.app</p>
+
+          <div className="level-badge">{formatLevel(dashboardData.level)}</div>
         </div>
 
-        <div>
-          <h2 style={{ fontSize: "40px", marginTop: 0, marginBottom: "20px" }}>
-            Riepilogo account
-          </h2>
+        <div className="dashboard-content">
+          <h2 className="section-title">Riepilogo account</h2>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "20px",
-              marginBottom: "24px",
-            }}
-          >
-            <div
-              style={{
-                background: "#334155",
-                borderRadius: "16px",
-                padding: "24px",
-              }}
-            >
-              <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Saldo GUFO</div>
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-                {dashboardData.balanceGufo.toFixed(2)}
-              </div>
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-label">Saldo GUFO</div>
+              <div className="stat-value">{dashboardData.balanceGufo.toFixed(2)}</div>
             </div>
 
-            <div
-              style={{
-                background: "#334155",
-                borderRadius: "16px",
-                padding: "24px",
-              }}
-            >
-              <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Cashback</div>
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-                {dashboardData.cashbackPercent}%
-              </div>
+            <div className="stat-card">
+              <div className="stat-label">Cashback</div>
+              <div className="stat-value">{dashboardData.cashbackPercent}%</div>
             </div>
 
-            <div
-              style={{
-                background: "#334155",
-                borderRadius: "16px",
-                padding: "24px",
-              }}
-            >
-              <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Spesa stagione</div>
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-                € {dashboardData.totalSpent.toFixed(2)}
-              </div>
+            <div className="stat-card">
+              <div className="stat-label">Spesa stagione</div>
+              <div className="stat-value">€ {dashboardData.totalSpent.toFixed(2)}</div>
             </div>
 
-            <div
-              style={{
-                background: "#334155",
-                borderRadius: "16px",
-                padding: "24px",
-              }}
-            >
-              <div style={{ color: "#e2e8f0", marginBottom: "8px" }}>Livello</div>
-              <div style={{ fontSize: "48px", fontWeight: "bold" }}>
-                {formatLevel(dashboardData.level)}
-              </div>
+            <div className="stat-card">
+              <div className="stat-label">Livello</div>
+              <div className="stat-value">{formatLevel(dashboardData.level)}</div>
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#1e293b",
-              borderRadius: "16px",
-              padding: "24px",
-              marginBottom: "24px",
-            }}
-          >
-            <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "28px" }}>
-              Grafico spese mensili
-            </h3>
+          <div className="panel">
+            <h3 className="panel-title">Grafico spese mensili</h3>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-                gap: "12px",
-                alignItems: "end",
-                height: "260px",
-              }}
-            >
+            <div className="chart-wrap">
               {dashboardData.monthlyExpenses.map((value, index) => {
                 const height =
                   value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "4px";
 
                 return (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "end",
-                      height: "100%",
-                    }}
-                  >
-                    <span style={{ fontSize: "12px", color: "#94a3b8", marginBottom: "8px" }}>
-                      €{value.toFixed(0)}
-                    </span>
+                  <div key={index} className="chart-item">
+                    <span className="chart-value">€{value.toFixed(0)}</span>
                     <div
+                      className="chart-bar"
                       style={{
-                        width: "28px",
                         height,
-                        background: "#3b82f6",
-                        borderTopLeftRadius: "6px",
-                        borderTopRightRadius: "6px",
                       }}
                     />
-                    <span style={{ fontSize: "12px", color: "#cbd5e1", marginTop: "8px" }}>
-                      {getMonthLabel(index)}
-                    </span>
+                    <span className="chart-label">{getMonthLabel(index)}</span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          <div
-            style={{
-              background: "#1e293b",
-              borderRadius: "16px",
-              padding: "24px",
-            }}
-          >
-            <h3 style={{ marginTop: 0, marginBottom: "20px", fontSize: "28px" }}>
-              Transazioni recenti
-            </h3>
+          <div className="panel">
+            <h3 className="panel-title">Transazioni recenti</h3>
 
             {dashboardData.transactions.length === 0 ? (
               <p style={{ color: "#94a3b8" }}>Nessuna transazione disponibile</p>
             ) : (
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ color: "#94a3b8", borderBottom: "1px solid #334155" }}>
-                      <th style={{ padding: "12px 0", textAlign: "left" }}>Tipo</th>
-                      <th style={{ padding: "12px 0", textAlign: "left" }}>Merchant</th>
-                      <th style={{ padding: "12px 0", textAlign: "left" }}>Importo</th>
-                      <th style={{ padding: "12px 0", textAlign: "left" }}>GUFO</th>
-                      <th style={{ padding: "12px 0", textAlign: "left" }}>Data</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dashboardData.transactions.slice(0, 8).map((tx, index) => (
-                      <tr
-                        key={tx.id || index}
-                        style={{ borderBottom: "1px solid #334155" }}
-                      >
-                        <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                          {getTransactionType(tx)}
-                        </td>
-                        <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
-                          {getTransactionMerchant(tx)}
-                        </td>
-                        <td style={{ padding: "14px 0", color: "#86efac", fontWeight: "bold" }}>
+              <>
+                <div className="table-wrap desktop-only">
+                  <table className="transactions-table">
+                    <thead>
+                      <tr>
+                        <th>Tipo</th>
+                        <th>Merchant</th>
+                        <th>Importo</th>
+                        <th>GUFO</th>
+                        <th>Data</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dashboardData.transactions.slice(0, 8).map((tx, index) => (
+                        <tr key={tx.id || index}>
+                          <td>{getTransactionType(tx)}</td>
+                          <td>{getTransactionMerchant(tx)}</td>
+                          <td className="amount-green">
+                            €{getTransactionAmount(tx).toFixed(2)}
+                          </td>
+                          <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                          <td>
+                            {tx.created_at
+                              ? new Date(tx.created_at).toLocaleString("it-IT")
+                              : "-"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mobile-transactions mobile-only">
+                  {dashboardData.transactions.slice(0, 8).map((tx, index) => (
+                    <div className="tx-card" key={tx.id || index}>
+                      <div className="tx-row">
+                        <span className="tx-label">Tipo</span>
+                        <span className="tx-value">{getTransactionType(tx)}</span>
+                      </div>
+
+                      <div className="tx-row">
+                        <span className="tx-label">Merchant</span>
+                        <span className="tx-value">{getTransactionMerchant(tx)}</span>
+                      </div>
+
+                      <div className="tx-row">
+                        <span className="tx-label">Importo</span>
+                        <span className="tx-value amount-green">
                           €{getTransactionAmount(tx).toFixed(2)}
-                        </td>
-                        <td style={{ padding: "14px 0", color: "#e2e8f0" }}>
+                        </span>
+                      </div>
+
+                      <div className="tx-row">
+                        <span className="tx-label">GUFO</span>
+                        <span className="tx-value">
                           {getTransactionGufo(tx).toFixed(2)}
-                        </td>
-                        <td style={{ padding: "14px 0", color: "#cbd5e1" }}>
+                        </span>
+                      </div>
+
+                      <div className="tx-row">
+                        <span className="tx-label">Data</span>
+                        <span className="tx-value">
                           {tx.created_at
                             ? new Date(tx.created_at).toLocaleString("it-IT")
                             : "-"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -466,3 +372,377 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+const dashboardStyles = `
+  * {
+    box-sizing: border-box;
+  }
+
+  .dashboard-page {
+    color: white;
+    width: 100%;
+  }
+
+  .dashboard-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    line-height: 1.1;
+  }
+
+  .dashboard-subtitle {
+    color: #cbd5e1;
+    margin: 0 0 30px 0;
+    font-size: 16px;
+  }
+
+  .dashboard-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .profile-card {
+    background: #1e293b;
+    border-radius: 20px;
+    padding: 28px 22px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 78px;
+    height: 78px;
+    border-radius: 999px;
+    background: #facc15;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .profile-name {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.1;
+  }
+
+  .profile-email {
+    color: #cbd5e1;
+    margin-top: 8px;
+    margin-bottom: 0;
+    word-break: break-word;
+  }
+
+  .level-badge {
+    margin-top: 18px;
+    background: #22c55e;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+
+  .dashboard-content {
+    min-width: 0;
+  }
+
+  .section-title {
+    font-size: 40px;
+    margin-top: 0;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: #334155;
+    border-radius: 18px;
+    padding: 24px;
+    min-width: 0;
+  }
+
+  .stat-label {
+    color: #e2e8f0;
+    margin-bottom: 10px;
+    font-size: 15px;
+  }
+
+  .stat-value {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .panel {
+    background: #1e293b;
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .panel-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 28px;
+    line-height: 1.1;
+  }
+
+  .chart-wrap {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 10px;
+    align-items: end;
+    height: 260px;
+    overflow-x: auto;
+    min-width: 0;
+  }
+
+  .chart-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: end;
+    height: 100%;
+    min-width: 0;
+  }
+
+  .chart-value {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+
+  .chart-bar {
+    width: 100%;
+    max-width: 28px;
+    min-width: 18px;
+    background: #3b82f6;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+
+  .chart-label {
+    font-size: 12px;
+    color: #cbd5e1;
+    margin-top: 8px;
+  }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .transactions-table th {
+    color: #94a3b8;
+    border-bottom: 1px solid #334155;
+    padding: 12px 0;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .transactions-table td {
+    padding: 14px 0;
+    color: #e2e8f0;
+    border-bottom: 1px solid #334155;
+    font-size: 14px;
+    vertical-align: top;
+  }
+
+  .amount-green {
+    color: #86efac !important;
+    font-weight: 700;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  .desktop-only {
+    display: block;
+  }
+
+  .mobile-transactions {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tx-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .tx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .tx-row:last-child {
+    border-bottom: none;
+  }
+
+  .tx-label {
+    color: #94a3b8;
+    font-size: 13px;
+    flex: 0 0 90px;
+  }
+
+  .tx-value {
+    color: #e2e8f0;
+    font-size: 13px;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  @media (max-width: 1024px) {
+    .dashboard-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-card {
+      min-height: auto;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 24px 20px;
+    }
+
+    .section-title {
+      font-size: 34px;
+    }
+
+    .dashboard-title {
+      font-size: 42px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-title {
+      font-size: 32px;
+    }
+
+    .dashboard-subtitle {
+      margin-bottom: 22px;
+      font-size: 14px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .profile-card {
+      border-radius: 18px;
+      padding: 22px 16px;
+    }
+
+    .profile-avatar {
+      width: 68px;
+      height: 68px;
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .profile-name {
+      font-size: 26px;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .stat-card {
+      padding: 18px;
+      border-radius: 16px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+    }
+
+    .panel {
+      padding: 18px 14px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    .chart-wrap {
+      gap: 8px;
+      height: 220px;
+    }
+
+    .chart-value,
+    .chart-label {
+      font-size: 11px;
+    }
+
+    .desktop-only {
+      display: none;
+    }
+
+    .mobile-only {
+      display: block;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .dashboard-title {
+      font-size: 28px;
+    }
+
+    .section-title {
+      font-size: 24px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+    }
+
+    .profile-name {
+      font-size: 22px;
+    }
+
+    .tx-label,
+    .tx-value {
+      font-size: 12px;
+    }
+  }
+`;
