@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import { safeJsonFetch } from "@/lib/api";
 
 type CustomerData = {
   id: string;
@@ -20,9 +21,6 @@ function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
 }
-
-import { safeJsonFetch } from "@/lib/api";
-  
 
 function formatLevel(level: string) {
   if (!level) return "Basic";
@@ -49,9 +47,15 @@ export default function CustomerCodePage() {
           throw new Error(data?.error || "Cliente non trovato");
         }
 
-        setCustomer(data);
+        const customerData = data?.customer ?? data;
+
+        if (!customerData || typeof customerData !== "object") {
+          throw new Error("Dati cliente non validi");
+        }
+
+        setCustomer(customerData);
       } catch (err: any) {
-        setError(err.message || "Errore nel caricamento codice cliente");
+        setError(err?.message || "Errore nel caricamento codice cliente");
       } finally {
         setLoading(false);
       }

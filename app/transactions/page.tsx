@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
 
 type Transaction = {
   id?: string | null;
@@ -19,7 +20,7 @@ type Transaction = {
 };
 
 const API_URL = "https://gufo-backend1.onrender.com";
-const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
+const CUSTOMER_CODE = "GUFO-123456";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -27,13 +28,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function getTransactionType(tx: any) {
-  return (
-    tx?.type ??
-    tx?.tipo ??
-    tx?.raw?.type ??
-    tx?.raw?.tipo ??
-    "-"
-  );
+  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
 }
 
 function getTransactionMerchant(tx: any) {
@@ -77,8 +72,6 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-import { safeJsonFetch } from "@/lib/api";
-
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -93,14 +86,18 @@ export default function TransactionsPage() {
         setError("");
 
         const { response, data } = await safeJsonFetch(
-          `${API_URL}/transactions/${USER_ID}`
+          `${API_URL}/transactions/${CUSTOMER_CODE}`
         );
 
         if (!response.ok || data?.success === false) {
           throw new Error(data?.error || "Errore nel caricamento transazioni");
         }
 
-        const rawTransactions = Array.isArray(data) ? data : [];
+        const rawTransactions = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.transactions)
+          ? data.transactions
+          : [];
 
         const normalizedTransactions: Transaction[] = rawTransactions.map(
           (tx: any) => ({
@@ -116,7 +113,7 @@ export default function TransactionsPage() {
 
         setTransactions(normalizedTransactions);
       } catch (err: any) {
-        setError(err.message || "Errore sconosciuto");
+        setError(err?.message || "Errore sconosciuto");
       } finally {
         setLoading(false);
       }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
 
 type Transaction = {
   id?: string | null;
@@ -23,23 +24,26 @@ type PartnerStatsResponse = {
   total_amount?: number | string | null;
   total_gufo_distributed?: number | string | null;
   recent_transactions?: Transaction[];
+  transactions?: Transaction[];
+  stats?: {
+    total_transactions?: number | string | null;
+    total_amount?: number | string | null;
+    total_gufo_distributed?: number | string | null;
+    recent_transactions?: Transaction[];
+    transactions?: Transaction[];
+  };
   error?: string;
 };
 
 const API_URL = "https://gufo-backend1.onrender.com";
+
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
 }
 
 function getTransactionType(tx: any) {
-  return (
-    tx?.type ??
-    tx?.tipo ??
-    tx?.raw?.type ??
-    tx?.raw?.tipo ??
-    "-"
-  );
+  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
 }
 
 function getTransactionMerchant(tx: any) {
@@ -83,8 +87,6 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-import { safeJsonFetch } from "@/lib/api";
-
 export default function PartnerDashboardPage() {
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -97,17 +99,19 @@ export default function PartnerDashboardPage() {
         setLoading(true);
         setError("");
 
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/partner/stats`
-        );
+        const { response, data } = await safeJsonFetch(`${API_URL}/partner/stats`);
 
         if (!response.ok || data?.success === false) {
           throw new Error(data?.error || "Errore nel caricamento statistiche");
         }
 
-        const stats: PartnerStatsResponse = data ?? {};
+        const statsRoot: PartnerStatsResponse = data ?? {};
+        const stats: PartnerStatsResponse = statsRoot?.stats ?? statsRoot;
+
         const rawTransactions = Array.isArray(stats?.recent_transactions)
           ? stats.recent_transactions
+          : Array.isArray(stats?.transactions)
+          ? stats.transactions
           : [];
 
         const normalizedTransactions: Transaction[] = rawTransactions.map(
@@ -125,7 +129,7 @@ export default function PartnerDashboardPage() {
         setData(stats);
         setTransactions(normalizedTransactions);
       } catch (err: any) {
-        setError(err.message || "Errore sconosciuto");
+        setError(err?.message || "Errore sconosciuto");
       } finally {
         setLoading(false);
       }

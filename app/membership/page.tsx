@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
 
 type WalletResponse = {
   balance_gufo?: number | string | null;
@@ -36,7 +37,7 @@ type DashboardResponse = {
 };
 
 const API_URL = "https://gufo-backend1.onrender.com";
-const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
+const CUSTOMER_CODE = "GUFO-123456";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -66,8 +67,6 @@ function getTransactionAmount(tx: any) {
   );
 }
 
-import { safeJsonFetch } from "@/lib/api";
-
 export default function MembershipPage() {
   const [wallet, setWallet] = useState<WalletResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -96,7 +95,7 @@ export default function MembershipPage() {
         setError("");
 
         const { response, data } = await safeJsonFetch(
-          `${API_URL}/dashboard/${USER_ID}`
+          `${API_URL}/dashboard/${CUSTOMER_CODE}`
         );
 
         if (!response.ok || data?.success === false) {
