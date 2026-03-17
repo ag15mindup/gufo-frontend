@@ -26,7 +26,7 @@ type PartnerStatsResponse = {
   error?: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = "https://gufo-backend1.onrender.com";
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;

@@ -31,7 +31,7 @@ type ApiResponse = {
 
 const DEFAULT_CUSTOMER_CODE = "GUFO-123456";
 const PARTNER_API_KEY = "gufo_partner_123456";
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = "https://gufo-backend1.onrender.com";
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;

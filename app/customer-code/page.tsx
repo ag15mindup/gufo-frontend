@@ -13,7 +13,7 @@ type CustomerData = {
   season_spent: number;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = "https://gufo-backend1.onrender.com";
 const CUSTOMER_CODE = "GUFO-123456";
 
 function toNumberSafe(value: unknown) {
