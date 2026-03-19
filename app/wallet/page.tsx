@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
+import { supabase } from "@/lib/supabase/client";
 
 type WalletResponse = {
   user_id?: string;
@@ -44,7 +46,6 @@ type WalletData = {
 };
 
 const API_URL = "https://gufo-backend1.onrender.com";
-const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -132,9 +133,6 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-
-import { safeJsonFetch } from "@/lib/api";
-
 export default function WalletPage() {
   const [walletData, setWalletData] = useState<WalletData>({
     balanceGufo: 0,
@@ -157,9 +155,22 @@ export default function WalletPage() {
         setLoading(true);
         setError("");
 
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw new Error(userError.message || "Errore recupero utente");
+        }
+
+        if (!user) {
+          throw new Error("Utente non autenticato");
+        }
+
         const [walletRes, transactionsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/wallet/${USER_ID}`),
-          safeJsonFetch(`${API_URL}/transactions/${USER_ID}`),
+          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+          safeJsonFetch(`${API_URL}/transactions/${user.id}`),
         ]);
 
         if (!walletRes.response.ok || walletRes.data?.success === false) {
@@ -183,7 +194,8 @@ export default function WalletPage() {
         const normalizedTransactions: Transaction[] = rawTransactions.map(
           (tx: any) => ({
             id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-            transaction_id: tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
+            transaction_id:
+              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
             type: getTransactionType(tx),
             merchant_name: getTransactionMerchant(tx),
             amount_euro: getTransactionAmount(tx),

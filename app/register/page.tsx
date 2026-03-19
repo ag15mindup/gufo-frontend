@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
-  const supabase = createClient();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -31,7 +30,7 @@ export default function RegisterPage() {
       return;
     }
 
-    setMessage("Registrazione completata. Ora puoi fare login.");
+    setMessage("Registrazione completata. Controlla la tua email per confermare l'account.");
     setLoading(false);
     router.push("/login");
   }

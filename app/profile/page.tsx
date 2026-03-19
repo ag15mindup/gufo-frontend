@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
+import { supabase } from "@/lib/supabase/client";
 
 type Transaction = {
   transaction_id?: string;
@@ -30,8 +32,8 @@ type ProfileData = {
   transactions: Transaction[];
 };
 
-const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 const API_URL = "https://gufo-backend1.onrender.com";
+
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -108,12 +110,10 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-import { safeJsonFetch } from "@/lib/api";
-
 export default function ProfilePage() {
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "Utente GUFO",
-    email: "email@gufo.app",
+    email: "",
     balanceGufo: 0,
     totalSpent: 0,
     cashbackPercent: 2,
@@ -130,8 +130,21 @@ export default function ProfilePage() {
         setLoading(true);
         setError("");
 
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw new Error(userError.message || "Errore recupero utente");
+        }
+
+        if (!user) {
+          throw new Error("Utente non autenticato");
+        }
+
         const { response, data } = await safeJsonFetch(
-          `${API_URL}/profile/${USER_ID}`
+          `${API_URL}/profile/${user.id}`
         );
 
         if (!response.ok || data?.success === false) {
@@ -173,13 +186,18 @@ export default function ProfilePage() {
           String(stats?.level ?? wallet?.current_level ?? "basic")
         );
 
+        const name =
+          profile?.full_name ??
+          profile?.name ??
+          profile?.username ??
+          user.email?.split("@")[0] ??
+          "Utente GUFO";
+
+        const email = profile?.email ?? user.email ?? "";
+
         setProfileData({
-          name:
-            profile?.full_name ??
-            profile?.name ??
-            profile?.username ??
-            "Utente GUFO",
-          email: profile?.email ?? "email@gufo.app",
+          name,
+          email,
           balanceGufo,
           totalSpent,
           cashbackPercent,

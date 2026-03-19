@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
+import { supabase } from "@/lib/supabase/client";
 
 type Transaction = {
   id?: string;
@@ -26,10 +28,12 @@ type DashboardData = {
   cashbackPercent: number;
   transactions: Transaction[];
   monthlyExpenses: number[];
+  profileName: string;
+  profileEmail: string;
+  profileInitial: string;
 };
 
 const API_URL = "https://gufo-backend1.onrender.com";
-const USER_ID = "1f49b570-08ea-4151-9999-825fa0c77d6e";
 
 function formatLevel(level: string) {
   if (!level) return "Basic";
@@ -101,12 +105,6 @@ function getTransactionType(tx: any) {
   );
 }
 
-import { safeJsonFetch } from "@/lib/api";
-  
-
- 
-
-
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     balanceGufo: 0,
@@ -117,6 +115,9 @@ export default function DashboardPage() {
     cashbackPercent: 2,
     transactions: [],
     monthlyExpenses: Array(12).fill(0),
+    profileName: "Utente GUFO",
+    profileEmail: "",
+    profileInitial: "U",
   });
 
   const [loading, setLoading] = useState(true);
@@ -128,15 +129,39 @@ export default function DashboardPage() {
         setLoading(true);
         setError("");
 
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/dashboard/${USER_ID}`
-        );
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
 
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel recupero dashboard");
+        if (userError) {
+          throw new Error(userError.message || "Errore recupero utente");
         }
 
-        const dashboard = data ?? {};
+        if (!user) {
+          throw new Error("Utente non autenticato");
+        }
+
+        const [dashboardRes, profileRes] = await Promise.all([
+          safeJsonFetch(`${API_URL}/dashboard/${user.id}`),
+          safeJsonFetch(`${API_URL}/profile/${user.id}`),
+        ]);
+
+        if (!dashboardRes.response.ok || dashboardRes.data?.success === false) {
+          throw new Error(
+            dashboardRes.data?.error || "Errore nel recupero dashboard"
+          );
+        }
+
+        if (!profileRes.response.ok || profileRes.data?.success === false) {
+          throw new Error(
+            profileRes.data?.error || "Errore nel recupero profilo"
+          );
+        }
+
+        const dashboard = dashboardRes.data ?? {};
+        const profilePayload = profileRes.data ?? {};
+        const profile = profilePayload?.profile ?? {};
         const wallet = dashboard?.wallet ?? {};
         const stats = dashboard?.stats ?? {};
         const rawTransactions = Array.isArray(dashboard?.transactions)
@@ -165,17 +190,32 @@ export default function DashboardPage() {
           })
         );
 
+        const profileName =
+          profile?.full_name ??
+          profile?.name ??
+          profile?.username ??
+          user.email?.split("@")[0] ??
+          "Utente GUFO";
+
+        const profileEmail = profile?.email ?? user.email ?? "";
+        const profileInitial = profileName.charAt(0).toUpperCase() || "U";
+
         setDashboardData({
           balanceGufo: toNumberSafe(stats?.balance_gufo ?? wallet?.balance_gufo),
           totalTransactions: toNumberSafe(
             stats?.total_transactions ?? normalizedTransactions.length
           ),
-          totalSpent: toNumberSafe(stats?.total_spent),
+          totalSpent: toNumberSafe(
+            stats?.season_spent ?? wallet?.season_spent ?? 0
+          ),
           totalGufoEarned: toNumberSafe(stats?.gufo_earned),
           level: String(stats?.level ?? "Basic"),
           cashbackPercent: toNumberSafe(stats?.cashback_percent ?? 2),
           transactions: normalizedTransactions,
           monthlyExpenses,
+          profileName,
+          profileEmail,
+          profileInitial,
         });
       } catch (err: any) {
         setError(err.message || "Errore sconosciuto");
@@ -218,10 +258,10 @@ export default function DashboardPage() {
 
       <div className="dashboard-layout">
         <div className="profile-card">
-          <div className="profile-avatar">U</div>
+          <div className="profile-avatar">{dashboardData.profileInitial}</div>
 
-          <h2 className="profile-name">Utente GUFO</h2>
-          <p className="profile-email">email@gufo.app</p>
+          <h2 className="profile-name">{dashboardData.profileName}</h2>
+          <p className="profile-email">{dashboardData.profileEmail}</p>
 
           <div className="level-badge">{formatLevel(dashboardData.level)}</div>
         </div>
@@ -232,7 +272,9 @@ export default function DashboardPage() {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-label">Saldo GUFO</div>
-              <div className="stat-value">{dashboardData.balanceGufo.toFixed(2)}</div>
+              <div className="stat-value">
+                {dashboardData.balanceGufo.toFixed(2)}
+              </div>
             </div>
 
             <div className="stat-card">
@@ -242,12 +284,16 @@ export default function DashboardPage() {
 
             <div className="stat-card">
               <div className="stat-label">Spesa stagione</div>
-              <div className="stat-value">€ {dashboardData.totalSpent.toFixed(2)}</div>
+              <div className="stat-value">
+                € {dashboardData.totalSpent.toFixed(2)}
+              </div>
             </div>
 
             <div className="stat-card">
               <div className="stat-label">Livello</div>
-              <div className="stat-value">{formatLevel(dashboardData.level)}</div>
+              <div className="stat-value">
+                {formatLevel(dashboardData.level)}
+              </div>
             </div>
           </div>
 
@@ -262,12 +308,7 @@ export default function DashboardPage() {
                 return (
                   <div key={index} className="chart-item">
                     <span className="chart-value">€{value.toFixed(0)}</span>
-                    <div
-                      className="chart-bar"
-                      style={{
-                        height,
-                      }}
-                    />
+                    <div className="chart-bar" style={{ height }} />
                     <span className="chart-label">{getMonthLabel(index)}</span>
                   </div>
                 );
@@ -323,7 +364,9 @@ export default function DashboardPage() {
 
                       <div className="tx-row">
                         <span className="tx-label">Merchant</span>
-                        <span className="tx-value">{getTransactionMerchant(tx)}</span>
+                        <span className="tx-value">
+                          {getTransactionMerchant(tx)}
+                        </span>
                       </div>
 
                       <div className="tx-row">
