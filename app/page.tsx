@@ -12,7 +12,7 @@ export default function HomePage() {
         <section className="hero-section">
           <div className="hero-content">
             <div className="hero-badge">
-              Cashback • Loyalty • Partner network
+              Cashback • Loyalty • Partner network 🚀
             </div>
 
             <h1 className="hero-title">GUFO</h1>
