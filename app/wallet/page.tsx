@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
@@ -138,33 +139,6 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-async function fetchJson(url: string) {
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    cache: "no-store",
-  });
-
-  const text = await response.text();
-
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error(`Risposta non valida dal server (${response.status})`);
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.error || data?.message || `Errore server (${response.status})`
-    );
-  }
-
-  return data;
-}
-
 function extractWallet(payload: any): WalletResponse {
   if (!payload) return {};
   if (payload.data && typeof payload.data === "object") return payload.data;
@@ -196,6 +170,8 @@ export default function WalletPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadWalletPage() {
       try {
         setLoading(true);
@@ -214,34 +190,70 @@ export default function WalletPage() {
           throw new Error("Utente non autenticato");
         }
 
-        const walletPayload = await fetchJson(`${API_URL}/wallet/${user.id}`);
-        const transactionsPayload = await fetchJson(`${API_URL}/transactions/${user.id}`);
+        const [walletRes, transactionsRes] = await Promise.all([
+          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+          safeJsonFetch(`${API_URL}/transactions/${user.id}`),
+        ]);
+
+        if (!walletRes.response.ok || walletRes.data?.success === false) {
+          throw new Error(
+            walletRes.data?.error || "Errore nel recupero wallet"
+          );
+        }
+
+        if (
+          !transactionsRes.response.ok ||
+          transactionsRes.data?.success === false
+        ) {
+          throw new Error(
+            transactionsRes.data?.error || "Errore nel recupero transazioni"
+          );
+        }
+
+        const walletPayload = walletRes.data ?? {};
+        const transactionsPayload = transactionsRes.data ?? {};
 
         const wallet: WalletResponse = extractWallet(walletPayload);
         const rawTransactions = extractTransactions(transactionsPayload);
 
-        const normalizedTransactions: Transaction[] = rawTransactions.map((tx: any) => ({
-          id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-          transaction_id:
-            tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
-          type: getTransactionType(tx),
-          merchant_name: getTransactionMerchant(tx),
-          amount_euro: getTransactionAmount(tx),
-          gufo_earned: getTransactionGufo(tx),
-          cashback:
-            tx?.cashback ??
-            tx?.cashback_percent ??
-            tx?.raw?.cashback ??
-            tx?.raw?.cashback_percent ??
-            null,
-          created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
-          raw: tx?.raw ?? tx,
-        }));
+        const normalizedTransactions: Transaction[] = rawTransactions.map(
+          (tx: any) => ({
+            id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
+            transaction_id:
+              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
+            type: getTransactionType(tx),
+            tipo: tx?.tipo ?? tx?.raw?.tipo,
+            merchant_name: getTransactionMerchant(tx),
+            benefit: tx?.benefit ?? tx?.raw?.benefit,
+            merchant: tx?.merchant ?? tx?.raw?.merchant,
+            amount_euro: getTransactionAmount(tx),
+            amount: getTransactionAmount(tx),
+            importo: tx?.importo ?? tx?.raw?.importo,
+            gufo_earned: getTransactionGufo(tx),
+            gufo: getTransactionGufo(tx),
+            cashback:
+              tx?.cashback ??
+              tx?.cashback_percent ??
+              tx?.raw?.cashback ??
+              tx?.raw?.cashback_percent ??
+              null,
+            cashback_percent:
+              tx?.cashback_percent ??
+              tx?.cashback ??
+              tx?.raw?.cashback_percent ??
+              tx?.raw?.cashback ??
+              null,
+            created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
+            raw: tx?.raw ?? tx,
+          })
+        );
 
         const totalGufoEarned = normalizedTransactions.reduce(
           (sum, tx) => sum + getTransactionGufo(tx),
           0
         );
+
+        if (!isMounted) return;
 
         setWalletData({
           balanceGufo: toNumberSafe(wallet?.balance_gufo),
@@ -255,13 +267,20 @@ export default function WalletPage() {
           lastSeasonReset: String(wallet?.last_season_reset ?? ""),
         });
       } catch (err: any) {
+        if (!isMounted) return;
         setError(err?.message || "Errore sconosciuto");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadWalletPage();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
