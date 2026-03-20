@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,10 +11,29 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingUser, setCheckingUser] = useState(true);
   const [error, setError] = useState("");
+
+  // 🔐 Se già loggato → vai direttamente in dashboard
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        router.push("/dashboard");
+      } else {
+        setCheckingUser(false);
+      }
+    }
+
+    checkUser();
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+
     setLoading(true);
     setError("");
 
@@ -24,13 +43,29 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError(error.message);
+      setError(error.message || "Errore login");
       setLoading(false);
       return;
     }
 
-    setLoading(false);
     router.push("/dashboard");
+  }
+
+  if (checkingUser) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#020617",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Caricamento...
+      </div>
+    );
   }
 
   return (
@@ -98,10 +133,10 @@ export default function LoginPage() {
               padding: "14px 16px",
               borderRadius: "12px",
               border: "none",
-              background: "#22c55e",
+              background: loading ? "#4ade80" : "#22c55e",
               color: "white",
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Accesso..." : "Entra"}
@@ -113,7 +148,17 @@ export default function LoginPage() {
         )}
 
         <p style={{ marginTop: "18px", color: "#94a3b8", fontSize: "14px" }}>
-          Non hai un account? Vai su <strong>/register</strong>
+          Non hai un account?{" "}
+          <span
+            onClick={() => router.push("/register")}
+            style={{
+              color: "#22c55e",
+              cursor: "pointer",
+              fontWeight: "600",
+            }}
+          >
+            Registrati
+          </span>
         </p>
       </div>
     </div>

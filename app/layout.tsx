@@ -1,6 +1,9 @@
+"use client";
+
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
+import { usePathname } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "GUFO Dashboard",
@@ -12,18 +15,24 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  // Mostra sidebar SOLO nelle pagine private
+  const showSidebar =
+    pathname?.startsWith("/dashboard") ||
+    pathname?.startsWith("/profile") ||
+    pathname?.startsWith("/wallet");
+
   return (
     <html lang="it">
       <body style={{ margin: 0, background: "#020617", color: "white" }}>
         
-        {/* Sidebar */}
-        <Sidebar />
+        {showSidebar && <Sidebar />}
 
-        {/* Contenuto principale */}
         <div
           style={{
             padding: "20px",
-            paddingLeft: "70px", // spazio per bottone sidebar
+            paddingLeft: showSidebar ? "70px" : "20px",
           }}
         >
           {children}

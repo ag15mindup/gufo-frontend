@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
@@ -14,6 +13,9 @@ type WalletResponse = {
   current_level?: string | null;
   cashback_percent?: number | string | null;
   last_season_reset?: string | null;
+  success?: boolean;
+  error?: string;
+  data?: any;
 };
 
 type Transaction = {
@@ -47,7 +49,8 @@ type WalletData = {
   lastSeasonReset: string;
 };
 
-const API_URL = "https://gufo-backend1.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -135,6 +138,47 @@ function formatDate(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
+async function fetchJson(url: string) {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  const text = await response.text();
+
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error(`Risposta non valida dal server (${response.status})`);
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || data?.message || `Errore server (${response.status})`
+    );
+  }
+
+  return data;
+}
+
+function extractWallet(payload: any): WalletResponse {
+  if (!payload) return {};
+  if (payload.data && typeof payload.data === "object") return payload.data;
+  return payload;
+}
+
+function extractTransactions(payload: any): any[] {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.transactions)) return payload.transactions;
+  if (Array.isArray(payload?.data?.transactions)) return payload.data.transactions;
+  return [];
+}
+
 export default function WalletPage() {
   const [walletData, setWalletData] = useState<WalletData>({
     balanceGufo: 0,
@@ -170,48 +214,29 @@ export default function WalletPage() {
           throw new Error("Utente non autenticato");
         }
 
-        const [walletRes, transactionsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
-          safeJsonFetch(`${API_URL}/transactions/${user.id}`),
-        ]);
+        const walletPayload = await fetchJson(`${API_URL}/wallet/${user.id}`);
+        const transactionsPayload = await fetchJson(`${API_URL}/transactions/${user.id}`);
 
-        if (!walletRes.response.ok || walletRes.data?.success === false) {
-          throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
-        }
+        const wallet: WalletResponse = extractWallet(walletPayload);
+        const rawTransactions = extractTransactions(transactionsPayload);
 
-        if (
-          !transactionsRes.response.ok ||
-          transactionsRes.data?.success === false
-        ) {
-          throw new Error(
-            transactionsRes.data?.error || "Errore nel recupero transazioni"
-          );
-        }
-
-        const wallet: WalletResponse = walletRes.data ?? {};
-        const rawTransactions = Array.isArray(transactionsRes.data)
-          ? transactionsRes.data
-          : [];
-
-        const normalizedTransactions: Transaction[] = rawTransactions.map(
-          (tx: any) => ({
-            id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-            transaction_id:
-              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
-            type: getTransactionType(tx),
-            merchant_name: getTransactionMerchant(tx),
-            amount_euro: getTransactionAmount(tx),
-            gufo_earned: getTransactionGufo(tx),
-            cashback:
-              tx?.cashback ??
-              tx?.cashback_percent ??
-              tx?.raw?.cashback ??
-              tx?.raw?.cashback_percent ??
-              null,
-            created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
-            raw: tx?.raw ?? tx,
-          })
-        );
+        const normalizedTransactions: Transaction[] = rawTransactions.map((tx: any) => ({
+          id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
+          transaction_id:
+            tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
+          type: getTransactionType(tx),
+          merchant_name: getTransactionMerchant(tx),
+          amount_euro: getTransactionAmount(tx),
+          gufo_earned: getTransactionGufo(tx),
+          cashback:
+            tx?.cashback ??
+            tx?.cashback_percent ??
+            tx?.raw?.cashback ??
+            tx?.raw?.cashback_percent ??
+            null,
+          created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
+          raw: tx?.raw ?? tx,
+        }));
 
         const totalGufoEarned = normalizedTransactions.reduce(
           (sum, tx) => sum + getTransactionGufo(tx),

@@ -35,7 +35,8 @@ type DashboardData = {
   profileInitial: string;
 };
 
-const API_URL = "https://gufo-backend1.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
 function formatLevel(level: string) {
   if (!level) return "Basic";
@@ -98,13 +99,7 @@ function getTransactionMerchant(tx: any) {
 }
 
 function getTransactionType(tx: any) {
-  return (
-    tx?.type ??
-    tx?.tipo ??
-    tx?.raw?.type ??
-    tx?.raw?.tipo ??
-    "-"
-  );
+  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
 }
 
 export default function DashboardPage() {
@@ -126,6 +121,8 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadDashboard() {
       try {
         setLoading(true);
@@ -202,6 +199,8 @@ export default function DashboardPage() {
         const profileEmail = profile?.email ?? user.email ?? "";
         const profileInitial = profileName.charAt(0).toUpperCase() || "U";
 
+        if (!isMounted) return;
+
         setDashboardData({
           balanceGufo: toNumberSafe(stats?.balance_gufo ?? wallet?.balance_gufo),
           totalTransactions: toNumberSafe(
@@ -210,9 +209,13 @@ export default function DashboardPage() {
           totalSpent: toNumberSafe(
             stats?.season_spent ?? wallet?.season_spent ?? 0
           ),
-          totalGufoEarned: toNumberSafe(stats?.gufo_earned),
-          level: String(stats?.level ?? "Basic"),
-          cashbackPercent: toNumberSafe(stats?.cashback_percent ?? 2),
+          totalGufoEarned: toNumberSafe(
+            stats?.gufo_earned ?? wallet?.balance_gufo ?? 0
+          ),
+          level: String(stats?.level ?? wallet?.current_level ?? "Basic"),
+          cashbackPercent: toNumberSafe(
+            stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
+          ),
           transactions: normalizedTransactions,
           monthlyExpenses,
           profileName,
@@ -220,13 +223,20 @@ export default function DashboardPage() {
           profileInitial,
         });
       } catch (err: any) {
+        if (!isMounted) return;
         setError(err.message || "Errore sconosciuto");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -295,6 +305,20 @@ export default function DashboardPage() {
               <div className="stat-label">Livello</div>
               <div className="stat-value">
                 {formatLevel(dashboardData.level)}
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-label">Transazioni</div>
+              <div className="stat-value">
+                {dashboardData.totalTransactions}
+              </div>
+            </div>
+
+            <div className="stat-card">
+              <div className="stat-label">GUFO guadagnati</div>
+              <div className="stat-value">
+                {dashboardData.totalGufoEarned.toFixed(2)}
               </div>
             </div>
           </div>

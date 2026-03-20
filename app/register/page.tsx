@@ -1,40 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export default function RegisterPage() {
+  const supabase = createClient();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingUser, setCheckingUser] = useState(true);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    async function checkUser() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        router.push("/dashboard");
+      } else {
+        setCheckingUser(false);
+      }
+    }
+
+    checkUser();
+  }, [router, supabase]);
+
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+
     setLoading(true);
     setError("");
     setMessage("");
 
-    const { error } = await supabase.auth.signUp({
-      email,
+    const trimmedEmail = email.trim();
+
+    const { data, error } = await supabase.auth.signUp({
+      email: trimmedEmail,
       password,
     });
 
     if (error) {
-      setError(error.message);
+      setError(error.message || "Errore durante la registrazione");
       setLoading(false);
       return;
     }
 
-    setMessage("Registrazione completata. Controlla la tua email per confermare l'account.");
+    const needsEmailConfirmation =
+      !data.session && !!data.user;
+
+    if (needsEmailConfirmation) {
+      setMessage(
+        "Registrazione completata. Controlla la tua email e conferma l'account prima di accedere."
+      );
+    } else {
+      setMessage("Account creato con successo. Reindirizzamento al login...");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1200);
+    }
+
     setLoading(false);
-    router.push("/login");
+  }
+
+  if (checkingUser) {
+    return (
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#020617",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        Caricamento...
+      </div>
+    );
   }
 
   return (
@@ -71,6 +119,7 @@ export default function RegisterPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            autoComplete="email"
             style={{
               padding: "14px 16px",
               borderRadius: "12px",
@@ -86,6 +135,8 @@ export default function RegisterPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            minLength={6}
+            autoComplete="new-password"
             style={{
               padding: "14px 16px",
               borderRadius: "12px",
@@ -102,10 +153,10 @@ export default function RegisterPage() {
               padding: "14px 16px",
               borderRadius: "12px",
               border: "none",
-              background: "#22c55e",
+              background: loading ? "#4ade80" : "#22c55e",
               color: "white",
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
             {loading ? "Registrazione..." : "Crea account"}
@@ -119,6 +170,20 @@ export default function RegisterPage() {
         {error && (
           <p style={{ color: "#fca5a5", marginTop: "14px" }}>{error}</p>
         )}
+
+        <p style={{ marginTop: "18px", color: "#94a3b8", fontSize: "14px" }}>
+          Hai già un account?{" "}
+          <span
+            onClick={() => router.push("/login")}
+            style={{
+              color: "#22c55e",
+              cursor: "pointer",
+              fontWeight: 600,
+            }}
+          >
+            Vai al login
+          </span>
+        </p>
       </div>
     </div>
   );

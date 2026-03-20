@@ -34,7 +34,8 @@ type ProfileData = {
   transactions: Transaction[];
 };
 
-const API_URL = "https://gufo-backend1.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -127,6 +128,8 @@ export default function ProfilePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadProfile() {
       try {
         setLoading(true);
@@ -163,12 +166,15 @@ export default function ProfilePage() {
         const transactions = sortTransactions(
           rawTransactions.map((tx: any) => ({
             id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-            transaction_id: tx?.transaction_id,
+            transaction_id: tx?.transaction_id ?? tx?.id,
             type: getTransactionType(tx),
             tipo: tx?.tipo ?? tx?.raw?.tipo,
             merchant_name: getTransactionMerchant(tx),
+            benefit: tx?.benefit ?? tx?.raw?.benefit,
+            merchant: tx?.merchant ?? tx?.raw?.merchant,
             amount_euro: getTransactionAmount(tx),
             amount: getTransactionAmount(tx),
+            importo: tx?.importo ?? tx?.raw?.importo,
             gufo_earned: getTransactionGufo(tx),
             gufo: getTransactionGufo(tx),
             cashback: tx?.cashback ?? tx?.raw?.cashback,
@@ -177,13 +183,18 @@ export default function ProfilePage() {
           }))
         );
 
-        const totalSpent = toNumberSafe(stats?.season_spent);
-        const balanceGufo = toNumberSafe(
-          stats?.balance_gufo ?? wallet?.balance_gufo
+        const totalSpent = toNumberSafe(
+          stats?.season_spent ?? wallet?.season_spent ?? 0
         );
+
+        const balanceGufo = toNumberSafe(
+          stats?.balance_gufo ?? wallet?.balance_gufo ?? 0
+        );
+
         const cashbackPercent = toNumberSafe(
           stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
         );
+
         const level = formatLevel(
           String(stats?.level ?? wallet?.current_level ?? "basic")
         );
@@ -197,6 +208,8 @@ export default function ProfilePage() {
 
         const email = profile?.email ?? user.email ?? "";
 
+        if (!isMounted) return;
+
         setProfileData({
           name,
           email,
@@ -208,13 +221,20 @@ export default function ProfilePage() {
         });
       } catch (err: unknown) {
         console.error("Errore caricamento profilo:", err);
+        if (!isMounted) return;
         setError(err instanceof Error ? err.message : "Errore recupero profilo");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
@@ -237,6 +257,8 @@ export default function ProfilePage() {
     );
   }
 
+  const profileInitial = profileData.name?.trim()?.charAt(0)?.toUpperCase() || "U";
+
   return (
     <div className="profile-page">
       <style>{profileStyles}</style>
@@ -248,9 +270,7 @@ export default function ProfilePage() {
 
       <div className="profile-layout">
         <div className="profile-card">
-          <div className="avatar">
-            {profileData.name.charAt(0).toUpperCase()}
-          </div>
+          <div className="avatar">{profileInitial}</div>
 
           <h2 className="profile-name">{profileData.name}</h2>
           <p className="profile-email">{profileData.email}</p>
@@ -480,6 +500,10 @@ const profileStyles = `
   .transaction-left,
   .transaction-right {
     min-width: 0;
+  }
+
+  .transaction-left {
+    flex: 1;
   }
 
   .transaction-right {
