@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = createClient();
 
 type Transaction = {
   transaction_id?: string;
