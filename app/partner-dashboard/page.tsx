@@ -103,7 +103,11 @@ export default function PartnerDashboardPage() {
         setLoading(true);
         setError("");
 
-        const { response, data } = await safeJsonFetch(`${API_URL}/partner/stats`);
+        const PARTNER_ID = 3; // Coop
+
+const { response, data } = await safeJsonFetch(
+  `${API_URL}/partner/stats?partner_id=${PARTNER_ID}`
+);
 
         if (!response.ok || data?.success === false) {
           throw new Error(data?.error || "Errore nel caricamento statistiche");
