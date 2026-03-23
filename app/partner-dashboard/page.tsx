@@ -5,6 +5,7 @@ import { safeJsonFetch } from "@/lib/api";
 
 type Transaction = {
   id?: string | null;
+  transaction_id?: string | null;
   type?: string;
   tipo?: string;
   merchant_name?: string;
@@ -16,7 +17,7 @@ type Transaction = {
   gufo_earned?: number | string | null;
   gufo?: number | string | null;
   created_at?: string | null;
-  raw?: any;
+  raw?: unknown;
 };
 
 type PartnerStatsResponse = {
@@ -35,7 +36,8 @@ type PartnerStatsResponse = {
   error?: string;
 };
 
-const API_URL = "https://gufo-backend1.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -94,6 +96,8 @@ export default function PartnerDashboardPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadStats() {
       try {
         setLoading(true);
@@ -114,35 +118,50 @@ export default function PartnerDashboardPage() {
           ? stats.transactions
           : [];
 
-        const normalizedTransactions: Transaction[] = rawTransactions.map(
-          (tx: any) => ({
+        const normalizedTransactions: Transaction[] = rawTransactions
+          .map((tx: any) => ({
             id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id ?? null,
+            transaction_id:
+              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id ?? null,
             type: getTransactionType(tx),
             merchant_name: getTransactionMerchant(tx),
             amount_euro: getTransactionAmount(tx),
             gufo_earned: getTransactionGufo(tx),
             created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
             raw: tx?.raw ?? tx,
-          })
-        );
+          }))
+          .sort((a, b) => {
+            const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return db - da;
+          });
+
+        if (!isMounted) return;
 
         setData(stats);
         setTransactions(normalizedTransactions);
       } catch (err: any) {
+        if (!isMounted) return;
         setError(err?.message || "Errore sconosciuto");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadStats();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (loading) {
     return (
       <div className="partner-dashboard-page">
         <style>{partnerDashboardStyles}</style>
-        <h1 className="page-title">GUFO Partner Dashboard</h1>
+        <h1 className="page-title">Partner Dashboard</h1>
         <p className="page-subtitle">Caricamento statistiche...</p>
       </div>
     );
@@ -152,7 +171,7 @@ export default function PartnerDashboardPage() {
     return (
       <div className="partner-dashboard-page">
         <style>{partnerDashboardStyles}</style>
-        <h1 className="page-title">GUFO Partner Dashboard</h1>
+        <h1 className="page-title">Partner Dashboard</h1>
         <div className="error-box">{error}</div>
       </div>
     );
@@ -162,27 +181,27 @@ export default function PartnerDashboardPage() {
     <div className="partner-dashboard-page">
       <style>{partnerDashboardStyles}</style>
 
-      <h1 className="page-title">GUFO Partner Dashboard</h1>
+      <h1 className="page-title">Partner Dashboard</h1>
       <p className="page-subtitle">
-        Panoramica partner con statistiche e ultime transazioni.
+        Panoramica partner con statistiche e ultime transazioni
       </p>
 
       <div className="stats-grid">
-        <div className="stat-card">
+        <div className="stat-card neon-card">
           <p className="stat-label">Totale transazioni</p>
           <p className="stat-value">
             {toNumberSafe(data?.total_transactions)}
           </p>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card neon-card">
           <p className="stat-label">Totale importi</p>
           <p className="stat-value">
             €{toNumberSafe(data?.total_amount).toFixed(2)}
           </p>
         </div>
 
-        <div className="stat-card">
+        <div className="stat-card neon-card">
           <p className="stat-label">GUFO distribuiti</p>
           <p className="stat-value">
             {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
@@ -190,11 +209,17 @@ export default function PartnerDashboardPage() {
         </div>
       </div>
 
-      <div className="panel">
+      <div className="panel neon-card">
         <h2 className="panel-title">Ultime transazioni</h2>
 
         {transactions.length === 0 ? (
-          <p className="empty-text">Nessuna transazione trovata.</p>
+          <div className="empty-state">
+            <div className="empty-icon">◎</div>
+            <p className="empty-title">Nessuna transazione trovata</p>
+            <p className="empty-text">
+              Le transazioni partner appariranno qui appena disponibili.
+            </p>
+          </div>
         ) : (
           <>
             <div className="table-wrap desktop-only">
@@ -210,7 +235,7 @@ export default function PartnerDashboardPage() {
                 </thead>
                 <tbody>
                   {transactions.map((tx, index) => (
-                    <tr key={tx.id || index}>
+                    <tr key={tx.id || tx.transaction_id || index}>
                       <td>{getTransactionMerchant(tx)}</td>
                       <td>{getTransactionType(tx)}</td>
                       <td className="amount-green">
@@ -226,7 +251,7 @@ export default function PartnerDashboardPage() {
 
             <div className="mobile-transactions mobile-only">
               {transactions.map((tx, index) => (
-                <div className="tx-card" key={tx.id || index}>
+                <div className="tx-card" key={tx.id || tx.transaction_id || index}>
                   <div className="tx-row">
                     <span className="tx-label">Merchant</span>
                     <span className="tx-value">{getTransactionMerchant(tx)}</span>
@@ -271,20 +296,45 @@ const partnerDashboardStyles = `
   }
 
   .partner-dashboard-page {
-    color: white;
     width: 100%;
+    color: #ffffff;
+    min-height: 100%;
+    position: relative;
+  }
+
+  .partner-dashboard-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
+      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
+      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+    z-index: 0;
+  }
+
+  .page-title,
+  .page-subtitle,
+  .stats-grid,
+  .panel,
+  .error-box {
+    position: relative;
+    z-index: 1;
   }
 
   .page-title {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 700;
     margin: 0 0 10px 0;
-    line-height: 1.1;
+    line-height: 1.05;
+    color: #fff7ed;
   }
 
   .page-subtitle {
-    color: #cbd5e1;
-    margin: 0 0 30px 0;
+    color: #d6d3d1;
+    margin: 0 0 28px 0;
     font-size: 16px;
     line-height: 1.6;
   }
@@ -296,17 +346,53 @@ const partnerDashboardStyles = `
     margin-bottom: 24px;
   }
 
+  .neon-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
+    border-radius: 22px;
+    padding: 22px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 10px 35px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .neon-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 1.3px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.95),
+      rgba(250, 204, 21, 0.95),
+      rgba(168, 85, 247, 0.95)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
   .stat-card {
-    background: #1e293b;
-    border: 1px solid rgba(148, 163, 184, 0.08);
-    border-radius: 20px;
-    padding: 24px;
     min-width: 0;
+  }
+
+  .stat-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .stat-label {
     margin: 0 0 10px 0;
-    color: #94a3b8;
+    color: #d6d3d1;
     font-size: 14px;
   }
 
@@ -316,14 +402,10 @@ const partnerDashboardStyles = `
     font-weight: 700;
     line-height: 1.1;
     word-break: break-word;
-    color: white;
+    color: #fffaf0;
   }
 
   .panel {
-    background: #1e293b;
-    border: 1px solid rgba(148, 163, 184, 0.08);
-    border-radius: 20px;
-    padding: 24px;
     overflow: hidden;
   }
 
@@ -331,11 +413,16 @@ const partnerDashboardStyles = `
     margin: 0 0 20px 0;
     font-size: 28px;
     line-height: 1.1;
+    color: #fff7ed;
+    position: relative;
+    z-index: 1;
   }
 
   .table-wrap {
     width: 100%;
     overflow-x: auto;
+    position: relative;
+    z-index: 1;
   }
 
   .transactions-table {
@@ -344,8 +431,8 @@ const partnerDashboardStyles = `
   }
 
   .transactions-table th {
-    color: #94a3b8;
-    border-bottom: 1px solid #334155;
+    color: #d6d3d1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     padding: 12px 0;
     text-align: left;
     font-weight: 600;
@@ -354,20 +441,46 @@ const partnerDashboardStyles = `
 
   .transactions-table td {
     padding: 14px 0;
-    color: #e2e8f0;
-    border-bottom: 1px solid #334155;
+    color: #f5f5f4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 14px;
     vertical-align: top;
   }
 
   .amount-green {
-    color: #86efac !important;
+    color: #bbf7d0 !important;
     font-weight: 700;
+  }
+
+  .empty-state {
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    padding: 36px 20px;
+    text-align: center;
+    background:
+      radial-gradient(circle at center, rgba(56, 189, 248, 0.06), transparent 38%),
+      rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+
+  .empty-icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+    color: #e7e5e4;
+  }
+
+  .empty-title {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff7ed;
   }
 
   .empty-text {
     margin: 0;
-    color: #94a3b8;
+    color: #d6d3d1;
+    font-size: 16px;
   }
 
   .error-box {
@@ -390,11 +503,13 @@ const partnerDashboardStyles = `
     display: flex;
     flex-direction: column;
     gap: 14px;
+    position: relative;
+    z-index: 1;
   }
 
   .tx-card {
-    background: #0f172a;
-    border: 1px solid #334155;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 14px;
   }
@@ -405,7 +520,7 @@ const partnerDashboardStyles = `
     align-items: flex-start;
     gap: 12px;
     padding: 6px 0;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .tx-row:last-child {
@@ -413,13 +528,13 @@ const partnerDashboardStyles = `
   }
 
   .tx-label {
-    color: #94a3b8;
+    color: #d6d3d1;
     font-size: 13px;
     flex: 0 0 90px;
   }
 
   .tx-value {
-    color: #e2e8f0;
+    color: #f5f5f4;
     font-size: 13px;
     text-align: right;
     word-break: break-word;
@@ -433,31 +548,34 @@ const partnerDashboardStyles = `
 
   @media (max-width: 768px) {
     .page-title {
-      font-size: 32px;
+      font-size: 38px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .stat-card {
-      padding: 18px;
-      border-radius: 16px;
+    .neon-card {
+      padding: 18px 14px;
+      border-radius: 18px;
     }
 
     .stat-value {
       font-size: 28px;
     }
 
-    .panel {
-      padding: 18px 14px;
-      border-radius: 16px;
-    }
-
     .panel-title {
       font-size: 22px;
       margin-bottom: 16px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+    }
+
+    .empty-text {
+      font-size: 14px;
     }
 
     .desktop-only {
@@ -471,7 +589,7 @@ const partnerDashboardStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 28px;
+      font-size: 30px;
     }
 
     .stat-value {

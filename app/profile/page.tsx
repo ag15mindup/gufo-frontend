@@ -21,7 +21,7 @@ type Transaction = {
   gufo_earned?: number | string | null;
   cashback?: number | string | null;
   created_at?: string | null;
-  raw?: any;
+  raw?: unknown;
 };
 
 type ProfileData = {
@@ -87,13 +87,7 @@ function getTransactionMerchant(tx: any) {
 }
 
 function getTransactionType(tx: any) {
-  return (
-    tx?.type ??
-    tx?.tipo ??
-    tx?.raw?.type ??
-    tx?.raw?.tipo ??
-    "cashback"
-  );
+  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "cashback";
 }
 
 function sortTransactions(transactions: Transaction[]): Transaction[] {
@@ -241,7 +235,7 @@ export default function ProfilePage() {
     return (
       <div className="profile-page">
         <style>{profileStyles}</style>
-        <h1 className="page-title">Il tuo profilo</h1>
+        <h1 className="page-title">Profilo</h1>
         <p className="page-subtitle">Caricamento profilo...</p>
       </div>
     );
@@ -251,7 +245,8 @@ export default function ProfilePage() {
     return (
       <div className="profile-page">
         <style>{profileStyles}</style>
-        <h1 className="page-title">Il tuo profilo</h1>
+        <h1 className="page-title">Profilo</h1>
+        <p className="page-subtitle">Si è verificato un problema.</p>
         <div className="error-box">{error}</div>
       </div>
     );
@@ -263,23 +258,40 @@ export default function ProfilePage() {
     <div className="profile-page">
       <style>{profileStyles}</style>
 
-      <h1 className="page-title">Il tuo profilo</h1>
+      <h1 className="page-title">Profilo</h1>
       <p className="page-subtitle">
-        Panoramica account, livello e ultime attività.
+        Panoramica account, livello e ultime attività
       </p>
 
       <div className="profile-layout">
-        <div className="profile-card">
+        <div className="profile-card neon-card">
           <div className="avatar">{profileInitial}</div>
 
           <h2 className="profile-name">{profileData.name}</h2>
           <p className="profile-email">{profileData.email}</p>
 
-          <span className="level-badge">{profileData.level}</span>
+          <div className="profile-stats">
+            <div className="profile-stat-row">
+              <span>Livello</span>
+              <strong>{profileData.level}</strong>
+            </div>
+
+            <div className="profile-stat-row">
+              <span>Cashback</span>
+              <strong>{profileData.cashbackPercent}%</strong>
+            </div>
+
+            <div className="profile-stat-row">
+              <span>Saldo GUFO</span>
+              <strong>{profileData.balanceGufo.toFixed(2)}</strong>
+            </div>
+          </div>
+
+          <div className="level-pill">{profileData.level}</div>
         </div>
 
         <div className="content-area">
-          <div className="panel">
+          <div className="panel neon-card">
             <h2 className="panel-title">Riepilogo account</h2>
 
             <div className="stats-grid">
@@ -311,11 +323,17 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="panel">
+          <div className="panel neon-card">
             <h2 className="panel-title">Transazioni recenti</h2>
 
             {profileData.transactions.length === 0 ? (
-              <p className="empty-text">Nessuna transazione trovata.</p>
+              <div className="empty-state">
+                <div className="empty-icon">◎</div>
+                <p className="empty-title">Nessuna transazione trovata</p>
+                <p className="empty-text">
+                  Le tue attività recenti compariranno qui appena inizierai a usare GUFO.
+                </p>
+              </div>
             ) : (
               <div className="transactions-list">
                 {profileData.transactions.slice(0, 5).map((transaction, index) => (
@@ -360,20 +378,44 @@ const profileStyles = `
   }
 
   .profile-page {
-    color: white;
     width: 100%;
+    color: #ffffff;
+    min-height: 100%;
+    position: relative;
+  }
+
+  .profile-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
+      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
+      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+    z-index: 0;
+  }
+
+  .page-title,
+  .page-subtitle,
+  .profile-layout,
+  .error-box {
+    position: relative;
+    z-index: 1;
   }
 
   .page-title {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 700;
     margin: 0 0 10px 0;
-    line-height: 1.1;
+    line-height: 1.05;
+    color: #fff7ed;
   }
 
   .page-subtitle {
-    color: #cbd5e1;
-    margin: 0 0 30px 0;
+    color: #d6d3d1;
+    margin: 0 0 28px 0;
     font-size: 16px;
   }
 
@@ -384,55 +426,138 @@ const profileStyles = `
     align-items: start;
   }
 
-  .profile-card {
-    background: #1e293b;
+  .neon-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
     border-radius: 22px;
-    padding: 28px 22px;
-    min-height: 360px;
+    padding: 22px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 10px 35px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .neon-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 1.3px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.95),
+      rgba(250, 204, 21, 0.95),
+      rgba(168, 85, 247, 0.95)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .profile-card {
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
-    border: 1px solid rgba(148, 163, 184, 0.08);
+    gap: 18px;
   }
 
   .avatar {
     width: 96px;
     height: 96px;
     border-radius: 999px;
-    background: #facc15;
-    color: #0f172a;
+    background: linear-gradient(
+      135deg,
+      #f472b6 0%,
+      #60a5fa 35%,
+      #4ade80 70%,
+      #facc15 100%
+    );
+    color: #111827;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    font-weight: 700;
-    margin-bottom: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    box-shadow: 0 0 24px rgba(96, 165, 250, 0.22);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
   }
 
   .profile-name {
     font-size: 34px;
     font-weight: 700;
-    margin: 0 0 8px 0;
+    margin: 0;
     line-height: 1.1;
     word-break: break-word;
+    color: #fff7ed;
+    position: relative;
+    z-index: 1;
   }
 
   .profile-email {
-    color: #cbd5e1;
-    margin: 0 0 18px 0;
+    color: #d6d3d1;
+    margin: 0;
     word-break: break-word;
+    position: relative;
+    z-index: 1;
   }
 
-  .level-badge {
-    display: inline-block;
-    padding: 8px 16px;
-    border-radius: 999px;
-    background: #22c55e;
-    color: white;
-    font-weight: 700;
+  .profile-stats {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+  }
+
+  .profile-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e7e5e4;
     font-size: 14px;
+  }
+
+  .profile-stat-row strong {
+    color: #ffffff;
+  }
+
+  .level-pill {
+    margin-top: auto;
+    min-height: 48px;
+    width: 100%;
+    border-radius: 999px;
+    font-weight: 700;
+    color: #111827;
+    background: linear-gradient(
+      90deg,
+      rgba(244, 114, 182, 0.95),
+      rgba(96, 165, 250, 0.95),
+      rgba(74, 222, 128, 0.95),
+      rgba(250, 204, 21, 0.95)
+    );
+    box-shadow: 0 0 24px rgba(250, 204, 21, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   .content-area {
@@ -440,35 +565,36 @@ const profileStyles = `
   }
 
   .panel {
-    background: #1e293b;
-    border-radius: 20px;
-    padding: 24px;
     margin-bottom: 24px;
-    overflow: hidden;
-    border: 1px solid rgba(148, 163, 184, 0.08);
   }
 
   .panel-title {
     margin: 0 0 20px 0;
     font-size: 30px;
     line-height: 1.1;
+    color: #fff7ed;
+    position: relative;
+    z-index: 1;
   }
 
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
+    position: relative;
+    z-index: 1;
   }
 
   .stat-card {
-    background: #334155;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 18px;
     padding: 22px;
     min-width: 0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .stat-label {
-    color: #e2e8f0;
+    color: #e7e5e4;
     margin-bottom: 10px;
     font-size: 14px;
   }
@@ -478,12 +604,15 @@ const profileStyles = `
     font-weight: 700;
     line-height: 1.1;
     word-break: break-word;
+    color: #fffaf0;
   }
 
   .transactions-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    position: relative;
+    z-index: 1;
   }
 
   .transaction-card {
@@ -491,8 +620,8 @@ const profileStyles = `
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    background: #0f172a;
-    border: 1px solid #334155;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 16px;
   }
@@ -516,20 +645,20 @@ const profileStyles = `
     font-size: 16px;
     font-weight: 700;
     text-transform: capitalize;
-    color: white;
+    color: #ffffff;
   }
 
   .transaction-merchant {
     margin: 0 0 4px 0;
     font-size: 14px;
-    color: #cbd5e1;
+    color: #d6d3d1;
     word-break: break-word;
   }
 
   .transaction-date {
     margin: 0;
     font-size: 13px;
-    color: #94a3b8;
+    color: #a8a29e;
     word-break: break-word;
   }
 
@@ -537,18 +666,44 @@ const profileStyles = `
     margin: 0 0 4px 0;
     font-size: 16px;
     font-weight: 700;
-    color: #86efac;
+    color: #bbf7d0;
   }
 
   .transaction-gufo {
     margin: 0;
     font-size: 13px;
-    color: #cbd5e1;
+    color: #d6d3d1;
+  }
+
+  .empty-state {
+    position: relative;
+    z-index: 1;
+    border-radius: 24px;
+    padding: 36px 20px;
+    text-align: center;
+    background:
+      radial-gradient(circle at center, rgba(56, 189, 248, 0.06), transparent 38%),
+      rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+
+  .empty-icon {
+    font-size: 34px;
+    margin-bottom: 12px;
+    color: #e7e5e4;
+  }
+
+  .empty-title {
+    margin: 0 0 8px 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff7ed;
   }
 
   .empty-text {
     margin: 0;
-    color: #94a3b8;
+    color: #d6d3d1;
+    font-size: 16px;
   }
 
   .error-box {
@@ -566,40 +721,32 @@ const profileStyles = `
 
     .profile-card {
       min-height: auto;
-      padding: 24px 20px;
     }
   }
 
   @media (max-width: 768px) {
     .page-title {
-      font-size: 32px;
+      font-size: 38px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .profile-card {
+    .neon-card {
+      padding: 18px 14px;
       border-radius: 18px;
-      padding: 22px 16px;
     }
 
     .avatar {
       width: 76px;
       height: 76px;
       font-size: 30px;
-      margin-bottom: 16px;
     }
 
     .profile-name {
       font-size: 26px;
-    }
-
-    .panel {
-      padding: 18px 14px;
-      border-radius: 16px;
-      margin-bottom: 18px;
     }
 
     .panel-title {
@@ -650,7 +797,7 @@ const profileStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 28px;
+      font-size: 30px;
     }
 
     .profile-name {
@@ -659,6 +806,14 @@ const profileStyles = `
 
     .stat-value {
       font-size: 26px;
+    }
+
+    .empty-title {
+      font-size: 18px;
+    }
+
+    .empty-text {
+      font-size: 14px;
     }
   }
 `;

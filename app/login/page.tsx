@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,7 +15,6 @@ export default function LoginPage() {
   const [checkingUser, setCheckingUser] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔐 Se già loggato → vai direttamente in dashboard
   useEffect(() => {
     async function checkUser() {
       const {
@@ -29,7 +29,7 @@ export default function LoginPage() {
     }
 
     checkUser();
-  }, []);
+  }, [router, supabase]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -53,114 +53,410 @@ export default function LoginPage() {
 
   if (checkingUser) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#020617",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        Caricamento...
+      <div className="auth-page">
+        <style>{loginStyles}</style>
+        <div className="auth-loading">Caricamento...</div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#020617",
-        color: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          background: "#0f172a",
-          border: "1px solid #334155",
-          borderRadius: "20px",
-          padding: "24px",
-        }}
-      >
-        <h1 style={{ margin: "0 0 10px 0", fontSize: "32px" }}>Login</h1>
-        <p style={{ margin: "0 0 20px 0", color: "#94a3b8" }}>
-          Accedi alla tua area GUFO
-        </p>
+    <div className="auth-page">
+      <style>{loginStyles}</style>
 
-        <form onSubmit={handleLogin} style={{ display: "grid", gap: "12px" }}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{
-              padding: "14px 16px",
-              borderRadius: "12px",
-              border: "1px solid #334155",
-              background: "#020617",
-              color: "white",
-            }}
-          />
+      <div className="auth-shell">
+        <div className="auth-left">
+          <div className="auth-badge">GUFO Rainbow</div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{
-              padding: "14px 16px",
-              borderRadius: "12px",
-              border: "1px solid #334155",
-              background: "#020617",
-              color: "white",
-            }}
-          />
+          <h1 className="auth-title">
+            Bentornato su
+            <span className="auth-title-glow"> GUFO</span>
+          </h1>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: "14px 16px",
-              borderRadius: "12px",
-              border: "none",
-              background: loading ? "#4ade80" : "#22c55e",
-              color: "white",
-              fontWeight: 700,
-              cursor: loading ? "not-allowed" : "pointer",
-            }}
-          >
-            {loading ? "Accesso..." : "Entra"}
-          </button>
-        </form>
+          <p className="auth-description">
+            Accedi alla tua area personale per controllare wallet, cashback,
+            membership, profilo e transazioni in tempo reale.
+          </p>
 
-        {error && (
-          <p style={{ color: "#fca5a5", marginTop: "14px" }}>{error}</p>
-        )}
+          <div className="auth-features">
+            <div className="auth-feature">Wallet e saldo GUFO</div>
+            <div className="auth-feature">Membership e livelli</div>
+            <div className="auth-feature">Profilo e transazioni</div>
+          </div>
+        </div>
 
-        <p style={{ marginTop: "18px", color: "#94a3b8", fontSize: "14px" }}>
-          Non hai un account?{" "}
-          <span
-            onClick={() => router.push("/register")}
-            style={{
-              color: "#22c55e",
-              cursor: "pointer",
-              fontWeight: "600",
-            }}
-          >
-            Registrati
-          </span>
-        </p>
+        <div className="auth-card">
+          <div className="auth-card-inner">
+            <p className="card-kicker">Login</p>
+            <h2 className="card-title">Accedi al tuo account</h2>
+            <p className="card-subtitle">Inserisci email e password per entrare</p>
+
+            <form onSubmit={handleLogin} className="auth-form">
+              <div className="field-group">
+                <label className="field-label">Email</label>
+                <input
+                  type="email"
+                  placeholder="Inserisci la tua email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="field-input"
+                />
+              </div>
+
+              <div className="field-group">
+                <label className="field-label">Password</label>
+                <input
+                  type="password"
+                  placeholder="Inserisci la tua password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="field-input"
+                />
+              </div>
+
+              <button type="submit" disabled={loading} className="submit-button">
+                {loading ? "Accesso in corso..." : "Entra"}
+              </button>
+            </form>
+
+            {error && <div className="error-box">{error}</div>}
+
+            <p className="auth-footer">
+              Non hai ancora un account?{" "}
+              <Link href="/register" className="auth-link">
+                Registrati
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+const loginStyles = `
+  * {
+    box-sizing: border-box;
+  }
+
+  .auth-page {
+    min-height: 100vh;
+    width: 100%;
+    color: white;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+      radial-gradient(circle at 12% 16%, rgba(236, 72, 153, 0.12), transparent 18%),
+      radial-gradient(circle at 82% 12%, rgba(56, 189, 248, 0.12), transparent 18%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.10), transparent 18%),
+      radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.10), transparent 18%),
+      linear-gradient(180deg, #081120 0%, #0b1424 48%, #081120 100%);
+  }
+
+  .auth-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at center, rgba(255,255,255,0.03), transparent 42%);
+    z-index: 0;
+  }
+
+  .auth-loading {
+    position: relative;
+    z-index: 1;
+    color: #f8fafc;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .auth-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1160px;
+    display: grid;
+    grid-template-columns: 1fr 440px;
+    gap: 28px;
+    align-items: stretch;
+  }
+
+  .auth-left {
+    padding: 22px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .auth-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    width: fit-content;
+    background: rgba(15, 23, 42, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #dbe7ff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  .auth-title {
+    margin: 0 0 16px 0;
+    font-size: 64px;
+    line-height: 0.98;
+    font-weight: 800;
+    color: #fffaf0;
+    letter-spacing: -0.04em;
+  }
+
+  .auth-title-glow {
+    display: block;
+    margin-top: 8px;
+    background: linear-gradient(
+      90deg,
+      #f472b6 0%,
+      #60a5fa 25%,
+      #4ade80 55%,
+      #facc15 80%,
+      #c084fc 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .auth-description {
+    margin: 0 0 24px 0;
+    max-width: 640px;
+    color: #c8d4e8;
+    font-size: 17px;
+    line-height: 1.75;
+  }
+
+  .auth-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .auth-feature {
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .auth-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow:
+      0 24px 60px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .auth-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    padding: 1.4px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.95),
+      rgba(250, 204, 21, 0.95),
+      rgba(168, 85, 247, 0.95)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .auth-card-inner {
+    position: relative;
+    z-index: 1;
+    padding: 28px 24px;
+  }
+
+  .card-kicker {
+    margin: 0 0 10px 0;
+    color: #93c5fd;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .card-title {
+    margin: 0 0 10px 0;
+    font-size: 32px;
+    line-height: 1.1;
+    color: #fff7ed;
+    font-weight: 800;
+  }
+
+  .card-subtitle {
+    margin: 0 0 22px 0;
+    color: #cbd5e1;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .auth-form {
+    display: grid;
+    gap: 16px;
+  }
+
+  .field-group {
+    display: grid;
+    gap: 8px;
+  }
+
+  .field-label {
+    color: #d6d3d1;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .field-input {
+    width: 100%;
+    min-height: 52px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 14px 16px;
+    color: white;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .field-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .submit-button {
+    width: 100%;
+    min-height: 54px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 800;
+    font-size: 15px;
+    color: #111827;
+    background: linear-gradient(
+      90deg,
+      #f472b6 0%,
+      #60a5fa 35%,
+      #4ade80 70%,
+      #facc15 100%
+    );
+    box-shadow: 0 14px 34px rgba(96, 165, 250, 0.18);
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+
+  .submit-button:hover {
+    transform: translateY(-1px);
+    opacity: 0.97;
+  }
+
+  .submit-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .error-box {
+    margin-top: 16px;
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    padding: 14px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+
+  .auth-footer {
+    margin: 18px 0 0 0;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .auth-link {
+    color: #93c5fd;
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  @media (max-width: 1024px) {
+    .auth-shell {
+      grid-template-columns: 1fr;
+      max-width: 680px;
+    }
+
+    .auth-left {
+      padding: 8px 0 0;
+    }
+
+    .auth-title {
+      font-size: 48px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .auth-page {
+      padding: 16px;
+    }
+
+    .auth-title {
+      font-size: 38px;
+    }
+
+    .auth-description {
+      font-size: 15px;
+      margin-bottom: 20px;
+    }
+
+    .auth-card-inner {
+      padding: 22px 16px;
+    }
+
+    .card-title {
+      font-size: 26px;
+    }
+
+    .card-subtitle,
+    .auth-footer {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .auth-title {
+      font-size: 32px;
+    }
+
+    .card-title {
+      font-size: 22px;
+    }
+  }
+`;

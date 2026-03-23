@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = createClient();
 
 type WalletResponse = {
   balance_gufo?: number | string | null;
@@ -19,7 +22,7 @@ type Transaction = {
   amount_euro?: number | string | null;
   amount?: number | string | null;
   importo?: number | string | null;
-  raw?: any;
+  raw?: unknown;
 };
 
 type DashboardResponse = {
@@ -36,8 +39,8 @@ type DashboardResponse = {
   transactions?: Transaction[];
 };
 
-const API_URL = "https://gufo-backend1.onrender.com";
-const CUSTOMER_CODE = "GUFO-123456";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -51,6 +54,7 @@ function formatLevel(level: string) {
 
   if (normalized === "vip") return "VIP";
   if (normalized === "platino" || normalized === "platinum") return "Platino";
+  if (normalized === "diamond") return "Diamond";
   if (normalized === "millionaire") return "Millionaire";
 
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
@@ -82,20 +86,36 @@ export default function MembershipPage() {
       { name: "Gold", min: 1000, next: 2500 },
       { name: "Platino", min: 2500, next: 5000 },
       { name: "VIP", min: 5000, next: 10000 },
-      { name: "Elite", min: 10000, next: 50000 },
+      { name: "Elite", min: 10000, next: 25000 },
+      { name: "Diamond", min: 25000, next: 50000 },
       { name: "Millionaire", min: 50000, next: null },
     ],
     []
   );
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchDashboard() {
       try {
         setLoading(true);
         setError("");
 
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
+        if (userError) {
+          throw new Error(userError.message || "Errore recupero utente");
+        }
+
+        if (!user) {
+          throw new Error("Utente non autenticato");
+        }
+
         const { response, data } = await safeJsonFetch(
-          `${API_URL}/dashboard/${CUSTOMER_CODE}`
+          `${API_URL}/dashboard/${user.id}`
         );
 
         if (!response.ok || data?.success === false) {
@@ -109,6 +129,8 @@ export default function MembershipPage() {
           ? dashboard.transactions
           : [];
 
+        if (!isMounted) return;
+
         setWallet(walletData);
         setTransactions(txs);
         setCashbackPercent(
@@ -117,13 +139,20 @@ export default function MembershipPage() {
           )
         );
       } catch (err: any) {
+        if (!isMounted) return;
         setError(err?.message || "Errore sconosciuto");
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const totalSpentFromTransactions = transactions.reduce(
@@ -198,11 +227,11 @@ export default function MembershipPage() {
 
       <h1 className="page-title">Membership GUFO</h1>
       <p className="page-subtitle">
-        Controlla il tuo livello attuale e i progressi per salire di status.
+        Controlla il tuo livello attuale e i progressi per salire di status
       </p>
 
       <div className="top-grid">
-        <div className="hero-card">
+        <div className="hero-card neon-card">
           <div className="badge">{currentLevel}</div>
           <h2 className="hero-title">Livello attuale: {currentLevel}</h2>
           <p className="hero-text">
@@ -237,29 +266,29 @@ export default function MembershipPage() {
         </div>
 
         <div className="stats-grid">
-          <div className="stat-card">
+          <div className="stat-card neon-card">
             <div className="stat-label">Saldo GUFO</div>
             <div className="stat-value">{balanceGufo.toFixed(2)}</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card neon-card">
             <div className="stat-label">Spesa stagione</div>
             <div className="stat-value">€ {seasonSpent.toFixed(2)}</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card neon-card">
             <div className="stat-label">Cashback attuale</div>
             <div className="stat-value">{cashbackPercent}%</div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card neon-card">
             <div className="stat-label">Transazioni</div>
             <div className="stat-value">{transactions.length}</div>
           </div>
         </div>
       </div>
 
-      <div className="panel">
+      <div className="panel neon-card">
         <h2 className="panel-title">Il tuo percorso Membership</h2>
 
         <div className="levels-grid">
@@ -313,20 +342,45 @@ const membershipStyles = `
   }
 
   .membership-page {
-    color: white;
     width: 100%;
+    color: #ffffff;
+    min-height: 100%;
+    position: relative;
+  }
+
+  .membership-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
+      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
+      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+    z-index: 0;
+  }
+
+  .page-title,
+  .page-subtitle,
+  .top-grid,
+  .panel,
+  .error-box {
+    position: relative;
+    z-index: 1;
   }
 
   .page-title {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 700;
     margin: 0 0 10px 0;
-    line-height: 1.1;
+    line-height: 1.05;
+    color: #fff7ed;
   }
 
   .page-subtitle {
-    color: #cbd5e1;
-    margin: 0 0 30px 0;
+    color: #d6d3d1;
+    margin: 0 0 28px 0;
     font-size: 16px;
   }
 
@@ -338,11 +392,51 @@ const membershipStyles = `
     align-items: stretch;
   }
 
-  .hero-card {
-    background: #1e293b;
-    border-radius: 20px;
-    padding: 24px;
-    border: 1px solid rgba(148, 163, 184, 0.08);
+  .neon-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
+    border-radius: 22px;
+    padding: 22px;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 10px 35px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .neon-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 1.3px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.95),
+      rgba(250, 204, 21, 0.95),
+      rgba(168, 85, 247, 0.95)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .hero-title,
+  .hero-text,
+  .progress-block,
+  .badge,
+  .stat-label,
+  .stat-value,
+  .panel-title,
+  .levels-grid {
+    position: relative;
+    z-index: 1;
   }
 
   .badge {
@@ -350,30 +444,38 @@ const membershipStyles = `
     margin-bottom: 16px;
     padding: 8px 14px;
     border-radius: 999px;
-    background: #22c55e;
-    color: white;
+    background: linear-gradient(
+      90deg,
+      rgba(244, 114, 182, 0.95),
+      rgba(96, 165, 250, 0.95),
+      rgba(74, 222, 128, 0.95),
+      rgba(250, 204, 21, 0.95)
+    );
+    color: #111827;
     font-weight: 700;
     font-size: 14px;
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.12);
   }
 
   .hero-title {
     font-size: 32px;
     margin: 0 0 12px 0;
     line-height: 1.15;
+    color: #fff7ed;
   }
 
   .hero-text {
-    color: #cbd5e1;
+    color: #d6d3d1;
     font-size: 16px;
     line-height: 1.7;
     margin: 0 0 22px 0;
   }
 
   .progress-block {
-    background: #0f172a;
+    background: rgba(255, 255, 255, 0.03);
     border-radius: 16px;
     padding: 18px;
-    border: 1px solid #334155;
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .progress-top {
@@ -382,7 +484,7 @@ const membershipStyles = `
     justify-content: space-between;
     gap: 12px;
     font-size: 14px;
-    color: #cbd5e1;
+    color: #d6d3d1;
     margin-bottom: 10px;
   }
 
@@ -390,7 +492,7 @@ const membershipStyles = `
     width: 100%;
     height: 12px;
     border-radius: 999px;
-    background: #334155;
+    background: rgba(255, 255, 255, 0.08);
     overflow: hidden;
     margin-bottom: 12px;
   }
@@ -398,12 +500,18 @@ const membershipStyles = `
   .progress-fill {
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #3b82f6 0%, #22c55e 100%);
+    background: linear-gradient(
+      90deg,
+      #f472b6 0%,
+      #60a5fa 35%,
+      #4ade80 70%,
+      #facc15 100%
+    );
   }
 
   .progress-note {
     margin: 0;
-    color: #e2e8f0;
+    color: #f5f5f4;
     font-size: 14px;
     line-height: 1.6;
   }
@@ -415,14 +523,11 @@ const membershipStyles = `
   }
 
   .stat-card {
-    background: #334155;
-    border-radius: 18px;
-    padding: 22px;
     min-width: 0;
   }
 
   .stat-label {
-    color: #e2e8f0;
+    color: #e7e5e4;
     margin-bottom: 10px;
     font-size: 14px;
   }
@@ -432,12 +537,10 @@ const membershipStyles = `
     font-weight: 700;
     line-height: 1.1;
     word-break: break-word;
+    color: #fffaf0;
   }
 
   .panel {
-    background: #1e293b;
-    border-radius: 20px;
-    padding: 24px;
     overflow: hidden;
   }
 
@@ -445,6 +548,7 @@ const membershipStyles = `
     margin: 0 0 20px 0;
     font-size: 28px;
     line-height: 1.1;
+    color: #fff7ed;
   }
 
   .levels-grid {
@@ -454,20 +558,22 @@ const membershipStyles = `
   }
 
   .level-card {
-    background: #0f172a;
-    border: 1px solid #334155;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
     padding: 18px;
     transition: transform 0.2s ease, border-color 0.2s ease;
   }
 
   .level-card.completed {
-    border-color: rgba(34, 197, 94, 0.35);
+    border-color: rgba(74, 222, 128, 0.35);
   }
 
   .level-card.current {
-    border-color: #3b82f6;
-    background: linear-gradient(180deg, rgba(30,41,59,1) 0%, rgba(15,23,42,1) 100%);
+    border-color: rgba(96, 165, 250, 0.7);
+    background:
+      linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.10);
   }
 
   .level-top {
@@ -482,6 +588,7 @@ const membershipStyles = `
     margin: 0;
     font-size: 22px;
     line-height: 1.1;
+    color: #fff7ed;
   }
 
   .level-badge {
@@ -498,14 +605,14 @@ const membershipStyles = `
   .level-threshold,
   .level-next {
     margin: 0 0 8px 0;
-    color: #cbd5e1;
+    color: #d6d3d1;
     font-size: 14px;
     line-height: 1.6;
   }
 
   .level-status {
     margin-top: 12px;
-    color: #94a3b8;
+    color: #a8a29e;
     font-size: 13px;
     line-height: 1.5;
   }
@@ -530,17 +637,17 @@ const membershipStyles = `
 
   @media (max-width: 768px) {
     .page-title {
-      font-size: 32px;
+      font-size: 38px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .hero-card {
-      padding: 18px 16px;
-      border-radius: 16px;
+    .neon-card {
+      padding: 18px 14px;
+      border-radius: 18px;
     }
 
     .hero-title {
@@ -568,18 +675,8 @@ const membershipStyles = `
       gap: 14px;
     }
 
-    .stat-card {
-      padding: 18px;
-      border-radius: 16px;
-    }
-
     .stat-value {
       font-size: 28px;
-    }
-
-    .panel {
-      padding: 18px 14px;
-      border-radius: 16px;
     }
 
     .panel-title {
@@ -605,7 +702,7 @@ const membershipStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 28px;
+      font-size: 30px;
     }
 
     .hero-title {

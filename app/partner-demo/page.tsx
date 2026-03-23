@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { safeJsonFetch } from "@/lib/api";
 
 type CustomerResponse = {
   id: string;
@@ -31,7 +32,9 @@ type ApiResponse = {
 
 const DEFAULT_CUSTOMER_CODE = "GUFO-123456";
 const PARTNER_API_KEY = "gufo_partner_123456";
-const API_URL = "https://gufo-backend1.onrender.com";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
+
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -39,10 +42,16 @@ function toNumberSafe(value: unknown) {
 
 function formatLevel(level: string) {
   if (!level) return "Basic";
-  return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
-}
 
-import { safeJsonFetch } from "@/lib/api";
+  const normalized = String(level).toLowerCase().trim();
+
+  if (normalized === "vip") return "VIP";
+  if (normalized === "platino" || normalized === "platinum") return "Platino";
+  if (normalized === "diamond") return "Diamond";
+  if (normalized === "millionaire") return "Millionaire";
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
 
 export default function PartnerDemoPage() {
   const [customerCode, setCustomerCode] = useState(DEFAULT_CUSTOMER_CODE);
@@ -60,14 +69,16 @@ export default function PartnerDemoPage() {
     );
 
     if (refreshed.response.ok) {
+      const payload = refreshed.data?.customer ?? refreshed.data;
+
       setCustomer({
-        id: refreshed.data.id,
-        customer_code: refreshed.data.customer_code,
-        balance_gufo: toNumberSafe(refreshed.data.balance_gufo),
-        balance_eur: toNumberSafe(refreshed.data.balance_eur),
-        level: String(refreshed.data.level || "basic"),
-        cashback_percent: toNumberSafe(refreshed.data.cashback_percent),
-        season_spent: toNumberSafe(refreshed.data.season_spent),
+        id: payload.id,
+        customer_code: payload.customer_code,
+        balance_gufo: toNumberSafe(payload.balance_gufo),
+        balance_eur: toNumberSafe(payload.balance_eur),
+        level: String(payload.level || "basic"),
+        cashback_percent: toNumberSafe(payload.cashback_percent),
+        season_spent: toNumberSafe(payload.season_spent),
       });
     }
   }
@@ -93,18 +104,20 @@ export default function PartnerDemoPage() {
         `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`
       );
 
-      if (!response.ok) {
+      if (!response.ok || data?.success === false) {
         throw new Error(data?.error || "Cliente non trovato");
       }
 
+      const payload = data?.customer ?? data;
+
       setCustomer({
-        id: data.id,
-        customer_code: data.customer_code,
-        balance_gufo: toNumberSafe(data.balance_gufo),
-        balance_eur: toNumberSafe(data.balance_eur),
-        level: String(data.level || "basic"),
-        cashback_percent: toNumberSafe(data.cashback_percent),
-        season_spent: toNumberSafe(data.season_spent),
+        id: payload.id,
+        customer_code: payload.customer_code,
+        balance_gufo: toNumberSafe(payload.balance_gufo),
+        balance_eur: toNumberSafe(payload.balance_eur),
+        level: String(payload.level || "basic"),
+        cashback_percent: toNumberSafe(payload.cashback_percent),
+        season_spent: toNumberSafe(payload.season_spent),
       });
     } catch (err: any) {
       setError(err.message || "Errore durante la ricerca cliente");
@@ -181,14 +194,14 @@ export default function PartnerDemoPage() {
       <style>{partnerDemoStyles}</style>
 
       <div className="partner-container">
-        <h1 className="page-title">GUFO Partner Demo</h1>
+        <h1 className="page-title">Partner Demo</h1>
         <p className="page-subtitle">
-          Cerca il cliente tramite codice GUFO e simula un pagamento partner.
+          Cerca il cliente tramite codice GUFO e simula un pagamento partner
         </p>
 
-        <div className="main-card">
+        <div className="main-card neon-card">
           <div className="form-grid">
-            <form onSubmit={handleSearchCustomer} className="panel">
+            <form onSubmit={handleSearchCustomer} className="panel inner-panel">
               <h2 className="panel-title">Cerca cliente</h2>
 
               <div className="field-group">
@@ -257,7 +270,7 @@ export default function PartnerDemoPage() {
               )}
             </form>
 
-            <form onSubmit={handlePayment} className="panel">
+            <form onSubmit={handlePayment} className="panel inner-panel">
               <h2 className="panel-title">Registra pagamento</h2>
 
               <div className="field-group">
@@ -328,7 +341,7 @@ export default function PartnerDemoPage() {
           {error && <div className="error-box">{error}</div>}
 
           {result?.success && (
-            <div className="info-box green-box">
+            <div className="info-box green-box result-box">
               <h2 className="info-title green-title">Pagamento completato</h2>
 
               <div className="info-grid">
@@ -391,7 +404,28 @@ const partnerDemoStyles = `
 
   .partner-page {
     width: 100%;
-    color: white;
+    color: #ffffff;
+    min-height: 100%;
+    position: relative;
+  }
+
+  .partner-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
+      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
+      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+    z-index: 0;
+  }
+
+  .partner-container,
+  .error-box {
+    position: relative;
+    z-index: 1;
   }
 
   .partner-container {
@@ -401,25 +435,58 @@ const partnerDemoStyles = `
 
   .page-title {
     margin: 0 0 10px 0;
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.05;
+    color: #fff7ed;
   }
 
   .page-subtitle {
-    margin: 0 0 30px 0;
+    margin: 0 0 28px 0;
     max-width: 760px;
-    color: #cbd5e1;
+    color: #d6d3d1;
     font-size: 16px;
     line-height: 1.7;
   }
 
-  .main-card {
-    background: #1e293b;
-    border: 1px solid rgba(148, 163, 184, 0.08);
+  .neon-card {
+    position: relative;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
     border-radius: 22px;
     padding: 24px;
     overflow: hidden;
+    backdrop-filter: blur(12px);
+    box-shadow:
+      0 10px 35px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .neon-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    padding: 1.3px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.95),
+      rgba(250, 204, 21, 0.95),
+      rgba(168, 85, 247, 0.95)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .main-card > * {
+    position: relative;
+    z-index: 1;
   }
 
   .form-grid {
@@ -428,9 +495,9 @@ const partnerDemoStyles = `
     gap: 24px;
   }
 
-  .panel {
-    background: #0f172a;
-    border: 1px solid #334155;
+  .inner-panel {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
     padding: 22px;
   }
@@ -439,6 +506,7 @@ const partnerDemoStyles = `
     margin: 0 0 20px 0;
     font-size: 28px;
     line-height: 1.1;
+    color: #fff7ed;
   }
 
   .field-group {
@@ -448,15 +516,15 @@ const partnerDemoStyles = `
   .field-label {
     display: block;
     margin-bottom: 8px;
-    color: #cbd5e1;
+    color: #d6d3d1;
     font-size: 14px;
   }
 
   .field-input {
     width: 100%;
     border-radius: 14px;
-    border: 1px solid #334155;
-    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
     padding: 14px 16px;
     color: white;
     outline: none;
@@ -464,7 +532,7 @@ const partnerDemoStyles = `
   }
 
   .field-input::placeholder {
-    color: #94a3b8;
+    color: #a8a29e;
   }
 
   .primary-button,
@@ -494,43 +562,43 @@ const partnerDemoStyles = `
   }
 
   .primary-button {
-    background: #4f46e5;
+    background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%);
   }
 
   .secondary-button {
-    background: #2563eb;
+    background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
   }
 
   .helper-text {
     margin: 12px 0 0 0;
     font-size: 13px;
-    color: #94a3b8;
+    color: #a8a29e;
   }
 
   .preview-box {
     margin-bottom: 18px;
     border-radius: 16px;
-    border: 1px solid #334155;
-    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
     padding: 16px;
   }
 
   .preview-title {
     margin: 0 0 12px 0;
     font-size: 18px;
-    color: #e2e8f0;
+    color: #f5f5f4;
   }
 
   .preview-list {
     display: grid;
     gap: 8px;
     font-size: 14px;
-    color: #cbd5e1;
+    color: #d6d3d1;
     word-break: break-word;
   }
 
   .preview-list span {
-    color: #94a3b8;
+    color: #a8a29e;
   }
 
   .info-box {
@@ -541,12 +609,16 @@ const partnerDemoStyles = `
 
   .blue-box {
     border: 1px solid rgba(59, 130, 246, 0.28);
-    background: rgba(59, 130, 246, 0.1);
+    background: rgba(59, 130, 246, 0.10);
   }
 
   .green-box {
     border: 1px solid rgba(34, 197, 94, 0.28);
-    background: rgba(34, 197, 94, 0.1);
+    background: rgba(34, 197, 94, 0.10);
+  }
+
+  .result-box {
+    margin-top: 24px;
   }
 
   .info-title {
@@ -572,7 +644,7 @@ const partnerDemoStyles = `
 
   .mini-card {
     background: rgba(15, 23, 42, 0.72);
-    border: 1px solid #334155;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 16px;
     min-width: 0;
@@ -580,7 +652,7 @@ const partnerDemoStyles = `
 
   .mini-label {
     margin: 0 0 8px 0;
-    color: #94a3b8;
+    color: #a8a29e;
     font-size: 13px;
   }
 
@@ -610,20 +682,20 @@ const partnerDemoStyles = `
 
   @media (max-width: 768px) {
     .page-title {
-      font-size: 32px;
+      font-size: 38px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .main-card {
+    .neon-card {
       padding: 18px 14px;
-      border-radius: 16px;
+      border-radius: 18px;
     }
 
-    .panel {
+    .inner-panel {
       padding: 18px 14px;
       border-radius: 16px;
     }
@@ -665,7 +737,7 @@ const partnerDemoStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 28px;
+      font-size: 30px;
     }
 
     .panel-title {
