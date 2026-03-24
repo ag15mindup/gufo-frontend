@@ -90,7 +90,7 @@ export default function PartnerDemoPage() {
     setResult(null);
     setCustomer(null);
 
-    const code = customerCode.trim();
+    const code = customerCode.trim().toUpperCase();
 
     if (!code) {
       setError("Inserisci un codice cliente");
@@ -119,7 +119,10 @@ export default function PartnerDemoPage() {
         cashback_percent: toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
       });
+
+      setCustomerCode(payload.customer_code || code);
     } catch (err: any) {
+      setCustomer(null);
       setError(err.message || "Errore durante la ricerca cliente");
     } finally {
       setLoadingCustomer(false);
@@ -138,13 +141,14 @@ export default function PartnerDemoPage() {
     }
 
     const finalAmount = toNumberSafe(amount);
+    const finalMerchantName = merchantName.trim();
 
     if (finalAmount <= 0) {
       setError("Inserisci un importo valido maggiore di 0");
       return;
     }
 
-    if (!merchantName.trim()) {
+    if (!finalMerchantName) {
       setError("Inserisci il nome del merchant");
       return;
     }
@@ -159,9 +163,9 @@ export default function PartnerDemoPage() {
           "x-partner-key": PARTNER_API_KEY,
         },
         body: JSON.stringify({
-          user_id: customer.id,
+          user_id: customer.customer_code,
           amount: finalAmount,
-          merchant_name: merchantName.trim(),
+          merchant_name: finalMerchantName,
         }),
       });
 
