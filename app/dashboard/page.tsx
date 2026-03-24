@@ -1,24 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import styles from "./dashboard.module.css";
 import { createClient } from "@/lib/supabase/client";
 
 const supabase = createClient();
 
 type Transaction = {
   id?: string;
+  transaction_id?: string;
   type?: string;
   tipo?: string;
   merchant_name?: string;
   benefit?: string;
   merchant?: string;
-  amount_euro?: number;
-  amount?: number;
-  gufo_earned?: number;
-  gufo?: number;
-  created_at?: string;
-  raw?: unknown;
+  amount_euro?: number | string | null;
+  amount?: number | string | null;
+  importo?: number | string | null;
+  gufo_earned?: number | string | null;
+  gufo?: number | string | null;
+  created_at?: string | null;
+  raw?: any;
+};
+
+type DashboardApiResponse = {
+  wallet?: {
+    balance_gufo?: number | string | null;
+    cashback_percent?: number | string | null;
+    current_level?: string | null;
+    season_spent?: number | string | null;
+  };
+  stats?: {
+    balance_gufo?: number | string | null;
+    total_transactions?: number | string | null;
+    season_spent?: number | string | null;
+    gufo_earned?: number | string | null;
+    level?: string | null;
+    cashback_percent?: number | string | null;
+    monthlyExpenses?: Array<number | string | null>;
+    monthly_expenses?: Array<number | string | null>;
+  };
+  transactions?: Transaction[];
+  profileName?: string;
+  profileEmail?: string;
+};
+
+type ProfileApiResponse = {
+  profile?: {
+    full_name?: string | null;
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+  };
 };
 
 type DashboardData = {
@@ -38,7 +71,12 @@ type DashboardData = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
-function formatLevel(level: string) {
+function toNumberSafe(value: unknown) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function formatLevel(level?: string) {
   if (!level) return "Basic";
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
@@ -61,12 +99,7 @@ function getMonthLabel(index: number) {
   return months[index] || "";
 }
 
-function toNumberSafe(value: unknown) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function getTransactionAmount(tx: any) {
+function getTransactionAmount(tx: Transaction) {
   return toNumberSafe(
     tx?.amount_euro ??
       tx?.amount ??
@@ -77,7 +110,7 @@ function getTransactionAmount(tx: any) {
   );
 }
 
-function getTransactionGufo(tx: any) {
+function getTransactionGufo(tx: Transaction) {
   return toNumberSafe(
     tx?.gufo_earned ??
       tx?.gufo ??
@@ -86,7 +119,7 @@ function getTransactionGufo(tx: any) {
   );
 }
 
-function getTransactionMerchant(tx: any) {
+function getTransactionMerchant(tx: Transaction) {
   return (
     tx?.merchant_name ??
     tx?.benefit ??
@@ -94,12 +127,28 @@ function getTransactionMerchant(tx: any) {
     tx?.raw?.merchant_name ??
     tx?.raw?.benefit ??
     tx?.raw?.merchant ??
-    "-"
+    "Partner GUFO"
   );
 }
 
-function getTransactionType(tx: any) {
-  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
+function getTransactionType(tx: Transaction) {
+  return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "cashback";
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Errore richiesta: ${response.status}`);
+  }
+
+  return data as T;
 }
 
 export default function DashboardPage() {
@@ -141,25 +190,11 @@ export default function DashboardPage() {
           throw new Error("Utente non autenticato");
         }
 
-        const [dashboardRes, profileRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/dashboard/${user.id}`),
-          safeJsonFetch(`${API_URL}/profile/${user.id}`),
+        const [dashboard, profilePayload] = await Promise.all([
+          fetchJson<DashboardApiResponse>(`${API_URL}/dashboard/${user.id}`),
+          fetchJson<ProfileApiResponse>(`${API_URL}/profile/${user.id}`),
         ]);
 
-        if (!dashboardRes.response.ok || dashboardRes.data?.success === false) {
-          throw new Error(
-            dashboardRes.data?.error || "Errore nel recupero dashboard"
-          );
-        }
-
-        if (!profileRes.response.ok || profileRes.data?.success === false) {
-          throw new Error(
-            profileRes.data?.error || "Errore nel recupero profilo"
-          );
-        }
-
-        const dashboard = dashboardRes.data ?? {};
-        const profilePayload = profileRes.data ?? {};
         const profile = profilePayload?.profile ?? {};
         const wallet = dashboard?.wallet ?? {};
         const stats = dashboard?.stats ?? {};
@@ -173,18 +208,18 @@ export default function DashboardPage() {
           ? stats.monthly_expenses
           : Array(12).fill(0);
 
-        const monthlyExpenses = monthlyExpensesRaw.map((value: unknown) =>
+        const monthlyExpenses = monthlyExpensesRaw.map((value) =>
           toNumberSafe(value)
         );
 
         const normalizedTransactions: Transaction[] = rawTransactions.map(
-          (tx: any) => ({
+          (tx: Transaction) => ({
             id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
             type: getTransactionType(tx),
             merchant_name: getTransactionMerchant(tx),
             amount_euro: getTransactionAmount(tx),
             gufo_earned: getTransactionGufo(tx),
-            created_at: tx?.created_at ?? tx?.raw?.created_at,
+            created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
             raw: tx?.raw ?? tx,
           })
         );
@@ -193,12 +228,15 @@ export default function DashboardPage() {
           profile?.full_name ??
           profile?.name ??
           profile?.username ??
+          dashboard?.profileName ??
           user.email?.split("@")[0] ??
           "Utente GUFO";
 
-        const profileEmail = profile?.email ?? user.email ?? "";
+        const profileEmail =
+          profile?.email ?? dashboard?.profileEmail ?? user.email ?? "";
+
         const profileInitial =
-          profileName?.trim()?.charAt(0)?.toUpperCase() || "U";
+          profileName.trim().charAt(0).toUpperCase() || "U";
 
         if (!isMounted) return;
 
@@ -220,7 +258,10 @@ export default function DashboardPage() {
             stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
           ),
           transactions: normalizedTransactions,
-          monthlyExpenses,
+          monthlyExpenses:
+            monthlyExpenses.length === 12
+              ? monthlyExpenses
+              : Array(12).fill(0),
           profileName,
           profileEmail,
           profileInitial,
@@ -242,942 +283,237 @@ export default function DashboardPage() {
     };
   }, []);
 
+  const recentTransactions = useMemo(() => {
+    return dashboardData.transactions.slice(0, 8);
+  }, [dashboardData.transactions]);
+
+  const maxMonthlyValue = Math.max(...dashboardData.monthlyExpenses, 1);
+
   if (loading) {
     return (
-      <div className="dashboard-page">
-        <style>{dashboardStyles}</style>
+      <div className={styles.page}>
+        <div className={styles.bgOverlay} />
+        <div className={styles.rainbowLine} />
 
-        <div className="dashboard-hero">
+        <div className={styles.hero}>
           <div>
-            <div className="eyebrow">GUFO CONTROL PANEL</div>
-            <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-subtitle">Caricamento dati account...</p>
+            <p className={styles.welcome}>Welcome back!</p>
+            <h1 className={styles.userName}>Dashboard</h1>
+            <p className={styles.email}>Caricamento dati account...</p>
           </div>
         </div>
 
-        <div className="loading-shell gufo-surface">
-          <div className="loading-glow" />
-          <p className="loading-text">Connessione ai dati in corso...</p>
-        </div>
+        <div className={styles.loadingBox}>Connessione ai dati in corso...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="dashboard-page">
-        <style>{dashboardStyles}</style>
+      <div className={styles.page}>
+        <div className={styles.bgOverlay} />
+        <div className={styles.rainbowLine} />
 
-        <div className="dashboard-hero">
+        <div className={styles.hero}>
           <div>
-            <div className="eyebrow">GUFO CONTROL PANEL</div>
-            <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-subtitle">Si è verificato un problema.</p>
+            <p className={styles.welcome}>Welcome back!</p>
+            <h1 className={styles.userName}>Dashboard</h1>
+            <p className={styles.email}>Si è verificato un problema.</p>
           </div>
         </div>
 
-        <div className="error-box">{error}</div>
+        <div className={styles.errorBox}>{error}</div>
       </div>
     );
   }
 
-  const maxMonthlyValue = Math.max(...dashboardData.monthlyExpenses, 1);
-
   return (
-    <div className="dashboard-page">
-      <style>{dashboardStyles}</style>
+    <div className={styles.page}>
+      <div className={styles.bgOverlay} />
+      <div className={styles.rainbowLine} />
 
-      <div className="dashboard-hero">
+      <div className={styles.hero}>
         <div>
-          <div className="eyebrow">GUFO CONTROL PANEL</div>
-          <h1 className="dashboard-title">Dashboard</h1>
-          <p className="dashboard-subtitle">
-            Panoramica account, cashback, spese e attività recenti
-          </p>
+          <p className={styles.welcome}>Welcome back!</p>
+          <h1 className={styles.userName}>{dashboardData.profileName}</h1>
+          {dashboardData.profileEmail ? (
+            <p className={styles.email}>{dashboardData.profileEmail}</p>
+          ) : null}
         </div>
 
-        <div className="hero-badge">
-          <span className="hero-badge-dot" />
-          Live Account
-        </div>
-      </div>
+        <div className={styles.balanceCard}>
+          <span className={styles.balanceLabel}>Balance</span>
+          <h2 className={styles.balanceValue}>
+            {dashboardData.balanceGufo.toFixed(2)} GUFO
+          </h2>
 
-      <div className="top-grid">
-        <div className="profile-card gufo-surface">
-          <div className="card-orb orb-cyan" />
-          <div className="card-orb orb-pink" />
-
-          <div className="profile-header">
-            <div className="profile-avatar">{dashboardData.profileInitial}</div>
-
-            <div className="profile-meta">
-              <div className="profile-kicker">Profilo utente</div>
-              <div className="profile-name">{dashboardData.profileName}</div>
-              <div className="profile-email">{dashboardData.profileEmail}</div>
-            </div>
-          </div>
-
-          <div className="profile-stats">
-            <div className="profile-stat-row">
-              <span>Livello</span>
-              <strong>{formatLevel(dashboardData.level)}</strong>
-            </div>
-            <div className="profile-stat-row">
-              <span>Cashback</span>
-              <strong>{dashboardData.cashbackPercent}%</strong>
-            </div>
-            <div className="profile-stat-row">
-              <span>Transazioni</span>
-              <strong>{dashboardData.totalTransactions}</strong>
-            </div>
-          </div>
-
-          <div className="level-pill">{formatLevel(dashboardData.level)}</div>
-        </div>
-
-        <div className="stats-area">
-          <div className="stats-grid">
-            <div className="stat-card gufo-surface">
-              <div className="stat-topline">Wallet</div>
-              <div className="stat-label">Saldo GUFO</div>
-              <div className="stat-value">
-                {dashboardData.balanceGufo.toFixed(2)}
-              </div>
-            </div>
-
-            <div className="stat-card gufo-surface">
-              <div className="stat-topline">Rewards</div>
-              <div className="stat-label">GUFO guadagnati</div>
-              <div className="stat-value">
-                {dashboardData.totalGufoEarned.toFixed(2)}
-              </div>
-            </div>
-
-            <div className="stat-card gufo-surface">
-              <div className="stat-topline">Season</div>
-              <div className="stat-label">Spesa stagione</div>
-              <div className="stat-value smaller-value">
-                € {dashboardData.totalSpent.toFixed(2)}
-              </div>
-            </div>
-
-            <div className="stat-card gufo-surface">
-              <div className="stat-topline">Membership</div>
-              <div className="stat-label">Cashback attuale</div>
-              <div className="stat-value">{dashboardData.cashbackPercent}%</div>
-            </div>
-          </div>
-
-          <div className="chart-panel gufo-surface">
-            <div className="panel-header">
-              <div>
-                <h2 className="section-title">Andamento spese</h2>
-                <p className="section-subtitle">
-                  Distribuzione mensile delle spese registrate
-                </p>
-              </div>
-
-              <div className="mini-pill">12 mesi</div>
-            </div>
-
-            <div className="chart-wrap">
-              {dashboardData.monthlyExpenses.map((value, index) => {
-                const height =
-                  value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
-
-                return (
-                  <div className="chart-item" key={index}>
-                    <span className="chart-value">€{value.toFixed(0)}</span>
-                    <div className="chart-bar-shell">
-                      <div className="chart-bar" style={{ height }} />
-                    </div>
-                    <span className="chart-label">{getMonthLabel(index)}</span>
-                  </div>
-                );
-              })}
-            </div>
+          <div className={styles.balanceButtons}>
+            <button type="button" className={styles.primaryBtn}>
+              + Deposit
+            </button>
+            <button type="button" className={styles.secondaryBtn}>
+              + Withdraw
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="transactions-panel gufo-surface">
-        <div className="panel-header">
+      <div className={styles.statsGrid}>
+        <div className={`${styles.statCard} ${styles.cyan}`}>
           <div>
-            <h2 className="section-title">Transazioni recenti</h2>
-            <p className="section-subtitle">
-              Ultimi movimenti registrati sul tuo account
-            </p>
+            <div className={styles.statValue}>
+              {dashboardData.totalTransactions}
+            </div>
+            <div className={styles.statLabel}>Active Transactions</div>
           </div>
-
-          <div className="mini-pill">Ultime 8</div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>↗</div>
+            <div className={styles.statHint}>Live</div>
+          </div>
         </div>
 
-        {dashboardData.transactions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">◎</div>
-            <p className="empty-title">Nessuna transazione disponibile</p>
-            <p className="empty-text">
-              Quando inizierai a ricevere cashback o GUFO, li vedrai qui.
-            </p>
+        <div className={`${styles.statCard} ${styles.purple}`}>
+          <div>
+            <div className={styles.statValue}>
+              {formatLevel(dashboardData.level)}
+            </div>
+            <div className={styles.statLabel}>Membership Level</div>
           </div>
-        ) : (
-          <>
-            <div className="table-wrap desktop-only">
-              <table className="transactions-table">
-                <thead>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>⬢</div>
+            <div className={styles.statHint}>User tier</div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.orange}`}>
+          <div>
+            <div className={styles.statValue}>
+              {dashboardData.cashbackPercent}%
+            </div>
+            <div className={styles.statLabel}>Cashback Rate</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>⤴</div>
+            <div className={styles.statHint}>Current</div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.bottomGrid}>
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h3>Recent Transactions</h3>
+            <span>View All</span>
+          </div>
+
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Partner</th>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Importo</th>
+                  <th>GUFO</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentTransactions.length === 0 ? (
                   <tr>
-                    <th>Tipo</th>
-                    <th>Merchant</th>
-                    <th>Importo</th>
-                    <th>GUFO</th>
-                    <th>Data</th>
+                    <td colSpan={5} className={styles.emptyRow}>
+                      Nessuna transazione disponibile
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {dashboardData.transactions.slice(0, 8).map((tx, index) => (
-                    <tr key={tx.id || index}>
-                      <td>{getTransactionType(tx)}</td>
-                      <td>{getTransactionMerchant(tx)}</td>
-                      <td className="amount-green">
-                        €{getTransactionAmount(tx).toFixed(2)}
+                ) : (
+                  recentTransactions.map((tx, index) => (
+                    <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
+                      <td className={styles.partnerCell}>
+                        {getTransactionMerchant(tx)}
                       </td>
-                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
                       <td>
                         {tx.created_at
-                          ? new Date(tx.created_at).toLocaleString("it-IT")
+                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
                           : "-"}
                       </td>
+                      <td>
+                        <span className={styles.badge}>
+                          {getTransactionType(tx)}
+                        </span>
+                      </td>
+                      <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
+                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h3>Top Info</h3>
+            <span>PRO</span>
+          </div>
+
+          <div className={styles.topList}>
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>
+                {dashboardData.profileInitial}
+              </div>
+              <div>
+                <strong>{dashboardData.profileName}</strong>
+                <p>Profilo attivo</p>
+              </div>
+              <span>{formatLevel(dashboardData.level)}</span>
             </div>
 
-            <div className="mobile-transactions mobile-only">
-              {dashboardData.transactions.slice(0, 8).map((tx, index) => (
-                <div className="tx-card" key={tx.id || index}>
-                  <div className="tx-row">
-                    <span className="tx-label">Tipo</span>
-                    <span className="tx-value">{getTransactionType(tx)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Merchant</span>
-                    <span className="tx-value">
-                      {getTransactionMerchant(tx)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Importo</span>
-                    <span className="tx-value amount-green">
-                      €{getTransactionAmount(tx).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">GUFO</span>
-                    <span className="tx-value">
-                      {getTransactionGufo(tx).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Data</span>
-                    <span className="tx-value">
-                      {tx.created_at
-                        ? new Date(tx.created_at).toLocaleString("it-IT")
-                        : "-"}
-                    </span>
-                  </div>
-                </div>
-              ))}
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>€</div>
+              <div>
+                <strong>€ {dashboardData.totalSpent.toFixed(2)}</strong>
+                <p>Spesa totale</p>
+              </div>
+              <span>tot</span>
             </div>
-          </>
-        )}
+
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>G</div>
+              <div>
+                <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
+                <p>GUFO guadagnati</p>
+              </div>
+              <span>earn</span>
+            </div>
+          </div>
+        </aside>
       </div>
+
+      <section className={styles.chartPanel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h3>Andamento spese</h3>
+            <span>Ultimi 12 mesi</span>
+          </div>
+        </div>
+
+        <div className={styles.chartWrap}>
+          {dashboardData.monthlyExpenses.map((value, index) => {
+            const height =
+              value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
+
+            return (
+              <div className={styles.chartItem} key={index}>
+                <span className={styles.chartValue}>€{value.toFixed(0)}</span>
+                <div className={styles.chartBarShell}>
+                  <div className={styles.chartBar} style={{ height }} />
+                </div>
+                <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
-
-const dashboardStyles = `
-  .dashboard-page {
-    width: 100%;
-    min-height: 100%;
-    color: #ffffff;
-    position: relative;
-  }
-
-  .dashboard-page::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(circle at 12% 12%, rgba(56, 189, 248, 0.08), transparent 18%),
-      radial-gradient(circle at 88% 10%, rgba(236, 72, 153, 0.07), transparent 18%),
-      radial-gradient(circle at 18% 88%, rgba(34, 197, 94, 0.05), transparent 16%),
-      radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.05), transparent 16%);
-    z-index: 0;
-  }
-
-  .dashboard-hero,
-  .top-grid,
-  .transactions-panel,
-  .loading-shell,
-  .error-box {
-    position: relative;
-    z-index: 1;
-  }
-
-  .dashboard-hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 28px;
-  }
-
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.06);
-  }
-
-  .dashboard-title {
-    margin: 0 0 8px 0;
-    font-size: 60px;
-    font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.14),
-      0 0 28px rgba(139, 92, 246, 0.08);
-  }
-
-  .dashboard-subtitle {
-    margin: 0;
-    max-width: 760px;
-    font-size: 16px;
-    color: #b9c6e3;
-    line-height: 1.55;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 42px;
-    padding: 0 16px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.05);
-  }
-
-  .hero-badge-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #4ade80, #22c55e);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
-    flex-shrink: 0;
-  }
-
-  .top-grid {
-    display: grid;
-    grid-template-columns: 320px minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
-    margin-bottom: 24px;
-  }
-
-  .stats-area {
-    min-width: 0;
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 20px;
-  }
-
-  .gufo-surface {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
-    padding: 22px;
-    background:
-      linear-gradient(180deg, rgba(10, 18, 36, 0.58), rgba(8, 15, 30, 0.70));
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.24),
-      0 0 18px rgba(56, 189, 248, 0.04),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .gufo-surface::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1px;
-    background: linear-gradient(
-      90deg,
-      rgba(56, 189, 248, 0.60),
-      rgba(139, 92, 246, 0.55),
-      rgba(236, 72, 153, 0.50),
-      rgba(250, 204, 21, 0.40),
-      rgba(34, 197, 94, 0.40)
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.7;
-  }
-
-  .card-orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(18px);
-    pointer-events: none;
-    opacity: 0.6;
-  }
-
-  .orb-cyan {
-    top: -20px;
-    right: -15px;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-  }
-
-  .orb-pink {
-    bottom: -35px;
-    left: -20px;
-    width: 120px;
-    height: 120px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.13), transparent 72%);
-  }
-
-  .profile-card {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 22px;
-  }
-
-  .profile-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .profile-avatar {
-    width: 68px;
-    height: 68px;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 900;
-    color: #111827;
-    background: linear-gradient(
-      135deg,
-      #f472b6 0%,
-      #60a5fa 35%,
-      #4ade80 70%,
-      #facc15 100%
-    );
-    box-shadow:
-      0 0 22px rgba(96, 165, 250, 0.16),
-      0 0 24px rgba(236, 72, 153, 0.08);
-    flex-shrink: 0;
-  }
-
-  .profile-meta {
-    min-width: 0;
-  }
-
-  .profile-kicker {
-    margin-bottom: 6px;
-    color: #9fb0d3;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .profile-name {
-    font-size: 26px;
-    font-weight: 800;
-    line-height: 1.05;
-    color: #ffffff;
-    word-break: break-word;
-  }
-
-  .profile-email {
-    margin-top: 6px;
-    color: #b9c6e3;
-    font-size: 14px;
-    word-break: break-word;
-  }
-
-  .profile-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .profile-stat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    color: #dbe4f0;
-    font-size: 14px;
-  }
-
-  .profile-stat-row strong {
-    color: #ffffff;
-  }
-
-  .level-pill {
-    margin-top: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 50px;
-    border-radius: 999px;
-    font-weight: 800;
-    color: #111827;
-    background: linear-gradient(
-      90deg,
-      rgba(244, 114, 182, 0.95),
-      rgba(96, 165, 250, 0.95),
-      rgba(74, 222, 128, 0.95),
-      rgba(250, 204, 21, 0.95)
-    );
-    box-shadow:
-      0 0 18px rgba(250, 204, 21, 0.10),
-      0 0 26px rgba(56, 189, 248, 0.08);
-    position: relative;
-    z-index: 1;
-  }
-
-  .stat-card {
-    min-height: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .stat-topline {
-    margin-bottom: 10px;
-    color: #9fb0d3;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .stat-label {
-    color: #d8e2f4;
-    margin-bottom: 12px;
-    font-size: 15px;
-  }
-
-  .stat-value {
-    font-size: 52px;
-    font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-    color: #ffffff;
-    word-break: break-word;
-    text-shadow: 0 0 14px rgba(56, 189, 248, 0.08);
-  }
-
-  .smaller-value {
-    font-size: 42px;
-  }
-
-  .panel-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
-  }
-
-  .section-title {
-    margin: 0 0 6px 0;
-    font-size: 24px;
-    font-weight: 800;
-    line-height: 1.1;
-    color: #ffffff;
-  }
-
-  .section-subtitle {
-    margin: 0;
-    color: #b9c6e3;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .mini-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .chart-panel {
-    min-width: 0;
-  }
-
-  .chart-wrap {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 10px;
-    align-items: end;
-    height: 280px;
-    min-width: 0;
-    overflow-x: auto;
-  }
-
-  .chart-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: end;
-    height: 100%;
-  }
-
-  .chart-value {
-    font-size: 12px;
-    color: #c6d3eb;
-    margin-bottom: 8px;
-  }
-
-  .chart-bar-shell {
-    width: 100%;
-    height: 100%;
-    border-radius: 16px;
-    padding: 8px 0;
-    display: flex;
-    align-items: end;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  .chart-bar {
-    width: 72%;
-    min-width: 18px;
-    max-width: 28px;
-    border-radius: 999px;
-    background: linear-gradient(
-      180deg,
-      #60a5fa 0%,
-      #38bdf8 26%,
-      #8b5cf6 52%,
-      #ec4899 76%,
-      #facc15 100%
-    );
-    box-shadow:
-      0 0 14px rgba(56, 189, 248, 0.12),
-      0 0 20px rgba(236, 72, 153, 0.08);
-  }
-
-  .chart-label {
-    font-size: 12px;
-    color: #dbe4f0;
-    margin-top: 8px;
-  }
-
-  .transactions-panel {
-    position: relative;
-    z-index: 1;
-  }
-
-  .table-wrap {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .transactions-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .transactions-table th {
-    color: #aebedf;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 0;
-    text-align: left;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-  }
-
-  .transactions-table td {
-    padding: 16px 0;
-    color: #f4f7ff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 14px;
-    vertical-align: top;
-  }
-
-  .amount-green {
-    color: #bbf7d0 !important;
-    font-weight: 800;
-  }
-
-  .empty-state {
-    border-radius: 22px;
-    padding: 36px 18px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.025);
-    border: 1px dashed rgba(255, 255, 255, 0.10);
-  }
-
-  .empty-icon {
-    font-size: 34px;
-    margin-bottom: 12px;
-    color: #dbe4f0;
-  }
-
-  .empty-title {
-    margin: 0 0 8px 0;
-    font-size: 18px;
-    font-weight: 800;
-    color: #ffffff;
-  }
-
-  .empty-text {
-    margin: 0;
-    color: #b9c6e3;
-    font-size: 14px;
-  }
-
-  .loading-shell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 180px;
-  }
-
-  .loading-glow {
-    position: absolute;
-    width: 180px;
-    height: 180px;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.14), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
-  }
-
-  .loading-text {
-    position: relative;
-    z-index: 1;
-    margin: 0;
-    font-size: 15px;
-    color: #dbe4f0;
-  }
-
-  .error-box {
-    margin-top: 14px;
-    color: #fecaca;
-    background: rgba(127, 29, 29, 0.24);
-    border: 1px solid rgba(248, 113, 113, 0.28);
-    padding: 16px 18px;
-    border-radius: 18px;
-  }
-
-  .mobile-only {
-    display: none;
-  }
-
-  .desktop-only {
-    display: block;
-  }
-
-  .mobile-transactions {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-
-  .tx-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 14px;
-  }
-
-  .tx-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-
-  .tx-row:last-child {
-    border-bottom: none;
-  }
-
-  .tx-label {
-    color: #b9c6e3;
-    font-size: 13px;
-    flex: 0 0 90px;
-  }
-
-  .tx-value {
-    color: #f4f7ff;
-    font-size: 13px;
-    text-align: right;
-    word-break: break-word;
-  }
-
-  @media (max-width: 1180px) {
-    .top-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .dashboard-hero {
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 22px;
-    }
-
-    .dashboard-title {
-      font-size: 40px;
-    }
-
-    .dashboard-subtitle {
-      font-size: 14px;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 14px;
-      margin-bottom: 16px;
-    }
-
-    .gufo-surface {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .gufo-surface::before {
-      border-radius: 20px;
-    }
-
-    .stat-card {
-      min-height: auto;
-    }
-
-    .stat-value {
-      font-size: 38px;
-    }
-
-    .smaller-value {
-      font-size: 32px;
-    }
-
-    .profile-name {
-      font-size: 22px;
-    }
-
-    .chart-wrap {
-      height: 230px;
-      gap: 8px;
-    }
-
-    .panel-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .desktop-only {
-      display: none;
-    }
-
-    .mobile-only {
-      display: block;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .dashboard-title {
-      font-size: 32px;
-    }
-
-    .profile-avatar {
-      width: 58px;
-      height: 58px;
-      font-size: 24px;
-      border-radius: 18px;
-    }
-
-    .profile-name {
-      font-size: 20px;
-    }
-
-    .stat-value {
-      font-size: 32px;
-    }
-
-    .smaller-value {
-      font-size: 28px;
-    }
-
-    .tx-label,
-    .tx-value,
-    .chart-label,
-    .chart-value {
-      font-size: 11px;
-    }
-  }
-`;
