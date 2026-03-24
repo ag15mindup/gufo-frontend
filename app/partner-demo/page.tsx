@@ -20,7 +20,9 @@ type ApiResponse = {
   new_balance?: number;
   merchant_name?: string;
   transaction?: {
-    id?: string;
+    id?: string | null;
+    transaction_id?: string | null;
+    Transaction_id?: string | null;
     amount?: number;
     gufo_earned?: number;
     cashback?: number;
@@ -30,7 +32,7 @@ type ApiResponse = {
   };
 };
 
-const DEFAULT_CUSTOMER_CODE = "GUFO-123456";
+const DEFAULT_CUSTOMER_CODE = "GUFO-915728";
 const PARTNER_API_KEY = "gufo_partner_123456";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
@@ -53,11 +55,20 @@ function formatLevel(level: string) {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+function getTransactionId(result: ApiResponse) {
+  return (
+    result.transaction?.id ||
+    result.transaction?.transaction_id ||
+    result.transaction?.Transaction_id ||
+    null
+  );
+}
+
 export default function PartnerDemoPage() {
   const [customerCode, setCustomerCode] = useState(DEFAULT_CUSTOMER_CODE);
   const [customer, setCustomer] = useState<CustomerResponse | null>(null);
   const [amount, setAmount] = useState("50");
-  const [merchantName, setMerchantName] = useState("adidas");
+  const [merchantName, setMerchantName] = useState("Coop");
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [result, setResult] = useState<ApiResponse | null>(null);
@@ -215,7 +226,7 @@ export default function PartnerDemoPage() {
                   value={customerCode}
                   onChange={(e) => setCustomerCode(e.target.value)}
                   className="field-input"
-                  placeholder="Es. GUFO-123456"
+                  placeholder="Es. GUFO-915728"
                 />
               </div>
 
@@ -284,7 +295,7 @@ export default function PartnerDemoPage() {
                   value={merchantName}
                   onChange={(e) => setMerchantName(e.target.value)}
                   className="field-input"
-                  placeholder="Es. Adidas"
+                  placeholder="Es. Coop"
                 />
               </div>
 
@@ -353,6 +364,13 @@ export default function PartnerDemoPage() {
                   <p className="mini-label">Merchant</p>
                   <p className="mini-value">
                     {result.merchant_name || result.transaction?.benefit || "-"}
+                  </p>
+                </div>
+
+                <div className="mini-card">
+                  <p className="mini-label">ID transazione</p>
+                  <p className="mini-value">
+                    {getTransactionId(result) || "-"}
                   </p>
                 </div>
 
