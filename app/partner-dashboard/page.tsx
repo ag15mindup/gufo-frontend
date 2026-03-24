@@ -6,6 +6,7 @@ import { safeJsonFetch } from "@/lib/api";
 type Transaction = {
   id?: string | null;
   transaction_id?: string | null;
+  Transaction_id?: string | null;
   type?: string;
   tipo?: string;
   merchant_name?: string;
@@ -17,6 +18,7 @@ type Transaction = {
   gufo_earned?: number | string | null;
   gufo?: number | string | null;
   created_at?: string | null;
+  partner_id?: number | string | null;
   raw?: unknown;
 };
 
@@ -26,12 +28,14 @@ type PartnerStatsResponse = {
   total_gufo_distributed?: number | string | null;
   recent_transactions?: Transaction[];
   transactions?: Transaction[];
+  partner_id?: number | string | null;
   stats?: {
     total_transactions?: number | string | null;
     total_amount?: number | string | null;
     total_gufo_distributed?: number | string | null;
     recent_transactions?: Transaction[];
     transactions?: Transaction[];
+    partner_id?: number | string | null;
   };
   error?: string;
 };
@@ -39,9 +43,26 @@ type PartnerStatsResponse = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
+const PARTNER_OPTIONS = [
+  { id: 2, label: "Eni" },
+  { id: 3, label: "Coop" },
+];
+
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+}
+
+function getTransactionId(tx: any) {
+  return (
+    tx?.id ??
+    tx?.transaction_id ??
+    tx?.Transaction_id ??
+    tx?.raw?.id ??
+    tx?.raw?.transaction_id ??
+    tx?.raw?.Transaction_id ??
+    null
+  );
 }
 
 function getTransactionType(tx: any) {
@@ -80,6 +101,10 @@ function getTransactionGufo(tx: any) {
   );
 }
 
+function getTransactionPartnerId(tx: any) {
+  return toNumberSafe(tx?.partner_id ?? tx?.raw?.partner_id);
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "-";
 
@@ -90,76 +115,71 @@ function formatDate(value?: string | null) {
 }
 
 export default function PartnerDashboardPage() {
+  const [selectedPartnerId, setSelectedPartnerId] = useState<number>(3);
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    let isMounted = true;
+  async function loadStats(partnerId: number) {
+    try {
+      setLoading(true);
+      setError("");
 
-    async function loadStats() {
-      try {
-        setLoading(true);
-        setError("");
+      const { response, data } = await safeJsonFetch(
+        `${API_URL}/partner/stats?partner_id=${partnerId}`
+      );
 
-        const PARTNER_ID = 3; // Coop
-
-const { response, data } = await safeJsonFetch(
-  `${API_URL}/partner/stats?partner_id=${PARTNER_ID}`
-);
-
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel caricamento statistiche");
-        }
-
-        const statsRoot: PartnerStatsResponse = data ?? {};
-        const stats: PartnerStatsResponse = statsRoot?.stats ?? statsRoot;
-
-        const rawTransactions = Array.isArray(stats?.recent_transactions)
-          ? stats.recent_transactions
-          : Array.isArray(stats?.transactions)
-          ? stats.transactions
-          : [];
-
-        const normalizedTransactions: Transaction[] = rawTransactions
-          .map((tx: any) => ({
-            id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id ?? null,
-            transaction_id:
-              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id ?? null,
-            type: getTransactionType(tx),
-            merchant_name: getTransactionMerchant(tx),
-            amount_euro: getTransactionAmount(tx),
-            gufo_earned: getTransactionGufo(tx),
-            created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
-            raw: tx?.raw ?? tx,
-          }))
-          .sort((a, b) => {
-            const da = a.created_at ? new Date(a.created_at).getTime() : 0;
-            const db = b.created_at ? new Date(b.created_at).getTime() : 0;
-            return db - da;
-          });
-
-        if (!isMounted) return;
-
-        setData(stats);
-        setTransactions(normalizedTransactions);
-      } catch (err: any) {
-        if (!isMounted) return;
-        setError(err?.message || "Errore sconosciuto");
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || "Errore nel caricamento statistiche");
       }
+
+      const statsRoot: PartnerStatsResponse = data ?? {};
+      const stats: PartnerStatsResponse = statsRoot?.stats ?? statsRoot;
+
+      const rawTransactions = Array.isArray(stats?.recent_transactions)
+        ? stats.recent_transactions
+        : Array.isArray(stats?.transactions)
+        ? stats.transactions
+        : [];
+
+      const normalizedTransactions: Transaction[] = rawTransactions
+        .map((tx: any) => ({
+          id: getTransactionId(tx),
+          transaction_id: tx?.transaction_id ?? tx?.Transaction_id ?? tx?.id ?? null,
+          Transaction_id: tx?.Transaction_id ?? tx?.transaction_id ?? tx?.id ?? null,
+          type: getTransactionType(tx),
+          merchant_name: getTransactionMerchant(tx),
+          amount_euro: getTransactionAmount(tx),
+          gufo_earned: getTransactionGufo(tx),
+          created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
+          partner_id: tx?.partner_id ?? tx?.raw?.partner_id ?? null,
+          raw: tx?.raw ?? tx,
+        }))
+        .sort((a, b) => {
+          const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return db - da;
+        });
+
+      setData(stats);
+      setTransactions(normalizedTransactions);
+    } catch (err: any) {
+      setError(err?.message || "Errore sconosciuto");
+      setData(null);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    loadStats();
+  useEffect(() => {
+    loadStats(selectedPartnerId);
+  }, [selectedPartnerId]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const activePartnerLabel =
+    PARTNER_OPTIONS.find((p) => p.id === selectedPartnerId)?.label ||
+    `Partner ${selectedPartnerId}`;
 
   if (loading) {
     return (
@@ -176,6 +196,34 @@ const { response, data } = await safeJsonFetch(
       <div className="partner-dashboard-page">
         <style>{partnerDashboardStyles}</style>
         <h1 className="page-title">Partner Dashboard</h1>
+
+        <div className="toolbar-row">
+          <div className="toolbar-card">
+            <div className="field-inline">
+              <label className="field-label">Partner</label>
+              <select
+                value={selectedPartnerId}
+                onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
+                className="field-input"
+              >
+                {PARTNER_OPTIONS.map((partner) => (
+                  <option key={partner.id} value={partner.id}>
+                    {partner.label} (ID {partner.id})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => loadStats(selectedPartnerId)}
+              className="refresh-button"
+            >
+              Ricarica
+            </button>
+          </div>
+        </div>
+
         <div className="error-box">{error}</div>
       </div>
     );
@@ -189,6 +237,40 @@ const { response, data } = await safeJsonFetch(
       <p className="page-subtitle">
         Panoramica partner con statistiche e ultime transazioni
       </p>
+
+      <div className="toolbar-row">
+        <div className="toolbar-card neon-card">
+          <div className="field-inline">
+            <label className="field-label">Partner</label>
+            <select
+              value={selectedPartnerId}
+              onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
+              className="field-input"
+            >
+              {PARTNER_OPTIONS.map((partner) => (
+                <option key={partner.id} value={partner.id}>
+                  {partner.label} (ID {partner.id})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="partner-meta">
+            <span className="partner-badge">{activePartnerLabel}</span>
+            <span className="partner-badge light">
+              partner_id: {selectedPartnerId}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => loadStats(selectedPartnerId)}
+            className="refresh-button"
+          >
+            Ricarica
+          </button>
+        </div>
+      </div>
 
       <div className="stats-grid">
         <div className="stat-card neon-card">
@@ -230,22 +312,26 @@ const { response, data } = await safeJsonFetch(
               <table className="transactions-table">
                 <thead>
                   <tr>
+                    <th>ID</th>
                     <th>Merchant</th>
                     <th>Tipo</th>
                     <th>Importo</th>
                     <th>GUFO</th>
+                    <th>Partner ID</th>
                     <th>Data</th>
                   </tr>
                 </thead>
                 <tbody>
                   {transactions.map((tx, index) => (
-                    <tr key={tx.id || tx.transaction_id || index}>
+                    <tr key={tx.id || tx.transaction_id || tx.Transaction_id || index}>
+                      <td>{getTransactionId(tx) || "-"}</td>
                       <td>{getTransactionMerchant(tx)}</td>
                       <td>{getTransactionType(tx)}</td>
                       <td className="amount-green">
                         €{getTransactionAmount(tx).toFixed(2)}
                       </td>
                       <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                      <td>{getTransactionPartnerId(tx)}</td>
                       <td>{formatDate(tx.created_at)}</td>
                     </tr>
                   ))}
@@ -255,7 +341,15 @@ const { response, data } = await safeJsonFetch(
 
             <div className="mobile-transactions mobile-only">
               {transactions.map((tx, index) => (
-                <div className="tx-card" key={tx.id || tx.transaction_id || index}>
+                <div
+                  className="tx-card"
+                  key={tx.id || tx.transaction_id || tx.Transaction_id || index}
+                >
+                  <div className="tx-row">
+                    <span className="tx-label">ID</span>
+                    <span className="tx-value">{getTransactionId(tx) || "-"}</span>
+                  </div>
+
                   <div className="tx-row">
                     <span className="tx-label">Merchant</span>
                     <span className="tx-value">{getTransactionMerchant(tx)}</span>
@@ -278,6 +372,11 @@ const { response, data } = await safeJsonFetch(
                     <span className="tx-value">
                       {getTransactionGufo(tx).toFixed(2)}
                     </span>
+                  </div>
+
+                  <div className="tx-row">
+                    <span className="tx-label">Partner ID</span>
+                    <span className="tx-value">{getTransactionPartnerId(tx)}</span>
                   </div>
 
                   <div className="tx-row">
@@ -321,6 +420,7 @@ const partnerDashboardStyles = `
 
   .page-title,
   .page-subtitle,
+  .toolbar-row,
   .stats-grid,
   .panel,
   .error-box {
@@ -341,6 +441,83 @@ const partnerDashboardStyles = `
     margin: 0 0 28px 0;
     font-size: 16px;
     line-height: 1.6;
+  }
+
+  .toolbar-row {
+    margin-bottom: 24px;
+  }
+
+  .toolbar-card {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .field-inline {
+    min-width: 240px;
+    flex: 1;
+  }
+
+  .field-label {
+    display: block;
+    margin-bottom: 8px;
+    color: #d6d3d1;
+    font-size: 14px;
+  }
+
+  .field-input {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 14px 16px;
+    color: white;
+    outline: none;
+    font-size: 14px;
+  }
+
+  .partner-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .partner-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 8px 12px;
+    background: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.28);
+    color: #bfdbfe;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .partner-badge.light {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e7e5e4;
+  }
+
+  .refresh-button {
+    border: none;
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .refresh-button:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
   }
 
   .stats-grid {
@@ -437,14 +614,15 @@ const partnerDashboardStyles = `
   .transactions-table th {
     color: #d6d3d1;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 0;
+    padding: 12px 8px 12px 0;
     text-align: left;
     font-weight: 600;
     font-size: 14px;
+    white-space: nowrap;
   }
 
   .transactions-table td {
-    padding: 14px 0;
+    padding: 14px 8px 14px 0;
     color: #f5f5f4;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 14px;
