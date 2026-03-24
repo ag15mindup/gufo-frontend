@@ -29,6 +29,13 @@ export default function RootLayout({
             min-height: 100%;
           }
 
+          /* ROOT LAYOUT */
+          .layout-root {
+            position: relative;
+            min-height: 100vh;
+          }
+
+          /* SFONDO BASE (viene arricchito da globals.css) */
           .gufo-body {
             background:
               radial-gradient(circle at 12% 16%, rgba(236, 72, 153, 0.08), transparent 18%),
@@ -40,6 +47,7 @@ export default function RootLayout({
             font-family: Arial, Helvetica, sans-serif;
           }
 
+          /* SHELL */
           .app-shell {
             min-height: 100vh;
             transition: padding-left 0.25s ease;
@@ -53,6 +61,7 @@ export default function RootLayout({
             padding-left: 0;
           }
 
+          /* MAIN */
           .app-main {
             min-height: 100vh;
             padding: 24px;
@@ -62,6 +71,17 @@ export default function RootLayout({
             padding: 0;
           }
 
+          .app-main.private-page {
+            position: relative;
+          }
+
+          /* FRAME PAGINE INTERNE */
+          .gufo-page-frame {
+            position: relative;
+            min-height: calc(100vh - 48px);
+          }
+
+          /* RESPONSIVE */
           @media (max-width: 1024px) {
             .app-shell.with-sidebar,
             .app-shell.no-sidebar {

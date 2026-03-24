@@ -246,8 +246,19 @@ export default function DashboardPage() {
     return (
       <div className="dashboard-page">
         <style>{dashboardStyles}</style>
-        <h1 className="dashboard-title">Dashboard</h1>
-        <p className="dashboard-subtitle">Caricamento dati account...</p>
+
+        <div className="dashboard-hero">
+          <div>
+            <div className="eyebrow">GUFO CONTROL PANEL</div>
+            <h1 className="dashboard-title">Dashboard</h1>
+            <p className="dashboard-subtitle">Caricamento dati account...</p>
+          </div>
+        </div>
+
+        <div className="loading-shell neon-card">
+          <div className="loading-glow" />
+          <p className="loading-text">Connessione ai dati in corso...</p>
+        </div>
       </div>
     );
   }
@@ -256,8 +267,15 @@ export default function DashboardPage() {
     return (
       <div className="dashboard-page">
         <style>{dashboardStyles}</style>
-        <h1 className="dashboard-title">Dashboard</h1>
-        <p className="dashboard-subtitle">Si è verificato un problema.</p>
+
+        <div className="dashboard-hero">
+          <div>
+            <div className="eyebrow">GUFO CONTROL PANEL</div>
+            <h1 className="dashboard-title">Dashboard</h1>
+            <p className="dashboard-subtitle">Si è verificato un problema.</p>
+          </div>
+        </div>
+
         <div className="error-box">{error}</div>
       </div>
     );
@@ -269,16 +287,31 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <style>{dashboardStyles}</style>
 
-      <h1 className="dashboard-title">Dashboard</h1>
-      <p className="dashboard-subtitle">
-        Panoramica account, spese e attività recenti
-      </p>
+      <div className="dashboard-hero">
+        <div>
+          <div className="eyebrow">GUFO CONTROL PANEL</div>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <p className="dashboard-subtitle">
+            Panoramica account, cashback, spese e attività recenti
+          </p>
+        </div>
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Live Account
+        </div>
+      </div>
 
       <div className="top-grid">
         <div className="profile-card neon-card">
+          <div className="card-orb orb-cyan" />
+          <div className="card-orb orb-pink" />
+
           <div className="profile-header">
             <div className="profile-avatar">{dashboardData.profileInitial}</div>
-            <div>
+
+            <div className="profile-meta">
+              <div className="profile-kicker">Profilo utente</div>
               <div className="profile-name">{dashboardData.profileName}</div>
               <div className="profile-email">{dashboardData.profileEmail}</div>
             </div>
@@ -305,6 +338,7 @@ export default function DashboardPage() {
         <div className="stats-area">
           <div className="stats-grid">
             <div className="stat-card neon-card">
+              <div className="stat-topline">Wallet</div>
               <div className="stat-label">Saldo GUFO</div>
               <div className="stat-value">
                 {dashboardData.balanceGufo.toFixed(2)}
@@ -312,6 +346,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="stat-card neon-card">
+              <div className="stat-topline">Rewards</div>
               <div className="stat-label">GUFO guadagnati</div>
               <div className="stat-value">
                 {dashboardData.totalGufoEarned.toFixed(2)}
@@ -319,28 +354,36 @@ export default function DashboardPage() {
             </div>
 
             <div className="stat-card neon-card">
+              <div className="stat-topline">Season</div>
               <div className="stat-label">Spesa stagione</div>
-              <div className="stat-value">
+              <div className="stat-value smaller-value">
                 € {dashboardData.totalSpent.toFixed(2)}
               </div>
             </div>
 
             <div className="stat-card neon-card">
+              <div className="stat-topline">Membership</div>
               <div className="stat-label">Cashback attuale</div>
               <div className="stat-value">{dashboardData.cashbackPercent}%</div>
             </div>
           </div>
 
           <div className="chart-panel neon-card">
-            <h2 className="section-title">Andamento spese</h2>
-            <p className="section-subtitle">
-              Distribuzione mensile delle spese registrate
-            </p>
+            <div className="panel-header">
+              <div>
+                <h2 className="section-title">Andamento spese</h2>
+                <p className="section-subtitle">
+                  Distribuzione mensile delle spese registrate
+                </p>
+              </div>
+
+              <div className="mini-pill">12 mesi</div>
+            </div>
 
             <div className="chart-wrap">
               {dashboardData.monthlyExpenses.map((value, index) => {
                 const height =
-                  value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "6px";
+                  value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
 
                 return (
                   <div className="chart-item" key={index}>
@@ -358,10 +401,16 @@ export default function DashboardPage() {
       </div>
 
       <div className="transactions-panel neon-card">
-        <h2 className="section-title">Transazioni recenti</h2>
-        <p className="section-subtitle">
-          Ultimi movimenti registrati sul tuo account
-        </p>
+        <div className="panel-header">
+          <div>
+            <h2 className="section-title">Transazioni recenti</h2>
+            <p className="section-subtitle">
+              Ultimi movimenti registrati sul tuo account
+            </p>
+          </div>
+
+          <div className="mini-pill">Ultime 8</div>
+        </div>
 
         {dashboardData.transactions.length === 0 ? (
           <div className="empty-state">
@@ -458,8 +507,8 @@ const dashboardStyles = `
 
   .dashboard-page {
     width: 100%;
-    color: #ffffff;
     min-height: 100%;
+    color: #ffffff;
     position: relative;
   }
 
@@ -469,38 +518,95 @@ const dashboardStyles = `
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.10), transparent 20%),
+      radial-gradient(circle at 85% 15%, rgba(236, 72, 153, 0.10), transparent 22%),
+      radial-gradient(circle at 20% 85%, rgba(34, 197, 94, 0.07), transparent 18%),
+      radial-gradient(circle at 82% 82%, rgba(250, 204, 21, 0.07), transparent 18%);
     z-index: 0;
   }
 
-  .dashboard-title,
-  .dashboard-subtitle,
+  .dashboard-hero,
   .top-grid,
-  .transactions-panel {
+  .transactions-panel,
+  .loading-shell,
+  .error-box {
     position: relative;
     z-index: 1;
   }
 
+  .dashboard-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
+  }
+
   .dashboard-title {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .dashboard-subtitle {
-    margin: 0 0 28px 0;
+    margin: 0;
+    max-width: 760px;
     font-size: 16px;
-    color: #d6d3d1;
+    color: #b9c6e3;
+    line-height: 1.55;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
   }
 
   .top-grid {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-columns: 320px minmax(0, 1fr);
     gap: 24px;
     align-items: start;
     margin-bottom: 24px;
@@ -519,14 +625,17 @@ const dashboardStyles = `
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 22px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -534,15 +643,15 @@ const dashboardStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -550,6 +659,31 @@ const dashboardStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .card-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(18px);
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .orb-cyan {
+    top: -20px;
+    right: -15px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  }
+
+  .orb-pink {
+    bottom: -35px;
+    left: -20px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
   }
 
   .profile-card {
@@ -563,17 +697,19 @@ const dashboardStyles = `
     display: flex;
     align-items: center;
     gap: 14px;
+    position: relative;
+    z-index: 1;
   }
 
   .profile-avatar {
-    width: 62px;
-    height: 62px;
-    border-radius: 999px;
+    width: 68px;
+    height: 68px;
+    border-radius: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
-    font-weight: 800;
+    font-size: 28px;
+    font-weight: 900;
     color: #111827;
     background: linear-gradient(
       135deg,
@@ -582,21 +718,36 @@ const dashboardStyles = `
       #4ade80 70%,
       #facc15 100%
     );
-    box-shadow: 0 0 24px rgba(96, 165, 250, 0.22);
+    box-shadow:
+      0 0 22px rgba(96, 165, 250, 0.20),
+      0 0 28px rgba(236, 72, 153, 0.10);
     flex-shrink: 0;
   }
 
+  .profile-meta {
+    min-width: 0;
+  }
+
+  .profile-kicker {
+    margin-bottom: 6px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
   .profile-name {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1.1;
-    color: #fff7ed;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.05;
+    color: #ffffff;
     word-break: break-word;
   }
 
   .profile-email {
-    margin-top: 4px;
-    color: #d6d3d1;
+    margin-top: 6px;
+    color: #b9c6e3;
     font-size: 14px;
     word-break: break-word;
   }
@@ -605,6 +756,8 @@ const dashboardStyles = `
     display: flex;
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    z-index: 1;
   }
 
   .profile-stat-row {
@@ -612,9 +765,9 @@ const dashboardStyles = `
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding-bottom: 10px;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    color: #e7e5e4;
+    color: #dbe4f0;
     font-size: 14px;
   }
 
@@ -627,52 +780,96 @@ const dashboardStyles = `
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 48px;
+    min-height: 50px;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 800;
     color: #111827;
     background: linear-gradient(
       90deg,
-      rgba(244, 114, 182, 0.95),
-      rgba(96, 165, 250, 0.95),
-      rgba(74, 222, 128, 0.95),
-      rgba(250, 204, 21, 0.95)
+      rgba(244, 114, 182, 0.96),
+      rgba(96, 165, 250, 0.96),
+      rgba(74, 222, 128, 0.96),
+      rgba(250, 204, 21, 0.96)
     );
-    box-shadow: 0 0 24px rgba(250, 204, 21, 0.14);
+    box-shadow:
+      0 0 20px rgba(250, 204, 21, 0.12),
+      0 0 30px rgba(56, 189, 248, 0.10);
+    position: relative;
+    z-index: 1;
   }
 
   .stat-card {
-    min-height: 126px;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
 
-  .stat-label {
-    color: #e7e5e4;
+  .stat-topline {
     margin-bottom: 10px;
-    font-size: 16px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .stat-label {
+    color: #d8e2f4;
+    margin-bottom: 12px;
+    font-size: 15px;
   }
 
   .stat-value {
     font-size: 52px;
-    font-weight: 700;
-    line-height: 1;
-    color: #fffaf0;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
     word-break: break-word;
+    text-shadow: 0 0 16px rgba(56, 189, 248, 0.10);
+  }
+
+  .smaller-value {
+    font-size: 42px;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
   }
 
   .section-title {
     margin: 0 0 6px 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff7ed;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: #ffffff;
   }
 
   .section-subtitle {
-    margin: 0 0 18px 0;
-    color: #d6d3d1;
+    margin: 0;
+    color: #b9c6e3;
     font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .chart-panel {
@@ -684,7 +881,7 @@ const dashboardStyles = `
     grid-template-columns: repeat(12, minmax(0, 1fr));
     gap: 10px;
     align-items: end;
-    height: 260px;
+    height: 280px;
     min-width: 0;
     overflow-x: auto;
   }
@@ -699,14 +896,14 @@ const dashboardStyles = `
 
   .chart-value {
     font-size: 12px;
-    color: #d6d3d1;
+    color: #c6d3eb;
     margin-bottom: 8px;
   }
 
   .chart-bar-shell {
     width: 100%;
     height: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 8px 0;
     display: flex;
     align-items: end;
@@ -716,23 +913,26 @@ const dashboardStyles = `
   }
 
   .chart-bar {
-    width: 70%;
+    width: 72%;
     min-width: 18px;
-    max-width: 26px;
+    max-width: 28px;
     border-radius: 999px;
     background: linear-gradient(
       180deg,
       #60a5fa 0%,
-      #38bdf8 30%,
-      #4ade80 68%,
+      #38bdf8 26%,
+      #8b5cf6 52%,
+      #ec4899 76%,
       #facc15 100%
     );
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.18);
+    box-shadow:
+      0 0 16px rgba(56, 189, 248, 0.16),
+      0 0 24px rgba(236, 72, 153, 0.10);
   }
 
   .chart-label {
     font-size: 12px;
-    color: #e7e5e4;
+    color: #dbe4f0;
     margin-top: 8px;
   }
 
@@ -752,17 +952,18 @@ const dashboardStyles = `
   }
 
   .transactions-table th {
-    color: #d6d3d1;
+    color: #aebedf;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     padding: 12px 0;
     text-align: left;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
   }
 
   .transactions-table td {
-    padding: 14px 0;
-    color: #f5f5f4;
+    padding: 16px 0;
+    color: #f4f7ff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 14px;
     vertical-align: top;
@@ -770,12 +971,12 @@ const dashboardStyles = `
 
   .amount-green {
     color: #bbf7d0 !important;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .empty-state {
-    border-radius: 20px;
-    padding: 34px 18px;
+    border-radius: 22px;
+    padding: 36px 18px;
     text-align: center;
     background: rgba(255, 255, 255, 0.03);
     border: 1px dashed rgba(255, 255, 255, 0.10);
@@ -784,31 +985,54 @@ const dashboardStyles = `
   .empty-icon {
     font-size: 34px;
     margin-bottom: 12px;
-    color: #e7e5e4;
+    color: #dbe4f0;
   }
 
   .empty-title {
     margin: 0 0 8px 0;
     font-size: 18px;
-    font-weight: 700;
-    color: #fff7ed;
+    font-weight: 800;
+    color: #ffffff;
   }
 
   .empty-text {
     margin: 0;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 14px;
   }
 
-  .error-box {
+  .loading-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .loading-text {
     position: relative;
     z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #dbe4f0;
+  }
+
+  .error-box {
     margin-top: 14px;
     color: #fecaca;
-    background: rgba(127, 29, 29, 0.25);
+    background: rgba(127, 29, 29, 0.24);
     border: 1px solid rgba(248, 113, 113, 0.28);
-    padding: 14px 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   .mobile-only {
@@ -828,7 +1052,7 @@ const dashboardStyles = `
   .tx-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 14px;
   }
 
@@ -837,7 +1061,7 @@ const dashboardStyles = `
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    padding: 7px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -846,32 +1070,37 @@ const dashboardStyles = `
   }
 
   .tx-label {
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 13px;
     flex: 0 0 90px;
   }
 
   .tx-value {
-    color: #f5f5f4;
+    color: #f4f7ff;
     font-size: 13px;
     text-align: right;
     word-break: break-word;
   }
 
-  @media (max-width: 1100px) {
+  @media (max-width: 1180px) {
     .top-grid {
       grid-template-columns: 1fr;
     }
   }
 
   @media (max-width: 768px) {
+    .dashboard-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .dashboard-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .dashboard-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .stats-grid {
@@ -882,7 +1111,11 @@ const dashboardStyles = `
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
     }
 
     .stat-card {
@@ -890,16 +1123,25 @@ const dashboardStyles = `
     }
 
     .stat-value {
-      font-size: 36px;
+      font-size: 38px;
+    }
+
+    .smaller-value {
+      font-size: 32px;
     }
 
     .profile-name {
-      font-size: 20px;
+      font-size: 22px;
     }
 
     .chart-wrap {
-      height: 220px;
+      height: 230px;
       gap: 8px;
+    }
+
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .desktop-only {
@@ -913,17 +1155,26 @@ const dashboardStyles = `
 
   @media (max-width: 480px) {
     .dashboard-title {
-      font-size: 30px;
-    }
-
-    .stat-value {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .profile-avatar {
-      width: 54px;
-      height: 54px;
-      font-size: 22px;
+      width: 58px;
+      height: 58px;
+      font-size: 24px;
+      border-radius: 18px;
+    }
+
+    .profile-name {
+      font-size: 20px;
+    }
+
+    .stat-value {
+      font-size: 32px;
+    }
+
+    .smaller-value {
+      font-size: 28px;
     }
 
     .tx-label,

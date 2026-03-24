@@ -140,14 +140,16 @@ export default function PartnerDashboardPage() {
       const rawTransactions = Array.isArray(stats?.recent_transactions)
         ? stats.recent_transactions
         : Array.isArray(stats?.transactions)
-        ? stats.transactions
-        : [];
+          ? stats.transactions
+          : [];
 
       const normalizedTransactions: Transaction[] = rawTransactions
         .map((tx: any) => ({
           id: getTransactionId(tx),
-          transaction_id: tx?.transaction_id ?? tx?.Transaction_id ?? tx?.id ?? null,
-          Transaction_id: tx?.Transaction_id ?? tx?.transaction_id ?? tx?.id ?? null,
+          transaction_id:
+            tx?.transaction_id ?? tx?.Transaction_id ?? tx?.id ?? null,
+          Transaction_id:
+            tx?.Transaction_id ?? tx?.transaction_id ?? tx?.id ?? null,
           type: getTransactionType(tx),
           merchant_name: getTransactionMerchant(tx),
           amount_euro: getTransactionAmount(tx),
@@ -185,8 +187,19 @@ export default function PartnerDashboardPage() {
     return (
       <div className="partner-dashboard-page">
         <style>{partnerDashboardStyles}</style>
-        <h1 className="page-title">Partner Dashboard</h1>
-        <p className="page-subtitle">Caricamento statistiche...</p>
+
+        <div className="dashboard-hero">
+          <div>
+            <div className="eyebrow">GUFO PARTNER ANALYTICS</div>
+            <h1 className="page-title">Partner Dashboard</h1>
+            <p className="page-subtitle">Caricamento statistiche...</p>
+          </div>
+        </div>
+
+        <div className="loading-shell neon-card">
+          <div className="loading-glow" />
+          <p className="loading-text">Recupero analytics partner in corso...</p>
+        </div>
       </div>
     );
   }
@@ -195,23 +208,32 @@ export default function PartnerDashboardPage() {
     return (
       <div className="partner-dashboard-page">
         <style>{partnerDashboardStyles}</style>
-        <h1 className="page-title">Partner Dashboard</h1>
+
+        <div className="dashboard-hero">
+          <div>
+            <div className="eyebrow">GUFO PARTNER ANALYTICS</div>
+            <h1 className="page-title">Partner Dashboard</h1>
+            <p className="page-subtitle">Si è verificato un problema.</p>
+          </div>
+        </div>
 
         <div className="toolbar-row">
-          <div className="toolbar-card">
-            <div className="field-inline">
-              <label className="field-label">Partner</label>
-              <select
-                value={selectedPartnerId}
-                onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
-                className="field-input"
-              >
-                {PARTNER_OPTIONS.map((partner) => (
-                  <option key={partner.id} value={partner.id}>
-                    {partner.label} (ID {partner.id})
-                  </option>
-                ))}
-              </select>
+          <div className="toolbar-card neon-card">
+            <div className="toolbar-left">
+              <div className="field-inline">
+                <label className="field-label">Partner</label>
+                <select
+                  value={selectedPartnerId}
+                  onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
+                  className="field-input"
+                >
+                  {PARTNER_OPTIONS.map((partner) => (
+                    <option key={partner.id} value={partner.id}>
+                      {partner.label} (ID {partner.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <button
@@ -233,33 +255,45 @@ export default function PartnerDashboardPage() {
     <div className="partner-dashboard-page">
       <style>{partnerDashboardStyles}</style>
 
-      <h1 className="page-title">Partner Dashboard</h1>
-      <p className="page-subtitle">
-        Panoramica partner con statistiche e ultime transazioni
-      </p>
+      <div className="dashboard-hero">
+        <div>
+          <div className="eyebrow">GUFO PARTNER ANALYTICS</div>
+          <h1 className="page-title">Partner Dashboard</h1>
+          <p className="page-subtitle">
+            Panoramica partner con statistiche e ultime transazioni
+          </p>
+        </div>
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Analytics Active
+        </div>
+      </div>
 
       <div className="toolbar-row">
         <div className="toolbar-card neon-card">
-          <div className="field-inline">
-            <label className="field-label">Partner</label>
-            <select
-              value={selectedPartnerId}
-              onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
-              className="field-input"
-            >
-              {PARTNER_OPTIONS.map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.label} (ID {partner.id})
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="toolbar-left">
+            <div className="field-inline">
+              <label className="field-label">Partner</label>
+              <select
+                value={selectedPartnerId}
+                onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
+                className="field-input"
+              >
+                {PARTNER_OPTIONS.map((partner) => (
+                  <option key={partner.id} value={partner.id}>
+                    {partner.label} (ID {partner.id})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div className="partner-meta">
-            <span className="partner-badge">{activePartnerLabel}</span>
-            <span className="partner-badge light">
-              partner_id: {selectedPartnerId}
-            </span>
+            <div className="partner-meta">
+              <span className="partner-badge">{activePartnerLabel}</span>
+              <span className="partner-badge light">
+                partner_id: {selectedPartnerId}
+              </span>
+            </div>
           </div>
 
           <button
@@ -274,6 +308,8 @@ export default function PartnerDashboardPage() {
 
       <div className="stats-grid">
         <div className="stat-card neon-card">
+          <div className="card-orb orb-cyan" />
+          <div className="stat-topline">Operations</div>
           <p className="stat-label">Totale transazioni</p>
           <p className="stat-value">
             {toNumberSafe(data?.total_transactions)}
@@ -281,13 +317,16 @@ export default function PartnerDashboardPage() {
         </div>
 
         <div className="stat-card neon-card">
+          <div className="card-orb orb-pink" />
+          <div className="stat-topline">Volume</div>
           <p className="stat-label">Totale importi</p>
-          <p className="stat-value">
+          <p className="stat-value smaller-value">
             €{toNumberSafe(data?.total_amount).toFixed(2)}
           </p>
         </div>
 
         <div className="stat-card neon-card">
+          <div className="stat-topline">Rewards</div>
           <p className="stat-label">GUFO distribuiti</p>
           <p className="stat-value">
             {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
@@ -296,7 +335,16 @@ export default function PartnerDashboardPage() {
       </div>
 
       <div className="panel neon-card">
-        <h2 className="panel-title">Ultime transazioni</h2>
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">Ultime transazioni</h2>
+            <p className="panel-subtitle">
+              Storico recente del partner selezionato
+            </p>
+          </div>
+
+          <div className="panel-count">{transactions.length} record</div>
+        </div>
 
         {transactions.length === 0 ? (
           <div className="empty-state">
@@ -323,7 +371,11 @@ export default function PartnerDashboardPage() {
                 </thead>
                 <tbody>
                   {transactions.map((tx, index) => (
-                    <tr key={tx.id || tx.transaction_id || tx.Transaction_id || index}>
+                    <tr
+                      key={
+                        tx.id || tx.transaction_id || tx.Transaction_id || index
+                      }
+                    >
                       <td>{getTransactionId(tx) || "-"}</td>
                       <td>{getTransactionMerchant(tx)}</td>
                       <td>{getTransactionType(tx)}</td>
@@ -343,7 +395,9 @@ export default function PartnerDashboardPage() {
               {transactions.map((tx, index) => (
                 <div
                   className="tx-card"
-                  key={tx.id || tx.transaction_id || tx.Transaction_id || index}
+                  key={
+                    tx.id || tx.transaction_id || tx.Transaction_id || index
+                  }
                 >
                   <div className="tx-row">
                     <span className="tx-label">ID</span>
@@ -418,29 +472,83 @@ const partnerDashboardStyles = `
     z-index: 0;
   }
 
-  .page-title,
-  .page-subtitle,
+  .dashboard-hero,
   .toolbar-row,
   .stats-grid,
   .panel,
-  .error-box {
+  .error-box,
+  .loading-shell {
     position: relative;
     z-index: 1;
   }
 
+  .dashboard-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
+  }
+
   .page-title {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .page-subtitle {
-    color: #d6d3d1;
-    margin: 0 0 28px 0;
+    color: #b9c6e3;
+    margin: 0;
     font-size: 16px;
     line-height: 1.6;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
   }
 
   .toolbar-row {
@@ -455,6 +563,15 @@ const partnerDashboardStyles = `
     flex-wrap: wrap;
   }
 
+  .toolbar-left {
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    flex-wrap: wrap;
+    flex: 1;
+    min-width: 0;
+  }
+
   .field-inline {
     min-width: 240px;
     flex: 1;
@@ -463,19 +580,32 @@ const partnerDashboardStyles = `
   .field-label {
     display: block;
     margin-bottom: 8px;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 14px;
   }
 
   .field-input {
     width: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     padding: 14px 16px;
     color: white;
     outline: none;
     font-size: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .field-input:focus {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.16),
+      0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .field-input option {
+    background: #0f172a;
+    color: #ffffff;
   }
 
   .partner-meta {
@@ -494,29 +624,32 @@ const partnerDashboardStyles = `
     border: 1px solid rgba(59, 130, 246, 0.28);
     color: #bfdbfe;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .partner-badge.light {
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     color: #e7e5e4;
   }
 
   .refresh-button {
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px 16px;
     color: white;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 15px;
     cursor: pointer;
     background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+    box-shadow:
+      0 12px 24px rgba(14, 165, 233, 0.18),
+      0 0 18px rgba(37, 99, 235, 0.10);
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .refresh-button:hover {
-    opacity: 0.95;
+    opacity: 0.97;
     transform: translateY(-1px);
   }
 
@@ -529,14 +662,17 @@ const partnerDashboardStyles = `
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 22px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -544,15 +680,15 @@ const partnerDashboardStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -560,6 +696,31 @@ const partnerDashboardStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .card-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(18px);
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  .orb-cyan {
+    top: -22px;
+    right: -18px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  }
+
+  .orb-pink {
+    bottom: -34px;
+    left: -16px;
+    width: 118px;
+    height: 118px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
   }
 
   .stat-card {
@@ -571,32 +732,76 @@ const partnerDashboardStyles = `
     z-index: 1;
   }
 
-  .stat-label {
+  .stat-topline {
     margin: 0 0 10px 0;
-    color: #d6d3d1;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .stat-label {
+    margin: 0 0 12px 0;
+    color: #d8e2f4;
     font-size: 14px;
   }
 
   .stat-value {
     margin: 0;
     font-size: 34px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-weight: 900;
+    line-height: 1.05;
     word-break: break-word;
-    color: #fffaf0;
+    color: #ffffff;
+  }
+
+  .smaller-value {
+    font-size: 30px;
   }
 
   .panel {
     overflow: hidden;
   }
 
-  .panel-title {
-    margin: 0 0 20px 0;
-    font-size: 28px;
-    line-height: 1.1;
-    color: #fff7ed;
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
     position: relative;
     z-index: 1;
+  }
+
+  .panel-title {
+    margin: 0 0 6px 0;
+    font-size: 28px;
+    line-height: 1.05;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .panel-subtitle {
+    margin: 0;
+    color: #b9c6e3;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .panel-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .table-wrap {
@@ -612,18 +817,19 @@ const partnerDashboardStyles = `
   }
 
   .transactions-table th {
-    color: #d6d3d1;
+    color: #aebedf;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     padding: 12px 8px 12px 0;
     text-align: left;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 13px;
     white-space: nowrap;
+    letter-spacing: 0.02em;
   }
 
   .transactions-table td {
-    padding: 14px 8px 14px 0;
-    color: #f5f5f4;
+    padding: 16px 8px 16px 0;
+    color: #f4f7ff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 14px;
     vertical-align: top;
@@ -631,7 +837,7 @@ const partnerDashboardStyles = `
 
   .amount-green {
     color: #bbf7d0 !important;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .empty-state {
@@ -649,28 +855,53 @@ const partnerDashboardStyles = `
   .empty-icon {
     font-size: 34px;
     margin-bottom: 12px;
-    color: #e7e5e4;
+    color: #dbe4f0;
   }
 
   .empty-title {
     margin: 0 0 8px 0;
     font-size: 22px;
-    font-weight: 700;
-    color: #fff7ed;
+    font-weight: 800;
+    color: #ffffff;
   }
 
   .empty-text {
     margin: 0;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 16px;
+  }
+
+  .loading-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .loading-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #dbe4f0;
   }
 
   .error-box {
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   .desktop-only {
@@ -692,7 +923,7 @@ const partnerDashboardStyles = `
   .tx-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 14px;
   }
 
@@ -701,7 +932,7 @@ const partnerDashboardStyles = `
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    padding: 6px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -710,13 +941,13 @@ const partnerDashboardStyles = `
   }
 
   .tx-label {
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 13px;
     flex: 0 0 90px;
   }
 
   .tx-value {
-    color: #f5f5f4;
+    color: #f4f7ff;
     font-size: 13px;
     text-align: right;
     word-break: break-word;
@@ -729,27 +960,55 @@ const partnerDashboardStyles = `
   }
 
   @media (max-width: 768px) {
+    .dashboard-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .page-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
+    }
+
+    .toolbar-card {
+      align-items: stretch;
+    }
+
+    .toolbar-left {
+      width: 100%;
+      align-items: stretch;
     }
 
     .stat-value {
       font-size: 28px;
     }
 
+    .smaller-value {
+      font-size: 26px;
+    }
+
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
     .panel-title {
       font-size: 22px;
-      margin-bottom: 16px;
+      margin-bottom: 0;
     }
 
     .empty-title {
@@ -771,11 +1030,15 @@ const partnerDashboardStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .stat-value {
       font-size: 24px;
+    }
+
+    .smaller-value {
+      font-size: 22px;
     }
 
     .tx-label,

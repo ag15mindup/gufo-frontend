@@ -229,8 +229,19 @@ export default function TransactionsPage() {
     return (
       <div className="transactions-page">
         <style>{transactionsStyles}</style>
-        <h1 className="page-title">Transazioni</h1>
-        <p className="page-subtitle">Caricamento transazioni...</p>
+
+        <div className="transactions-hero">
+          <div>
+            <div className="eyebrow">GUFO TRANSACTION CENTER</div>
+            <h1 className="page-title">Transazioni</h1>
+            <p className="page-subtitle">Caricamento transazioni...</p>
+          </div>
+        </div>
+
+        <div className="loading-shell neon-card">
+          <div className="loading-glow" />
+          <p className="loading-text">Recupero storico transazioni in corso...</p>
+        </div>
       </div>
     );
   }
@@ -239,7 +250,15 @@ export default function TransactionsPage() {
     return (
       <div className="transactions-page">
         <style>{transactionsStyles}</style>
-        <h1 className="page-title">Transazioni</h1>
+
+        <div className="transactions-hero">
+          <div>
+            <div className="eyebrow">GUFO TRANSACTION CENTER</div>
+            <h1 className="page-title">Transazioni</h1>
+            <p className="page-subtitle">Si è verificato un problema.</p>
+          </div>
+        </div>
+
         <div className="error-box">{error}</div>
       </div>
     );
@@ -249,28 +268,52 @@ export default function TransactionsPage() {
     <div className="transactions-page">
       <style>{transactionsStyles}</style>
 
-      <h1 className="page-title">Transazioni</h1>
-      <p className="page-subtitle">Storico completo delle transazioni utente</p>
+      <div className="transactions-hero">
+        <div>
+          <div className="eyebrow">GUFO TRANSACTION CENTER</div>
+          <h1 className="page-title">Transazioni</h1>
+          <p className="page-subtitle">Storico completo delle transazioni utente</p>
+        </div>
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Ledger Active
+        </div>
+      </div>
 
       <div className="stats-grid">
         <div className="stat-card neon-card">
+          <div className="card-orb orb-cyan" />
+          <div className="stat-topline">Filtered Data</div>
           <div className="stat-label">Transazioni filtrate</div>
           <div className="stat-value">{filteredTransactions.length}</div>
         </div>
 
         <div className="stat-card neon-card">
+          <div className="card-orb orb-pink" />
+          <div className="stat-topline">Amount</div>
           <div className="stat-label">Importo totale</div>
-          <div className="stat-value">€ {totalAmount.toFixed(2)}</div>
+          <div className="stat-value smaller-value">€ {totalAmount.toFixed(2)}</div>
         </div>
 
         <div className="stat-card neon-card">
+          <div className="stat-topline">Rewards</div>
           <div className="stat-label">GUFO totali</div>
           <div className="stat-value">{totalGufo.toFixed(2)}</div>
         </div>
       </div>
 
       <div className="panel neon-card">
-        <h2 className="panel-title">Filtri</h2>
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">Filtri</h2>
+            <p className="panel-subtitle">
+              Seleziona tipo transazione o cerca per merchant
+            </p>
+          </div>
+
+          <div className="mini-pill">Search & Filter</div>
+        </div>
 
         <div className="filters-grid">
           <div>
@@ -304,7 +347,13 @@ export default function TransactionsPage() {
 
       <div className="panel neon-card">
         <div className="panel-header">
-          <h2 className="panel-title no-margin">Tutte le transazioni</h2>
+          <div>
+            <h2 className="panel-title no-margin">Tutte le transazioni</h2>
+            <p className="panel-subtitle">
+              Storico completo filtrato in tempo reale
+            </p>
+          </div>
+
           <span className="panel-count">Totale: {filteredTransactions.length}</span>
         </div>
 
@@ -409,27 +458,82 @@ const transactionsStyles = `
     z-index: 0;
   }
 
-  .page-title,
-  .page-subtitle,
+  .transactions-hero,
   .stats-grid,
   .panel,
-  .error-box {
+  .error-box,
+  .loading-shell {
     position: relative;
     z-index: 1;
   }
 
+  .transactions-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
+  }
+
   .page-title {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .page-subtitle {
-    color: #d6d3d1;
-    margin: 0 0 28px 0;
+    color: #b9c6e3;
+    margin: 0;
     font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
   }
 
   .stats-grid {
@@ -441,14 +545,17 @@ const transactionsStyles = `
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 22px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -456,15 +563,15 @@ const transactionsStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -472,15 +579,51 @@ const transactionsStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .card-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(18px);
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  .orb-cyan {
+    top: -22px;
+    right: -18px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  }
+
+  .orb-pink {
+    bottom: -34px;
+    left: -16px;
+    width: 118px;
+    height: 118px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
   }
 
   .stat-card {
     min-width: 0;
   }
 
-  .stat-label {
-    color: #e7e5e4;
+  .stat-topline {
+    position: relative;
+    z-index: 1;
     margin-bottom: 10px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .stat-label {
+    color: #d8e2f4;
+    margin-bottom: 12px;
     font-size: 15px;
     position: relative;
     z-index: 1;
@@ -488,12 +631,17 @@ const transactionsStyles = `
 
   .stat-value {
     font-size: 38px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
     word-break: break-word;
-    color: #fffaf0;
+    color: #ffffff;
     position: relative;
     z-index: 1;
+  }
+
+  .smaller-value {
+    font-size: 34px;
   }
 
   .panel {
@@ -501,10 +649,11 @@ const transactionsStyles = `
   }
 
   .panel-title {
-    margin: 0 0 20px 0;
+    margin: 0 0 6px 0;
     font-size: 28px;
-    line-height: 1.1;
-    color: #fff7ed;
+    line-height: 1.05;
+    font-weight: 800;
+    color: #ffffff;
     position: relative;
     z-index: 1;
   }
@@ -513,9 +662,18 @@ const transactionsStyles = `
     margin: 0;
   }
 
+  .panel-subtitle {
+    margin: 0;
+    color: #b9c6e3;
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+
   .panel-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 20px;
@@ -524,8 +682,33 @@ const transactionsStyles = `
   }
 
   .panel-count {
-    color: #d6d3d1;
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .filters-grid {
@@ -538,24 +721,37 @@ const transactionsStyles = `
 
   .input-label {
     display: block;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 14px;
     margin-bottom: 8px;
   }
 
   .input-control {
     width: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 14px 16px;
     color: white;
     outline: none;
     font-size: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .input-control::placeholder {
-    color: #a8a29e;
+    color: #99a8c7;
+  }
+
+  .input-control:focus {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.16),
+      0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .input-control option {
+    background: #0f172a;
+    color: #ffffff;
   }
 
   .table-wrap {
@@ -571,17 +767,18 @@ const transactionsStyles = `
   }
 
   .transactions-table th {
-    color: #d6d3d1;
+    color: #aebedf;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     padding: 12px 0;
     text-align: left;
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
   }
 
   .transactions-table td {
-    padding: 14px 0;
-    color: #f5f5f4;
+    padding: 16px 0;
+    color: #f4f7ff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 14px;
     vertical-align: top;
@@ -589,7 +786,7 @@ const transactionsStyles = `
 
   .amount-green {
     color: #bbf7d0 !important;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .empty-state {
@@ -607,28 +804,53 @@ const transactionsStyles = `
   .empty-icon {
     font-size: 34px;
     margin-bottom: 12px;
-    color: #e7e5e4;
+    color: #dbe4f0;
   }
 
   .empty-title {
     margin: 0 0 8px 0;
     font-size: 22px;
-    font-weight: 700;
-    color: #fff7ed;
+    font-weight: 800;
+    color: #ffffff;
   }
 
   .empty-text {
-    color: #d6d3d1;
+    color: #b9c6e3;
     margin: 0;
     font-size: 16px;
   }
 
+  .loading-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .loading-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #dbe4f0;
+  }
+
   .error-box {
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   .desktop-only {
@@ -650,7 +872,7 @@ const transactionsStyles = `
   .tx-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 14px;
   }
 
@@ -659,7 +881,7 @@ const transactionsStyles = `
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
-    padding: 6px 0;
+    padding: 8px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
@@ -668,13 +890,13 @@ const transactionsStyles = `
   }
 
   .tx-label {
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 13px;
     flex: 0 0 90px;
   }
 
   .tx-value {
-    color: #f5f5f4;
+    color: #f4f7ff;
     font-size: 13px;
     text-align: right;
     word-break: break-word;
@@ -687,27 +909,40 @@ const transactionsStyles = `
   }
 
   @media (max-width: 768px) {
+    .transactions-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .page-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
     }
 
     .stat-value {
       font-size: 30px;
     }
 
+    .smaller-value {
+      font-size: 28px;
+    }
+
     .panel-title {
       font-size: 22px;
-      margin-bottom: 16px;
+      margin-bottom: 0;
     }
 
     .panel-header {
@@ -740,11 +975,15 @@ const transactionsStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .stat-value {
       font-size: 26px;
+    }
+
+    .smaller-value {
+      font-size: 24px;
     }
 
     .tx-label,

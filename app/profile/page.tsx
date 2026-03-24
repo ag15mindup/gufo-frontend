@@ -235,8 +235,19 @@ export default function ProfilePage() {
     return (
       <div className="profile-page">
         <style>{profileStyles}</style>
-        <h1 className="page-title">Profilo</h1>
-        <p className="page-subtitle">Caricamento profilo...</p>
+
+        <div className="profile-hero">
+          <div>
+            <div className="eyebrow">GUFO PROFILE CENTER</div>
+            <h1 className="page-title">Profilo</h1>
+            <p className="page-subtitle">Caricamento profilo...</p>
+          </div>
+        </div>
+
+        <div className="loading-shell neon-card">
+          <div className="loading-glow" />
+          <p className="loading-text">Recupero dati account in corso...</p>
+        </div>
       </div>
     );
   }
@@ -245,8 +256,15 @@ export default function ProfilePage() {
     return (
       <div className="profile-page">
         <style>{profileStyles}</style>
-        <h1 className="page-title">Profilo</h1>
-        <p className="page-subtitle">Si è verificato un problema.</p>
+
+        <div className="profile-hero">
+          <div>
+            <div className="eyebrow">GUFO PROFILE CENTER</div>
+            <h1 className="page-title">Profilo</h1>
+            <p className="page-subtitle">Si è verificato un problema.</p>
+          </div>
+        </div>
+
         <div className="error-box">{error}</div>
       </div>
     );
@@ -258,15 +276,29 @@ export default function ProfilePage() {
     <div className="profile-page">
       <style>{profileStyles}</style>
 
-      <h1 className="page-title">Profilo</h1>
-      <p className="page-subtitle">
-        Panoramica account, livello e ultime attività
-      </p>
+      <div className="profile-hero">
+        <div>
+          <div className="eyebrow">GUFO PROFILE CENTER</div>
+          <h1 className="page-title">Profilo</h1>
+          <p className="page-subtitle">
+            Panoramica account, livello, cashback e ultime attività
+          </p>
+        </div>
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Identity Active
+        </div>
+      </div>
 
       <div className="profile-layout">
         <div className="profile-card neon-card">
+          <div className="card-orb orb-cyan" />
+          <div className="card-orb orb-pink" />
+
           <div className="avatar">{profileInitial}</div>
 
+          <div className="profile-kicker">Account utente</div>
           <h2 className="profile-name">{profileData.name}</h2>
           <p className="profile-email">{profileData.email}</p>
 
@@ -292,10 +324,20 @@ export default function ProfilePage() {
 
         <div className="content-area">
           <div className="panel neon-card">
-            <h2 className="panel-title">Riepilogo account</h2>
+            <div className="panel-header">
+              <div>
+                <h2 className="panel-title">Riepilogo account</h2>
+                <p className="panel-subtitle">
+                  Stato attuale del profilo e metriche principali
+                </p>
+              </div>
+
+              <div className="mini-pill">Overview</div>
+            </div>
 
             <div className="stats-grid">
               <div className="stat-card">
+                <div className="stat-topline">Wallet</div>
                 <div className="stat-label">Saldo GUFO</div>
                 <div className="stat-value">
                   {profileData.balanceGufo.toFixed(2)}
@@ -303,6 +345,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="stat-card">
+                <div className="stat-topline">Membership</div>
                 <div className="stat-label">Cashback</div>
                 <div className="stat-value">
                   {profileData.cashbackPercent}%
@@ -310,13 +353,15 @@ export default function ProfilePage() {
               </div>
 
               <div className="stat-card">
+                <div className="stat-topline">Season</div>
                 <div className="stat-label">Spesa stagione</div>
-                <div className="stat-value">
+                <div className="stat-value smaller-value">
                   € {profileData.totalSpent.toFixed(2)}
                 </div>
               </div>
 
               <div className="stat-card">
+                <div className="stat-topline">Level</div>
                 <div className="stat-label">Livello</div>
                 <div className="stat-value">{profileData.level}</div>
               </div>
@@ -324,7 +369,18 @@ export default function ProfilePage() {
           </div>
 
           <div className="panel neon-card">
-            <h2 className="panel-title">Transazioni recenti</h2>
+            <div className="panel-header">
+              <div>
+                <h2 className="panel-title">Transazioni recenti</h2>
+                <p className="panel-subtitle">
+                  Ultimi movimenti associati al tuo profilo
+                </p>
+              </div>
+
+              <div className="mini-pill">
+                {Math.min(profileData.transactions.length, 5)} recenti
+              </div>
+            </div>
 
             {profileData.transactions.length === 0 ? (
               <div className="empty-state">
@@ -379,8 +435,8 @@ const profileStyles = `
 
   .profile-page {
     width: 100%;
-    color: #ffffff;
     min-height: 100%;
+    color: #ffffff;
     position: relative;
   }
 
@@ -397,26 +453,81 @@ const profileStyles = `
     z-index: 0;
   }
 
-  .page-title,
-  .page-subtitle,
+  .profile-hero,
   .profile-layout,
-  .error-box {
+  .error-box,
+  .loading-shell {
     position: relative;
     z-index: 1;
   }
 
+  .profile-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
+  }
+
   .page-title {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .page-subtitle {
-    color: #d6d3d1;
-    margin: 0 0 28px 0;
+    margin: 0;
+    color: #b9c6e3;
     font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
   }
 
   .profile-layout {
@@ -428,14 +539,17 @@ const profileStyles = `
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 22px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -443,15 +557,15 @@ const profileStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -459,6 +573,31 @@ const profileStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .card-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(18px);
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  .orb-cyan {
+    top: -22px;
+    right: -18px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  }
+
+  .orb-pink {
+    bottom: -34px;
+    left: -16px;
+    width: 118px;
+    height: 118px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
   }
 
   .profile-card {
@@ -473,7 +612,7 @@ const profileStyles = `
   .avatar {
     width: 96px;
     height: 96px;
-    border-radius: 999px;
+    border-radius: 26px;
     background: linear-gradient(
       135deg,
       #f472b6 0%,
@@ -486,27 +625,40 @@ const profileStyles = `
     align-items: center;
     justify-content: center;
     font-size: 40px;
-    font-weight: 800;
+    font-weight: 900;
     margin-bottom: 4px;
-    box-shadow: 0 0 24px rgba(96, 165, 250, 0.22);
+    box-shadow:
+      0 0 22px rgba(96, 165, 250, 0.18),
+      0 0 30px rgba(236, 72, 153, 0.10);
     flex-shrink: 0;
     position: relative;
     z-index: 1;
   }
 
+  .profile-kicker {
+    position: relative;
+    z-index: 1;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-top: -2px;
+  }
+
   .profile-name {
     font-size: 34px;
-    font-weight: 700;
+    font-weight: 800;
     margin: 0;
-    line-height: 1.1;
+    line-height: 1.05;
     word-break: break-word;
-    color: #fff7ed;
+    color: #ffffff;
     position: relative;
     z-index: 1;
   }
 
   .profile-email {
-    color: #d6d3d1;
+    color: #b9c6e3;
     margin: 0;
     word-break: break-word;
     position: relative;
@@ -528,9 +680,9 @@ const profileStyles = `
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    padding-bottom: 10px;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    color: #e7e5e4;
+    color: #dbe4f0;
     font-size: 14px;
   }
 
@@ -540,19 +692,21 @@ const profileStyles = `
 
   .level-pill {
     margin-top: auto;
-    min-height: 48px;
+    min-height: 50px;
     width: 100%;
     border-radius: 999px;
-    font-weight: 700;
+    font-weight: 800;
     color: #111827;
     background: linear-gradient(
       90deg,
-      rgba(244, 114, 182, 0.95),
-      rgba(96, 165, 250, 0.95),
-      rgba(74, 222, 128, 0.95),
-      rgba(250, 204, 21, 0.95)
+      rgba(244, 114, 182, 0.96),
+      rgba(96, 165, 250, 0.96),
+      rgba(74, 222, 128, 0.96),
+      rgba(250, 204, 21, 0.96)
     );
-    box-shadow: 0 0 24px rgba(250, 204, 21, 0.14);
+    box-shadow:
+      0 0 20px rgba(250, 204, 21, 0.12),
+      0 0 30px rgba(56, 189, 248, 0.10);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -568,13 +722,44 @@ const profileStyles = `
     margin-bottom: 24px;
   }
 
-  .panel-title {
-    margin: 0 0 20px 0;
-    font-size: 30px;
-    line-height: 1.1;
-    color: #fff7ed;
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
     position: relative;
     z-index: 1;
+  }
+
+  .panel-title {
+    margin: 0 0 6px 0;
+    font-size: 30px;
+    line-height: 1.05;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .panel-subtitle {
+    margin: 0;
+    color: #b9c6e3;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .stats-grid {
@@ -591,20 +776,34 @@ const profileStyles = `
     padding: 22px;
     min-width: 0;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .stat-topline {
+    margin-bottom: 10px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
   .stat-label {
-    color: #e7e5e4;
-    margin-bottom: 10px;
+    color: #d8e2f4;
+    margin-bottom: 12px;
     font-size: 14px;
   }
 
   .stat-value {
     font-size: 36px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-weight: 800;
+    line-height: 1.05;
     word-break: break-word;
-    color: #fffaf0;
+    color: #ffffff;
+  }
+
+  .smaller-value {
+    font-size: 30px;
   }
 
   .transactions-list {
@@ -622,7 +821,7 @@ const profileStyles = `
     gap: 16px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 16px;
   }
 
@@ -643,7 +842,7 @@ const profileStyles = `
   .transaction-type {
     margin: 0 0 4px 0;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: capitalize;
     color: #ffffff;
   }
@@ -651,28 +850,28 @@ const profileStyles = `
   .transaction-merchant {
     margin: 0 0 4px 0;
     font-size: 14px;
-    color: #d6d3d1;
+    color: #b9c6e3;
     word-break: break-word;
   }
 
   .transaction-date {
     margin: 0;
     font-size: 13px;
-    color: #a8a29e;
+    color: #99a8c7;
     word-break: break-word;
   }
 
   .transaction-amount {
     margin: 0 0 4px 0;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     color: #bbf7d0;
   }
 
   .transaction-gufo {
     margin: 0;
     font-size: 13px;
-    color: #d6d3d1;
+    color: #dbe4f0;
   }
 
   .empty-state {
@@ -690,28 +889,53 @@ const profileStyles = `
   .empty-icon {
     font-size: 34px;
     margin-bottom: 12px;
-    color: #e7e5e4;
+    color: #dbe4f0;
   }
 
   .empty-title {
     margin: 0 0 8px 0;
     font-size: 22px;
-    font-weight: 700;
-    color: #fff7ed;
+    font-weight: 800;
+    color: #ffffff;
   }
 
   .empty-text {
     margin: 0;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 16px;
+  }
+
+  .loading-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .loading-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #dbe4f0;
   }
 
   .error-box {
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   @media (max-width: 1024px) {
@@ -725,23 +949,33 @@ const profileStyles = `
   }
 
   @media (max-width: 768px) {
+    .profile-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .page-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
     }
 
     .avatar {
       width: 76px;
       height: 76px;
+      border-radius: 22px;
       font-size: 30px;
     }
 
@@ -751,7 +985,6 @@ const profileStyles = `
 
     .panel-title {
       font-size: 22px;
-      margin-bottom: 16px;
     }
 
     .stats-grid {
@@ -766,6 +999,15 @@ const profileStyles = `
 
     .stat-value {
       font-size: 30px;
+    }
+
+    .smaller-value {
+      font-size: 26px;
+    }
+
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .transaction-card {
@@ -797,7 +1039,7 @@ const profileStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .profile-name {
@@ -806,6 +1048,10 @@ const profileStyles = `
 
     .stat-value {
       font-size: 26px;
+    }
+
+    .smaller-value {
+      font-size: 22px;
     }
 
     .empty-title {

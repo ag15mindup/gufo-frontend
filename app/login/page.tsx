@@ -55,7 +55,10 @@ export default function LoginPage() {
     return (
       <div className="auth-page">
         <style>{loginStyles}</style>
-        <div className="auth-loading">Caricamento...</div>
+        <div className="auth-loading-shell">
+          <div className="auth-loading-glow" />
+          <div className="auth-loading">Caricamento...</div>
+        </div>
       </div>
     );
   }
@@ -168,12 +171,66 @@ const loginStyles = `
     z-index: 0;
   }
 
+  .auth-loading-shell {
+    position: relative;
+    z-index: 1;
+    min-height: 180px;
+    width: min(100%, 520px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+  }
+
+  .auth-loading-shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    padding: 1.2px;
+    background: linear-gradient(
+      90deg,
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .auth-loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
   .auth-loading {
     position: relative;
     z-index: 1;
     color: #f8fafc;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .auth-shell {
@@ -340,24 +397,32 @@ const loginStyles = `
   .field-input {
     width: 100%;
     min-height: 52px;
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     padding: 14px 16px;
     color: white;
     outline: none;
     font-size: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .field-input::placeholder {
     color: #94a3b8;
   }
 
+  .field-input:focus {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.16),
+      0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
   .submit-button {
     width: 100%;
     min-height: 54px;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
     font-weight: 800;
     font-size: 15px;
@@ -387,7 +452,7 @@ const loginStyles = `
   .error-box {
     margin-top: 16px;
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
     padding: 14px 16px;
     border-radius: 16px;

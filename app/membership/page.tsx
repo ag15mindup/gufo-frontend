@@ -205,8 +205,19 @@ export default function MembershipPage() {
     return (
       <div className="membership-page">
         <style>{membershipStyles}</style>
-        <h1 className="page-title">Membership GUFO</h1>
-        <p className="page-subtitle">Caricamento membership...</p>
+
+        <div className="membership-hero">
+          <div>
+            <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
+            <h1 className="page-title">Membership GUFO</h1>
+            <p className="page-subtitle">Caricamento membership...</p>
+          </div>
+        </div>
+
+        <div className="loading-shell neon-card">
+          <div className="loading-glow" />
+          <p className="loading-text">Recupero progressi membership in corso...</p>
+        </div>
       </div>
     );
   }
@@ -215,7 +226,15 @@ export default function MembershipPage() {
     return (
       <div className="membership-page">
         <style>{membershipStyles}</style>
-        <h1 className="page-title">Membership GUFO</h1>
+
+        <div className="membership-hero">
+          <div>
+            <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
+            <h1 className="page-title">Membership GUFO</h1>
+            <p className="page-subtitle">Si è verificato un problema.</p>
+          </div>
+        </div>
+
         <div className="error-box">{error}</div>
       </div>
     );
@@ -225,13 +244,26 @@ export default function MembershipPage() {
     <div className="membership-page">
       <style>{membershipStyles}</style>
 
-      <h1 className="page-title">Membership GUFO</h1>
-      <p className="page-subtitle">
-        Controlla il tuo livello attuale e i progressi per salire di status
-      </p>
+      <div className="membership-hero">
+        <div>
+          <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
+          <h1 className="page-title">Membership GUFO</h1>
+          <p className="page-subtitle">
+            Controlla il tuo livello attuale e i progressi per salire di status
+          </p>
+        </div>
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Status Active
+        </div>
+      </div>
 
       <div className="top-grid">
         <div className="hero-card neon-card">
+          <div className="card-orb orb-cyan" />
+          <div className="card-orb orb-pink" />
+
           <div className="badge">{currentLevel}</div>
           <h2 className="hero-title">Livello attuale: {currentLevel}</h2>
           <p className="hero-text">
@@ -267,21 +299,27 @@ export default function MembershipPage() {
 
         <div className="stats-grid">
           <div className="stat-card neon-card">
+            <div className="stat-topline">Wallet</div>
             <div className="stat-label">Saldo GUFO</div>
             <div className="stat-value">{balanceGufo.toFixed(2)}</div>
           </div>
 
           <div className="stat-card neon-card">
+            <div className="stat-topline">Season</div>
             <div className="stat-label">Spesa stagione</div>
-            <div className="stat-value">€ {seasonSpent.toFixed(2)}</div>
+            <div className="stat-value smaller-value">
+              € {seasonSpent.toFixed(2)}
+            </div>
           </div>
 
           <div className="stat-card neon-card">
+            <div className="stat-topline">Rewards</div>
             <div className="stat-label">Cashback attuale</div>
             <div className="stat-value">{cashbackPercent}%</div>
           </div>
 
           <div className="stat-card neon-card">
+            <div className="stat-topline">Activity</div>
             <div className="stat-label">Transazioni</div>
             <div className="stat-value">{transactions.length}</div>
           </div>
@@ -289,7 +327,16 @@ export default function MembershipPage() {
       </div>
 
       <div className="panel neon-card">
-        <h2 className="panel-title">Il tuo percorso Membership</h2>
+        <div className="panel-header">
+          <div>
+            <h2 className="panel-title">Il tuo percorso Membership</h2>
+            <p className="panel-subtitle">
+              Tutti i livelli disponibili e lo stato del tuo avanzamento
+            </p>
+          </div>
+
+          <div className="mini-pill">Levels Map</div>
+        </div>
 
         <div className="levels-grid">
           {levels.map((level) => {
@@ -324,8 +371,8 @@ export default function MembershipPage() {
                   {isCurrent
                     ? "Questo è il tuo livello attuale."
                     : isCompleted
-                    ? "Livello già raggiunto."
-                    : "Livello ancora da raggiungere."}
+                      ? "Livello già raggiunto."
+                      : "Livello ancora da raggiungere."}
                 </div>
               </div>
             );
@@ -361,27 +408,82 @@ const membershipStyles = `
     z-index: 0;
   }
 
-  .page-title,
-  .page-subtitle,
+  .membership-hero,
   .top-grid,
   .panel,
-  .error-box {
+  .error-box,
+  .loading-shell {
     position: relative;
     z-index: 1;
   }
 
+  .membership-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
+  }
+
   .page-title {
-    font-size: 56px;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .page-subtitle {
-    color: #d6d3d1;
-    margin: 0 0 28px 0;
+    color: #b9c6e3;
+    margin: 0;
     font-size: 16px;
+    line-height: 1.6;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
   }
 
   .top-grid {
@@ -394,14 +496,17 @@ const membershipStyles = `
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 22px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -409,15 +514,15 @@ const membershipStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -425,15 +530,42 @@ const membershipStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .card-orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(18px);
+    pointer-events: none;
+    opacity: 0.72;
+  }
+
+  .orb-cyan {
+    top: -22px;
+    right: -18px;
+    width: 110px;
+    height: 110px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+  }
+
+  .orb-pink {
+    bottom: -34px;
+    left: -16px;
+    width: 118px;
+    height: 118px;
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
   }
 
   .hero-title,
   .hero-text,
   .progress-block,
   .badge,
+  .stat-topline,
   .stat-label,
   .stat-value,
   .panel-title,
+  .panel-subtitle,
   .levels-grid {
     position: relative;
     z-index: 1;
@@ -446,26 +578,28 @@ const membershipStyles = `
     border-radius: 999px;
     background: linear-gradient(
       90deg,
-      rgba(244, 114, 182, 0.95),
-      rgba(96, 165, 250, 0.95),
-      rgba(74, 222, 128, 0.95),
-      rgba(250, 204, 21, 0.95)
+      rgba(244, 114, 182, 0.96),
+      rgba(96, 165, 250, 0.96),
+      rgba(74, 222, 128, 0.96),
+      rgba(250, 204, 21, 0.96)
     );
     color: #111827;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 14px;
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.12);
+    box-shadow:
+      0 0 20px rgba(96, 165, 250, 0.12),
+      0 0 28px rgba(236, 72, 153, 0.08);
   }
 
   .hero-title {
     font-size: 32px;
     margin: 0 0 12px 0;
     line-height: 1.15;
-    color: #fff7ed;
+    color: #ffffff;
   }
 
   .hero-text {
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 16px;
     line-height: 1.7;
     margin: 0 0 22px 0;
@@ -473,9 +607,10 @@ const membershipStyles = `
 
   .progress-block {
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .progress-top {
@@ -484,7 +619,7 @@ const membershipStyles = `
     justify-content: space-between;
     gap: 12px;
     font-size: 14px;
-    color: #d6d3d1;
+    color: #dbe4f0;
     margin-bottom: 10px;
   }
 
@@ -507,11 +642,14 @@ const membershipStyles = `
       #4ade80 70%,
       #facc15 100%
     );
+    box-shadow:
+      0 0 18px rgba(96, 165, 250, 0.14),
+      0 0 22px rgba(244, 114, 182, 0.08);
   }
 
   .progress-note {
     margin: 0;
-    color: #f5f5f4;
+    color: #f4f7ff;
     font-size: 14px;
     line-height: 1.6;
   }
@@ -526,29 +664,75 @@ const membershipStyles = `
     min-width: 0;
   }
 
-  .stat-label {
-    color: #e7e5e4;
+  .stat-topline {
     margin-bottom: 10px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .stat-label {
+    color: #d8e2f4;
+    margin-bottom: 12px;
     font-size: 14px;
   }
 
   .stat-value {
     font-size: 34px;
-    font-weight: 700;
-    line-height: 1.1;
+    font-weight: 900;
+    line-height: 1.05;
     word-break: break-word;
-    color: #fffaf0;
+    color: #ffffff;
+  }
+
+  .smaller-value {
+    font-size: 30px;
   }
 
   .panel {
     overflow: hidden;
   }
 
+  .panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
   .panel-title {
-    margin: 0 0 20px 0;
+    margin: 0 0 6px 0;
     font-size: 28px;
-    line-height: 1.1;
-    color: #fff7ed;
+    line-height: 1.05;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .panel-subtitle {
+    margin: 0;
+    color: #b9c6e3;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .levels-grid {
@@ -562,7 +746,7 @@ const membershipStyles = `
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 18px;
     padding: 18px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .level-card.completed {
@@ -573,7 +757,9 @@ const membershipStyles = `
     border-color: rgba(96, 165, 250, 0.7);
     background:
       linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-    box-shadow: 0 0 20px rgba(96, 165, 250, 0.10);
+    box-shadow:
+      0 0 20px rgba(96, 165, 250, 0.10),
+      inset 0 1px 0 rgba(255,255,255,0.03);
   }
 
   .level-top {
@@ -588,7 +774,7 @@ const membershipStyles = `
     margin: 0;
     font-size: 22px;
     line-height: 1.1;
-    color: #fff7ed;
+    color: #ffffff;
   }
 
   .level-badge {
@@ -598,31 +784,57 @@ const membershipStyles = `
     background: #3b82f6;
     color: white;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     white-space: nowrap;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.18);
   }
 
   .level-threshold,
   .level-next {
     margin: 0 0 8px 0;
-    color: #d6d3d1;
+    color: #dbe4f0;
     font-size: 14px;
     line-height: 1.6;
   }
 
   .level-status {
     margin-top: 12px;
-    color: #a8a29e;
+    color: #99a8c7;
     font-size: 13px;
     line-height: 1.5;
   }
 
+  .loading-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+  }
+
+  .loading-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .loading-text {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    color: #dbe4f0;
+  }
+
   .error-box {
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   @media (max-width: 1024px) {
@@ -636,18 +848,27 @@ const membershipStyles = `
   }
 
   @media (max-width: 768px) {
+    .membership-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .page-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
     }
 
     .hero-title {
@@ -661,7 +882,7 @@ const membershipStyles = `
 
     .progress-block {
       padding: 16px;
-      border-radius: 14px;
+      border-radius: 16px;
     }
 
     .progress-top {
@@ -679,9 +900,19 @@ const membershipStyles = `
       font-size: 28px;
     }
 
+    .smaller-value {
+      font-size: 26px;
+    }
+
+    .panel-header {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
     .panel-title {
       font-size: 22px;
-      margin-bottom: 16px;
+      margin-bottom: 0;
     }
 
     .level-card {
@@ -702,7 +933,7 @@ const membershipStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .hero-title {
@@ -711,6 +942,10 @@ const membershipStyles = `
 
     .stat-value {
       font-size: 24px;
+    }
+
+    .smaller-value {
+      font-size: 22px;
     }
 
     .level-name {

@@ -208,16 +208,35 @@ export default function PartnerDemoPage() {
     <div className="partner-page">
       <style>{partnerDemoStyles}</style>
 
-      <div className="partner-container">
-        <h1 className="page-title">Partner Demo</h1>
-        <p className="page-subtitle">
-          Cerca il cliente tramite codice GUFO e simula un pagamento partner
-        </p>
+      <div className="partner-hero">
+        <div>
+          <div className="eyebrow">GUFO PARTNER CENTER</div>
+          <h1 className="page-title">Partner Demo</h1>
+          <p className="page-subtitle">
+            Cerca il cliente tramite codice GUFO e simula un pagamento partner
+          </p>
+        </div>
 
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Partner Flow Active
+        </div>
+      </div>
+
+      <div className="partner-container">
         <div className="main-card neon-card">
           <div className="form-grid">
             <form onSubmit={handleSearchCustomer} className="panel inner-panel">
-              <h2 className="panel-title">Cerca cliente</h2>
+              <div className="panel-head">
+                <div>
+                  <h2 className="panel-title">Cerca cliente</h2>
+                  <p className="panel-subtitle">
+                    Recupera dati wallet e membership dal codice GUFO
+                  </p>
+                </div>
+
+                <div className="mini-pill">Lookup</div>
+              </div>
 
               <div className="field-group">
                 <label className="field-label">Codice cliente</label>
@@ -286,7 +305,16 @@ export default function PartnerDemoPage() {
             </form>
 
             <form onSubmit={handlePayment} className="panel inner-panel">
-              <h2 className="panel-title">Registra pagamento</h2>
+              <div className="panel-head">
+                <div>
+                  <h2 className="panel-title">Registra pagamento</h2>
+                  <p className="panel-subtitle">
+                    Simula una transazione partner e il cashback GUFO
+                  </p>
+                </div>
+
+                <div className="mini-pill">Payment</div>
+              </div>
 
               <div className="field-group">
                 <label className="field-label">Merchant</label>
@@ -357,7 +385,16 @@ export default function PartnerDemoPage() {
 
           {result?.success && (
             <div className="info-box green-box result-box">
-              <h2 className="info-title green-title">Pagamento completato</h2>
+              <div className="result-head">
+                <div>
+                  <h2 className="info-title green-title">Pagamento completato</h2>
+                  <p className="panel-subtitle">
+                    La simulazione partner è stata registrata correttamente
+                  </p>
+                </div>
+
+                <div className="mini-pill">Success</div>
+              </div>
 
               <div className="info-grid">
                 <div className="mini-card">
@@ -369,9 +406,7 @@ export default function PartnerDemoPage() {
 
                 <div className="mini-card">
                   <p className="mini-label">ID transazione</p>
-                  <p className="mini-value">
-                    {getTransactionId(result) || "-"}
-                  </p>
+                  <p className="mini-value">{getTransactionId(result) || "-"}</p>
                 </div>
 
                 <div className="mini-card">
@@ -444,43 +479,101 @@ const partnerDemoStyles = `
     z-index: 0;
   }
 
+  .partner-hero,
   .partner-container,
   .error-box {
     position: relative;
     z-index: 1;
   }
 
-  .partner-container {
-    max-width: 1100px;
-    margin: 0 auto;
+  .partner-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #dbeafe;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.04),
+      0 0 18px rgba(56, 189, 248, 0.08);
   }
 
   .page-title {
-    margin: 0 0 10px 0;
-    font-size: 56px;
-    font-weight: 700;
-    line-height: 1.05;
-    color: #fff7ed;
+    margin: 0 0 8px 0;
+    font-size: 60px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(56, 189, 248, 0.16),
+      0 0 28px rgba(139, 92, 246, 0.10);
   }
 
   .page-subtitle {
-    margin: 0 0 28px 0;
+    margin: 0;
     max-width: 760px;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 16px;
-    line-height: 1.7;
+    line-height: 1.65;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+  }
+
+  .hero-badge-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #4ade80, #22c55e);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    flex-shrink: 0;
+  }
+
+  .partner-container {
+    max-width: 1150px;
+    margin: 0 auto;
   }
 
   .neon-card {
     position: relative;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
-    border-radius: 22px;
-    padding: 24px;
     overflow: hidden;
-    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 24px;
+    background:
+      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
+    border: 1px solid rgba(255,255,255,0.07);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 10px 35px rgba(0, 0, 0, 0.28),
+      0 16px 40px rgba(0, 0, 0, 0.30),
+      0 0 22px rgba(56, 189, 248, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -488,15 +581,15 @@ const partnerDemoStyles = `
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: 22px;
-    padding: 1.3px;
+    border-radius: 24px;
+    padding: 1.2px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.95),
-      rgba(56, 189, 248, 0.95),
-      rgba(34, 197, 94, 0.95),
-      rgba(250, 204, 21, 0.95),
-      rgba(168, 85, 247, 0.95)
+      rgba(236, 72, 153, 0.92),
+      rgba(56, 189, 248, 0.92),
+      rgba(34, 197, 94, 0.86),
+      rgba(250, 204, 21, 0.86),
+      rgba(168, 85, 247, 0.92)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -504,6 +597,7 @@ const partnerDemoStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+    opacity: 0.9;
   }
 
   .main-card > * {
@@ -520,15 +614,48 @@ const partnerDemoStyles = `
   .inner-panel {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    border-radius: 22px;
     padding: 22px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  }
+
+  .panel-head,
+  .result-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
   }
 
   .panel-title {
-    margin: 0 0 20px 0;
+    margin: 0 0 6px 0;
     font-size: 28px;
-    line-height: 1.1;
-    color: #fff7ed;
+    line-height: 1.05;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .panel-subtitle {
+    margin: 0;
+    color: #b9c6e3;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
   .field-group {
@@ -538,41 +665,49 @@ const partnerDemoStyles = `
   .field-label {
     display: block;
     margin-bottom: 8px;
-    color: #d6d3d1;
+    color: #b9c6e3;
     font-size: 14px;
   }
 
   .field-input {
     width: 100%;
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     padding: 14px 16px;
     color: white;
     outline: none;
     font-size: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .field-input::placeholder {
-    color: #a8a29e;
+    color: #99a8c7;
+  }
+
+  .field-input:focus {
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow:
+      0 0 0 1px rgba(56, 189, 248, 0.16),
+      0 0 18px rgba(56, 189, 248, 0.06);
   }
 
   .primary-button,
   .secondary-button {
     width: 100%;
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 14px 16px;
     color: white;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 15px;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   }
 
   .primary-button:hover,
   .secondary-button:hover {
-    opacity: 0.95;
+    opacity: 0.97;
     transform: translateY(-1px);
   }
 
@@ -581,25 +716,32 @@ const partnerDemoStyles = `
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
+    box-shadow: none;
   }
 
   .primary-button {
     background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%);
+    box-shadow:
+      0 12px 24px rgba(37, 99, 235, 0.18),
+      0 0 18px rgba(79, 70, 229, 0.10);
   }
 
   .secondary-button {
     background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
+    box-shadow:
+      0 12px 24px rgba(14, 165, 233, 0.18),
+      0 0 18px rgba(37, 99, 235, 0.10);
   }
 
   .helper-text {
     margin: 12px 0 0 0;
     font-size: 13px;
-    color: #a8a29e;
+    color: #99a8c7;
   }
 
   .preview-box {
     margin-bottom: 18px;
-    border-radius: 16px;
+    border-radius: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
     padding: 16px;
@@ -608,24 +750,29 @@ const partnerDemoStyles = `
   .preview-title {
     margin: 0 0 12px 0;
     font-size: 18px;
-    color: #f5f5f4;
+    font-weight: 800;
+    color: #ffffff;
   }
 
   .preview-list {
     display: grid;
     gap: 8px;
     font-size: 14px;
-    color: #d6d3d1;
+    color: #dbe4f0;
     word-break: break-word;
   }
 
+  .preview-list p {
+    margin: 0;
+  }
+
   .preview-list span {
-    color: #a8a29e;
+    color: #99a8c7;
   }
 
   .info-box {
     margin-top: 24px;
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 18px;
   }
 
@@ -644,9 +791,9 @@ const partnerDemoStyles = `
   }
 
   .info-title {
-    margin: 0 0 16px 0;
+    margin: 0 0 6px 0;
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.1;
   }
 
@@ -667,14 +814,14 @@ const partnerDemoStyles = `
   .mini-card {
     background: rgba(15, 23, 42, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 16px;
     min-width: 0;
   }
 
   .mini-label {
     margin: 0 0 8px 0;
-    color: #a8a29e;
+    color: #99a8c7;
     font-size: 13px;
   }
 
@@ -682,7 +829,7 @@ const partnerDemoStyles = `
     margin: 0;
     color: white;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: 800;
     line-height: 1.4;
     word-break: break-word;
   }
@@ -690,10 +837,10 @@ const partnerDemoStyles = `
   .error-box {
     margin-top: 24px;
     border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.1);
+    background: rgba(239, 68, 68, 0.10);
     color: #fca5a5;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 16px 18px;
+    border-radius: 18px;
   }
 
   @media (max-width: 1024px) {
@@ -703,28 +850,44 @@ const partnerDemoStyles = `
   }
 
   @media (max-width: 768px) {
+    .partner-hero {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
     .page-title {
-      font-size: 38px;
+      font-size: 40px;
     }
 
     .page-subtitle {
       font-size: 14px;
-      margin-bottom: 20px;
     }
 
     .neon-card {
       padding: 18px 14px;
-      border-radius: 18px;
+      border-radius: 20px;
+    }
+
+    .neon-card::before {
+      border-radius: 20px;
     }
 
     .inner-panel {
       padding: 18px 14px;
-      border-radius: 16px;
+      border-radius: 18px;
+    }
+
+    .panel-head,
+    .result-head {
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 16px;
     }
 
     .panel-title {
       font-size: 22px;
-      margin-bottom: 16px;
+      margin-bottom: 0;
     }
 
     .field-group {
@@ -734,12 +897,11 @@ const partnerDemoStyles = `
     .info-box {
       margin-top: 18px;
       padding: 16px 14px;
-      border-radius: 16px;
+      border-radius: 18px;
     }
 
     .info-title {
       font-size: 20px;
-      margin-bottom: 14px;
     }
 
     .info-grid {
@@ -749,7 +911,7 @@ const partnerDemoStyles = `
 
     .mini-card {
       padding: 14px;
-      border-radius: 14px;
+      border-radius: 16px;
     }
 
     .mini-value {
@@ -759,7 +921,7 @@ const partnerDemoStyles = `
 
   @media (max-width: 480px) {
     .page-title {
-      font-size: 30px;
+      font-size: 32px;
     }
 
     .panel-title {
