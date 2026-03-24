@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "./components/Sidebar";
+import LayoutShell from "./components/LayoutShell";
 
 export const metadata: Metadata = {
   title: "GUFO Dashboard",
@@ -15,11 +15,7 @@ export default function RootLayout({
   return (
     <html lang="it">
       <body className="gufo-body">
-        <Sidebar />
-
-        <div className="app-shell">
-          <main className="app-main">{children}</main>
-        </div>
+        <LayoutShell>{children}</LayoutShell>
 
         <style>{`
           * {
@@ -46,8 +42,15 @@ export default function RootLayout({
 
           .app-shell {
             min-height: 100vh;
-            padding-left: 280px;
             transition: padding-left 0.25s ease;
+          }
+
+          .app-shell.with-sidebar {
+            padding-left: 280px;
+          }
+
+          .app-shell.no-sidebar {
+            padding-left: 0;
           }
 
           .app-main {
@@ -55,19 +58,32 @@ export default function RootLayout({
             padding: 24px;
           }
 
+          .app-main.public-page {
+            padding: 0;
+          }
+
           @media (max-width: 1024px) {
-            .app-shell {
+            .app-shell.with-sidebar,
+            .app-shell.no-sidebar {
               padding-left: 0;
             }
 
             .app-main {
               padding: 78px 16px 20px;
             }
+
+            .app-main.public-page {
+              padding: 0;
+            }
           }
 
           @media (max-width: 480px) {
             .app-main {
               padding: 74px 14px 18px;
+            }
+
+            .app-main.public-page {
+              padding: 0;
             }
           }
         `}</style>
