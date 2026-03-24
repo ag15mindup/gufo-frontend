@@ -255,7 +255,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="loading-shell neon-card">
+        <div className="loading-shell gufo-surface">
           <div className="loading-glow" />
           <p className="loading-text">Connessione ai dati in corso...</p>
         </div>
@@ -303,7 +303,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="top-grid">
-        <div className="profile-card neon-card">
+        <div className="profile-card gufo-surface">
           <div className="card-orb orb-cyan" />
           <div className="card-orb orb-pink" />
 
@@ -337,7 +337,7 @@ export default function DashboardPage() {
 
         <div className="stats-area">
           <div className="stats-grid">
-            <div className="stat-card neon-card">
+            <div className="stat-card gufo-surface">
               <div className="stat-topline">Wallet</div>
               <div className="stat-label">Saldo GUFO</div>
               <div className="stat-value">
@@ -345,7 +345,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="stat-card neon-card">
+            <div className="stat-card gufo-surface">
               <div className="stat-topline">Rewards</div>
               <div className="stat-label">GUFO guadagnati</div>
               <div className="stat-value">
@@ -353,7 +353,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="stat-card neon-card">
+            <div className="stat-card gufo-surface">
               <div className="stat-topline">Season</div>
               <div className="stat-label">Spesa stagione</div>
               <div className="stat-value smaller-value">
@@ -361,14 +361,14 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="stat-card neon-card">
+            <div className="stat-card gufo-surface">
               <div className="stat-topline">Membership</div>
               <div className="stat-label">Cashback attuale</div>
               <div className="stat-value">{dashboardData.cashbackPercent}%</div>
             </div>
           </div>
 
-          <div className="chart-panel neon-card">
+          <div className="chart-panel gufo-surface">
             <div className="panel-header">
               <div>
                 <h2 className="section-title">Andamento spese</h2>
@@ -400,7 +400,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="transactions-panel neon-card">
+      <div className="transactions-panel gufo-surface">
         <div className="panel-header">
           <div>
             <h2 className="section-title">Transazioni recenti</h2>
@@ -501,10 +501,6 @@ export default function DashboardPage() {
 }
 
 const dashboardStyles = `
-  * {
-    box-sizing: border-box;
-  }
-
   .dashboard-page {
     width: 100%;
     min-height: 100%;
@@ -514,14 +510,14 @@ const dashboardStyles = `
 
   .dashboard-page::before {
     content: "";
-    position: fixed;
+    position: absolute;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 85% 15%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 20% 85%, rgba(34, 197, 94, 0.07), transparent 18%),
-      radial-gradient(circle at 82% 82%, rgba(250, 204, 21, 0.07), transparent 18%);
+      radial-gradient(circle at 12% 12%, rgba(56, 189, 248, 0.08), transparent 18%),
+      radial-gradient(circle at 88% 10%, rgba(236, 72, 153, 0.07), transparent 18%),
+      radial-gradient(circle at 18% 88%, rgba(34, 197, 94, 0.05), transparent 16%),
+      radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.05), transparent 16%);
     z-index: 0;
   }
 
@@ -556,7 +552,7 @@ const dashboardStyles = `
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
+      0 0 18px rgba(56, 189, 248, 0.06);
   }
 
   .dashboard-title {
@@ -567,8 +563,8 @@ const dashboardStyles = `
     letter-spacing: -0.04em;
     color: #ffffff;
     text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
+      0 0 18px rgba(56, 189, 248, 0.14),
+      0 0 28px rgba(139, 92, 246, 0.08);
   }
 
   .dashboard-subtitle {
@@ -592,7 +588,7 @@ const dashboardStyles = `
     color: #eef2ff;
     font-size: 13px;
     font-weight: 700;
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
+    box-shadow: 0 0 18px rgba(56, 189, 248, 0.05);
   }
 
   .hero-badge-dot {
@@ -600,7 +596,7 @@ const dashboardStyles = `
     height: 9px;
     border-radius: 999px;
     background: linear-gradient(180deg, #4ade80, #22c55e);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
     flex-shrink: 0;
   }
 
@@ -623,35 +619,35 @@ const dashboardStyles = `
     margin-bottom: 20px;
   }
 
-  .neon-card {
+  .gufo-surface {
     position: relative;
     overflow: hidden;
     border-radius: 24px;
     padding: 22px;
     background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
+      linear-gradient(180deg, rgba(10, 18, 36, 0.58), rgba(8, 15, 30, 0.70));
+    border: 1px solid rgba(255,255,255,0.08);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
     box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
+      0 16px 40px rgba(0, 0, 0, 0.24),
+      0 0 18px rgba(56, 189, 248, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .neon-card::before {
+  .gufo-surface::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: 24px;
-    padding: 1.2px;
+    padding: 1px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
+      rgba(56, 189, 248, 0.60),
+      rgba(139, 92, 246, 0.55),
+      rgba(236, 72, 153, 0.50),
+      rgba(250, 204, 21, 0.40),
+      rgba(34, 197, 94, 0.40)
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -659,7 +655,7 @@ const dashboardStyles = `
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0.7;
   }
 
   .card-orb {
@@ -667,7 +663,7 @@ const dashboardStyles = `
     border-radius: 999px;
     filter: blur(18px);
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.6;
   }
 
   .orb-cyan {
@@ -675,7 +671,7 @@ const dashboardStyles = `
     right: -15px;
     width: 110px;
     height: 110px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
   }
 
   .orb-pink {
@@ -683,7 +679,7 @@ const dashboardStyles = `
     left: -20px;
     width: 120px;
     height: 120px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.13), transparent 72%);
   }
 
   .profile-card {
@@ -719,8 +715,8 @@ const dashboardStyles = `
       #facc15 100%
     );
     box-shadow:
-      0 0 22px rgba(96, 165, 250, 0.20),
-      0 0 28px rgba(236, 72, 153, 0.10);
+      0 0 22px rgba(96, 165, 250, 0.16),
+      0 0 24px rgba(236, 72, 153, 0.08);
     flex-shrink: 0;
   }
 
@@ -786,14 +782,14 @@ const dashboardStyles = `
     color: #111827;
     background: linear-gradient(
       90deg,
-      rgba(244, 114, 182, 0.96),
-      rgba(96, 165, 250, 0.96),
-      rgba(74, 222, 128, 0.96),
-      rgba(250, 204, 21, 0.96)
+      rgba(244, 114, 182, 0.95),
+      rgba(96, 165, 250, 0.95),
+      rgba(74, 222, 128, 0.95),
+      rgba(250, 204, 21, 0.95)
     );
     box-shadow:
-      0 0 20px rgba(250, 204, 21, 0.12),
-      0 0 30px rgba(56, 189, 248, 0.10);
+      0 0 18px rgba(250, 204, 21, 0.10),
+      0 0 26px rgba(56, 189, 248, 0.08);
     position: relative;
     z-index: 1;
   }
@@ -827,7 +823,7 @@ const dashboardStyles = `
     letter-spacing: -0.04em;
     color: #ffffff;
     word-break: break-word;
-    text-shadow: 0 0 16px rgba(56, 189, 248, 0.10);
+    text-shadow: 0 0 14px rgba(56, 189, 248, 0.08);
   }
 
   .smaller-value {
@@ -908,7 +904,7 @@ const dashboardStyles = `
     display: flex;
     align-items: end;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.025);
     border: 1px solid rgba(255, 255, 255, 0.06);
   }
 
@@ -926,8 +922,8 @@ const dashboardStyles = `
       #facc15 100%
     );
     box-shadow:
-      0 0 16px rgba(56, 189, 248, 0.16),
-      0 0 24px rgba(236, 72, 153, 0.10);
+      0 0 14px rgba(56, 189, 248, 0.12),
+      0 0 20px rgba(236, 72, 153, 0.08);
   }
 
   .chart-label {
@@ -978,7 +974,7 @@ const dashboardStyles = `
     border-radius: 22px;
     padding: 36px 18px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.025);
     border: 1px dashed rgba(255, 255, 255, 0.10);
   }
 
@@ -1013,7 +1009,7 @@ const dashboardStyles = `
     width: 180px;
     height: 180px;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.14), transparent 70%);
     filter: blur(20px);
     pointer-events: none;
   }
@@ -1109,12 +1105,12 @@ const dashboardStyles = `
       margin-bottom: 16px;
     }
 
-    .neon-card {
+    .gufo-surface {
       padding: 18px 14px;
       border-radius: 20px;
     }
 
-    .neon-card::before {
+    .gufo-surface::before {
       border-radius: 20px;
     }
 

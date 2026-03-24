@@ -39,13 +39,20 @@ export default function Sidebar() {
         onClick={() => setOpen(true)}
         className="sidebar-toggle"
         aria-label="Apri menu"
+        type="button"
       >
         <span />
         <span />
         <span />
       </button>
 
-      {open && <div className="sidebar-overlay" onClick={() => setOpen(false)} />}
+      {open && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+      )}
 
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <div className="sidebar-inner">
@@ -65,6 +72,7 @@ export default function Sidebar() {
               onClick={() => setOpen(false)}
               className="sidebar-close"
               aria-label="Chiudi menu"
+              type="button"
             >
               ✕
             </button>
@@ -100,7 +108,11 @@ export default function Sidebar() {
               </div>
             </div>
 
-            <button onClick={handleLogout} className="logout-button">
+            <button
+              onClick={handleLogout}
+              className="logout-button"
+              type="button"
+            >
               Logout
             </button>
           </div>
@@ -111,10 +123,6 @@ export default function Sidebar() {
 }
 
 const sidebarStyles = `
-  * {
-    box-sizing: border-box;
-  }
-
   .sidebar-toggle {
     position: fixed;
     top: 16px;
@@ -125,11 +133,13 @@ const sidebarStyles = `
     border: none;
     border-radius: 18px;
     background:
-      linear-gradient(180deg, rgba(9, 15, 29, 0.95), rgba(15, 23, 42, 0.92));
+      linear-gradient(180deg, rgba(9, 15, 29, 0.86), rgba(15, 23, 42, 0.82));
     box-shadow:
       0 16px 34px rgba(0, 0, 0, 0.34),
       0 0 18px rgba(56, 189, 248, 0.10),
       inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -174,9 +184,9 @@ const sidebarStyles = `
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(2, 6, 23, 0.72);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(2, 6, 23, 0.50);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     z-index: 1190;
   }
 
@@ -189,11 +199,11 @@ const sidebarStyles = `
     z-index: 1200;
     overflow: hidden;
     background:
-      linear-gradient(180deg, rgba(8, 12, 24, 0.84), rgba(15, 23, 42, 0.82));
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+      linear-gradient(180deg, rgba(8, 12, 24, 0.62), rgba(15, 23, 42, 0.58));
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
     box-shadow:
-      18px 0 44px rgba(0, 0, 0, 0.34),
+      18px 0 44px rgba(0, 0, 0, 0.28),
       0 0 30px rgba(56, 189, 248, 0.05),
       inset -1px 0 0 rgba(255,255,255,0.05);
   }
@@ -225,9 +235,9 @@ const sidebarStyles = `
     position: absolute;
     inset: 0;
     background:
-      radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.12), transparent 24%),
-      radial-gradient(circle at 90% 15%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 30% 100%, rgba(139, 92, 246, 0.10), transparent 28%);
+      radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 90% 15%, rgba(236, 72, 153, 0.08), transparent 22%),
+      radial-gradient(circle at 30% 100%, rgba(139, 92, 246, 0.08), transparent 28%);
     pointer-events: none;
   }
 
