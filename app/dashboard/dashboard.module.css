@@ -3,13 +3,13 @@
   min-height: 100vh;
   padding: 32px;
   color: #ffffff;
-  background:
-    linear-gradient(rgba(4, 10, 28, 0.62), rgba(4, 10, 28, 0.72)),
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.56)),
     url("/dashboard-space.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  overflow: hidden;
 }
 
 .bgOverlay {
