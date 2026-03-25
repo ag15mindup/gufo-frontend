@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
-import { createClient } from "@/lib/supabase/client";
+import { useEffect, useMemo, useState } from "react";
 import styles from "./wallet.module.css";
+import { createClient } from "@/lib/supabase/client";
+import { safeJsonFetch } from "@/lib/api";
 
 const supabase = createClient();
 
@@ -18,7 +18,6 @@ type WalletData = {
   totalTransactions: number;
   totalGufoEarned: number;
   transactions: Transaction[];
-  lastSeasonReset: string;
 };
 
 const API_URL =
@@ -29,31 +28,21 @@ function toNumberSafe(value: unknown) {
   return Number.isFinite(n) ? n : 0;
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("it-IT");
+function formatLevel(level?: string) {
+  if (!level) return "Basic";
+  return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
 
 function getTransactionAmount(tx: any) {
-  return toNumberSafe(
-    tx?.amount_euro ?? tx?.amount ?? tx?.importo ?? tx?.raw?.amount_euro
-  );
-}
-
-function getTransactionMerchant(tx: any) {
-  return (
-    tx?.merchant_name ??
-    tx?.benefit ??
-    tx?.merchant ??
-    tx?.raw?.merchant_name ??
-    "-"
-  );
+  return toNumberSafe(tx?.amount_euro ?? tx?.amount ?? tx?.importo);
 }
 
 function getTransactionGufo(tx: any) {
-  return toNumberSafe(tx?.gufo_earned ?? tx?.gufo ?? tx?.raw?.gufo);
+  return toNumberSafe(tx?.gufo_earned ?? tx?.gufo);
+}
+
+function getTransactionMerchant(tx: any) {
+  return tx?.merchant_name ?? tx?.merchant ?? "Partner GUFO";
 }
 
 export default function WalletPage() {
@@ -66,11 +55,10 @@ export default function WalletPage() {
     totalTransactions: 0,
     totalGufoEarned: 0,
     transactions: [],
-    lastSeasonReset: "",
   });
 
-  const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("GUFO User");
+  const [userEmail, setUserEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -83,8 +71,8 @@ export default function WalletPage() {
 
         if (!user) throw new Error("Utente non autenticato");
 
-        setUserEmail(user.email || "");
         setUserName(user.email?.split("@")[0] || "GUFO User");
+        setUserEmail(user.email || "");
 
         const [walletRes, txRes] = await Promise.all([
           safeJsonFetch(`${API_URL}/wallet/${user.id}`),
@@ -108,7 +96,6 @@ export default function WalletPage() {
           totalTransactions: transactions.length,
           totalGufoEarned: totalGufo,
           transactions,
-          lastSeasonReset: wallet.last_season_reset || "",
         });
       } catch (err: any) {
         setError(err.message);
@@ -120,8 +107,12 @@ export default function WalletPage() {
     load();
   }, []);
 
+  const recentTransactions = useMemo(() => {
+    return walletData.transactions.slice(0, 8);
+  }, [walletData.transactions]);
+
   if (loading) {
-    return <div className={styles.page}>Loading...</div>;
+    return <div className={styles.page}>Loading wallet...</div>;
   }
 
   if (error) {
@@ -134,95 +125,78 @@ export default function WalletPage() {
       {/* HERO */}
       <div className={styles.hero}>
         <div>
-          <h1 className={styles.title}>{userName}</h1>
-          <p className={styles.subtitle}>{userEmail}</p>
+          <p className={styles.welcome}>Welcome back!</p>
+          <h1 className={styles.userName}>{userName}</h1>
+          <p className={styles.email}>{userEmail}</p>
         </div>
 
-        <div className={`${styles.card} ${styles.balance}`}>
-          <span>Balance</span>
-          <h2>{walletData.balanceGufo.toFixed(2)} GUFO</h2>
+        <div className={styles.balanceCard}>
+          <span className={styles.balanceLabel}>Balance</span>
+          <h2 className={styles.balanceValue}>
+            {walletData.balanceGufo.toFixed(2)} GUFO
+          </h2>
         </div>
       </div>
 
       {/* STATS */}
-      <div className={styles.stats}>
-        <div className={styles.card}>
-          <h3>{walletData.totalTransactions}</h3>
-          <p>Transactions</p>
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>
+            {walletData.totalTransactions}
+          </div>
+          <div className={styles.statLabel}>Transactions</div>
         </div>
 
-        <div className={styles.card}>
-          <h3>{walletData.level}</h3>
-          <p>Level</p>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>
+            {formatLevel(walletData.level)}
+          </div>
+          <div className={styles.statLabel}>Level</div>
         </div>
 
-        <div className={styles.card}>
-          <h3>{walletData.cashbackPercent}%</h3>
-          <p>Cashback</p>
+        <div className={styles.statCard}>
+          <div className={styles.statValue}>
+            {walletData.cashbackPercent}%
+          </div>
+          <div className={styles.statLabel}>Cashback</div>
         </div>
       </div>
 
       {/* GRID */}
-      <div className={styles.grid}>
-        
-        {/* DESKTOP TABLE */}
-        <div className={`${styles.card} ${styles.desktop}`}>
-          <h2>Transactions</h2>
+      <div className={styles.bottomGrid}>
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h3>Recent Transactions</h3>
+          </div>
 
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Partner</th>
-                <th>Data</th>
-                <th>Importo</th>
-                <th>GUFO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {walletData.transactions.slice(0, 8).map((tx, i) => (
-                <tr key={i}>
-                  <td>{getTransactionMerchant(tx)}</td>
-                  <td>{formatDate(tx.created_at)}</td>
-                  <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
-                  <td>{getTransactionGufo(tx).toFixed(2)}</td>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Partner</th>
+                  <th>Importo</th>
+                  <th>GUFO</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {recentTransactions.map((tx, i) => (
+                  <tr key={i}>
+                    <td>{getTransactionMerchant(tx)}</td>
+                    <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
+                    <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
-        {/* MOBILE CARDS */}
-        <div className={`${styles.card} ${styles.mobile}`}>
-          <h2>Transactions</h2>
-
-          {walletData.transactions.slice(0, 8).map((tx, i) => (
-            <div key={i} className={styles.txCard}>
-              <div className={styles.txTop}>
-                <strong>{getTransactionMerchant(tx)}</strong>
-                <span>{getTransactionGufo(tx).toFixed(2)} GUFO</span>
-              </div>
-
-              <div className={styles.txRow}>
-                <span>Importo</span>
-                <span>€ {getTransactionAmount(tx).toFixed(2)}</span>
-              </div>
-
-              <div className={styles.txRow}>
-                <span>Data</span>
-                <span>{formatDate(tx.created_at)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* INFO */}
-        <div className={styles.card}>
-          <h2>Info</h2>
-          <p>GUFO earned: {walletData.totalGufoEarned}</p>
-          <p>Season spent: € {walletData.seasonSpent}</p>
-          <p>Balance EUR: € {walletData.balanceEuro}</p>
-        </div>
-
+        <aside className={styles.panel}>
+          <h3>Wallet Info</h3>
+          <p>GUFO: {walletData.totalGufoEarned}</p>
+          <p>Season: € {walletData.seasonSpent}</p>
+          <p>EUR: € {walletData.balanceEuro}</p>
+        </aside>
       </div>
     </div>
   );

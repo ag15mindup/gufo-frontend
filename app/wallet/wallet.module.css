@@ -1,99 +1,152 @@
 .page {
-  color: white;
+  position: relative;
+  min-height: 100vh;
+  padding: 32px;
+  color: #ffffff;
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.56)),
+    url("/dashboard-space.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 15% 80%, rgba(0, 255, 255, 0.22), transparent 22%),
+    radial-gradient(circle at 85% 76%, rgba(255, 90, 0, 0.18), transparent 24%),
+    radial-gradient(circle at 60% 18%, rgba(0, 120, 255, 0.18), transparent 22%),
+    radial-gradient(circle at 30% 55%, rgba(140, 0, 255, 0.12), transparent 24%);
+  z-index: 0;
+}
+
+.rainbowLine {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #00c6ff,
+    #00f5a0,
+    #ffe66d,
+    #ff7b7b,
+    #b388ff,
+    #6ea8ff
+  );
+  box-shadow: 0 0 20px rgba(255,255,255,0.3);
+  z-index: 1;
+}
+
+.hero,
+.statsGrid,
+.bottomGrid {
+  position: relative;
+  z-index: 2;
 }
 
 .hero {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1.4fr 0.8fr;
+  gap: 24px;
+  margin-top: 34px;
+  margin-bottom: 28px;
 }
 
-.title {
-  font-size: 42px;
-  font-weight: 900;
+.welcome {
+  font-size: 18px;
+  opacity: 0.9;
 }
 
-.subtitle {
-  color: #94a3b8;
+.userName {
+  font-size: 48px;
+  font-weight: 700;
 }
 
-.card {
-  background: rgba(20,20,40,0.35);
+.email {
+  opacity: 0.7;
+}
+
+.balanceCard,
+.statCard,
+.panel {
   backdrop-filter: blur(14px);
+  background: rgba(8, 18, 52, 0.6);
+  border: 1px solid rgba(110,170,255,0.4);
   border-radius: 20px;
   padding: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
 }
 
-.balance h2 {
-  font-size: 36px;
+.balanceValue {
+  font-size: 42px;
 }
 
-.stats {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.grid {
+.statsGrid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: repeat(3,1fr);
+  gap: 16px;
+}
+
+.statCard {
+  min-height: 120px;
+}
+
+.statValue {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.statLabel {
+  opacity: 0.8;
+}
+
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr;
   gap: 20px;
 }
 
-/* TABLE */
+.panel {
+  padding: 20px;
+}
+
 .table {
   width: 100%;
 }
 
 .table th,
 .table td {
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-/* MOBILE */
-.mobile {
-  display: none;
+@media (max-width: 1100px) {
+  .hero,
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
-.txCard {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.txTop {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.txRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .hero {
-    flex-direction: column;
-    gap: 16px;
+@media (max-width: 820px) {
+  .page {
+    padding: 20px;
   }
 
-  .stats {
-    flex-direction: column;
-  }
-
-  .grid {
+  .statsGrid {
     grid-template-columns: 1fr;
   }
 
-  .desktop {
-    display: none;
+  .userName {
+    font-size: 36px;
   }
 
-  .mobile {
-    display: block;
+  .balanceValue {
+    font-size: 30px;
   }
 }
