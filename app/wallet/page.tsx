@@ -76,10 +76,7 @@ function getTransactionAmount(tx: any) {
 
 function getTransactionGufo(tx: any) {
   const direct = toNumberSafe(
-    tx?.gufo_earned ??
-      tx?.gufo ??
-      tx?.raw?.gufo_earned ??
-      tx?.raw?.gufo
+    tx?.gufo_earned ?? tx?.gufo ?? tx?.raw?.gufo_earned ?? tx?.raw?.gufo
   );
 
   if (direct > 0) return direct;
@@ -126,11 +123,9 @@ function getTransactionCashback(tx: any) {
 
 function formatDate(value?: string | null) {
   if (!value) return "-";
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-
-  return date.toLocaleString("it-IT");
+  return date.toLocaleDateString("it-IT");
 }
 
 function extractWallet(payload: any): WalletResponse {
@@ -160,6 +155,8 @@ export default function WalletPage() {
     lastSeasonReset: "",
   });
 
+  const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("GUFO User");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -182,6 +179,17 @@ export default function WalletPage() {
 
         if (!user) {
           throw new Error("Utente non autenticato");
+        }
+
+        const fallbackName =
+          user.user_metadata?.username ||
+          user.user_metadata?.full_name ||
+          user.email?.split("@")[0] ||
+          "GUFO User";
+
+        if (isMounted) {
+          setUserEmail(user.email || "");
+          setUserName(fallbackName);
         }
 
         const [walletRes, transactionsRes] = await Promise.all([
@@ -271,22 +279,23 @@ export default function WalletPage() {
 
   if (loading) {
     return (
-      <div className="wallet-page">
+      <div className="wallet-premium-page">
         <style>{walletStyles}</style>
 
-        <div className="wallet-hero">
-          <div>
-            <div className="eyebrow">GUFO WALLET CENTER</div>
-            <h1 className="wallet-title">Wallet</h1>
-            <p className="wallet-subtitle">
-              Caricamento saldo, cashback e movimenti...
+        <div className="hero-line" />
+
+        <div className="wallet-premium-hero">
+          <div className="hero-left">
+            <div className="hero-eyebrow">GUFO WALLET</div>
+            <h1 className="hero-title">Wallet</h1>
+            <p className="hero-subtitle">
+              Connessione al saldo, cashback e movimenti in corso...
             </p>
           </div>
         </div>
 
-        <div className="loading-shell neon-card">
-          <div className="loading-glow" />
-          <p className="loading-text">Connessione al wallet in corso...</p>
+        <div className="loading-box premium-card">
+          <p>Caricamento wallet premium...</p>
         </div>
       </div>
     );
@@ -294,14 +303,16 @@ export default function WalletPage() {
 
   if (error) {
     return (
-      <div className="wallet-page">
+      <div className="wallet-premium-page">
         <style>{walletStyles}</style>
 
-        <div className="wallet-hero">
-          <div>
-            <div className="eyebrow">GUFO WALLET CENTER</div>
-            <h1 className="wallet-title">Wallet</h1>
-            <p className="wallet-subtitle">Si è verificato un problema.</p>
+        <div className="hero-line" />
+
+        <div className="wallet-premium-hero">
+          <div className="hero-left">
+            <div className="hero-eyebrow">GUFO WALLET</div>
+            <h1 className="hero-title">Wallet</h1>
+            <p className="hero-subtitle">Si è verificato un problema.</p>
           </div>
         </div>
 
@@ -311,209 +322,179 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="wallet-page">
+    <div className="wallet-premium-page">
       <style>{walletStyles}</style>
 
-      <div className="wallet-hero">
-        <div>
-          <div className="eyebrow">GUFO WALLET CENTER</div>
-          <h1 className="wallet-title">Wallet</h1>
-          <p className="wallet-subtitle">
-            Panoramica saldo, cashback, stagione e movimenti
-          </p>
+      <div className="hero-line" />
+
+      <div className="wallet-premium-hero">
+        <div className="hero-left">
+          <div className="hero-eyebrow">Welcome back!</div>
+          <h1 className="hero-title">{userName}</h1>
+          <p className="hero-subtitle">{userEmail || "Profilo wallet attivo"}</p>
         </div>
 
-        <div className="hero-badge">
-          <span className="hero-badge-dot" />
-          Active Wallet
-        </div>
-      </div>
+        <div className="balance-card premium-card">
+          <div className="balance-label">Balance</div>
+          <div className="balance-value">{walletData.balanceGufo.toFixed(2)} GUFO</div>
 
-      <div className="top-stats-grid">
-        <div className="big-stat-card neon-card">
-          <div className="card-orb orb-cyan" />
-          <div className="big-stat-topline">GUFO Balance</div>
-          <div className="big-stat-label">Saldo GUFO</div>
-          <div className="big-stat-value gufo-mark">
-            G {walletData.balanceGufo.toFixed(2)}
-          </div>
-        </div>
-
-        <div className="big-stat-card neon-card">
-          <div className="card-orb orb-pink" />
-          <div className="big-stat-topline">EUR Balance</div>
-          <div className="big-stat-label">Saldo Euro</div>
-          <div className="big-stat-value">
-            € {walletData.balanceEuro.toFixed(2)}
-          </div>
-        </div>
-
-        <div className="big-stat-card neon-card">
-          <div className="big-stat-topline">Season</div>
-          <div className="big-stat-label">Spesa stagione</div>
-          <div className="big-stat-value">
-            € {walletData.seasonSpent.toFixed(2)}
-          </div>
-        </div>
-
-        <div className="big-stat-card neon-card">
-          <div className="big-stat-topline">Cashback</div>
-          <div className="big-stat-label">Cashback attuale</div>
-          <div className="big-stat-value">{walletData.cashbackPercent}%</div>
-        </div>
-
-        <div className="big-stat-card neon-card">
-          <div className="big-stat-topline">Membership</div>
-          <div className="big-stat-label">Livello</div>
-          <div className="big-stat-value">{formatLevel(walletData.level)}</div>
-        </div>
-
-        <div className="big-stat-card neon-card">
-          <div className="big-stat-topline">Rewards</div>
-          <div className="big-stat-label">GUFO guadagnati</div>
-          <div className="big-stat-value">
-            {walletData.totalGufoEarned.toFixed(2)}
+          <div className="balance-actions">
+            <button className="action-btn action-btn-secondary" type="button">
+              + Deposit
+            </button>
+            <button className="action-btn action-btn-primary" type="button">
+              + Withdraw
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="panel neon-card">
-        <div className="panel-header">
-          <div>
-            <h2 className="panel-title">Riepilogo Wallet</h2>
-            <p className="panel-subtitle">
-              Stato attuale del wallet e della stagione attiva
-            </p>
-          </div>
-
-          <div className="mini-pill">Overview</div>
+      <div className="stats-row">
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">{walletData.totalTransactions}</div>
+          <div className="mini-stat-label">Active Transactions</div>
+          <div className="mini-stat-side">Live</div>
         </div>
 
-        <div className="summary-grid">
-          <div className="summary-card">
-            <div className="summary-label">Transazioni</div>
-            <div className="summary-value">{walletData.totalTransactions}</div>
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">{formatLevel(walletData.level)}</div>
+          <div className="mini-stat-label">Membership Level</div>
+          <div className="mini-stat-side">User tier</div>
+        </div>
+
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">{walletData.cashbackPercent}%</div>
+          <div className="mini-stat-label">Cashback Rate</div>
+          <div className="mini-stat-side">Current</div>
+        </div>
+      </div>
+
+      <div className="content-grid">
+        <div className="left-column premium-card">
+          <div className="section-header">
+            <h2 className="section-title">Recent Transactions</h2>
+            <span className="section-link">View All</span>
           </div>
 
-          <div className="summary-card">
-            <div className="summary-label">Livello attuale</div>
-            <div className="summary-value">{formatLevel(walletData.level)}</div>
-          </div>
-
-          <div className="summary-card">
-            <div className="summary-label">Cashback</div>
-            <div className="summary-value">{walletData.cashbackPercent}%</div>
-          </div>
-
-          <div className="summary-card">
-            <div className="summary-label">Ultimo reset stagionale</div>
-            <div className="summary-value small">
-              {walletData.lastSeasonReset
-                ? formatDate(walletData.lastSeasonReset)
-                : "Nessuno"}
+          {walletData.transactions.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-title">Nessuna transazione disponibile</div>
+              <div className="empty-text">
+                Quando riceverai cashback o guadagni GUFO, li vedrai qui.
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="panel neon-card">
-        <div className="panel-header">
-          <div>
-            <h2 className="panel-title">Storico transazioni</h2>
-            <p className="panel-subtitle">
-              Elenco completo dei movimenti del wallet
-            </p>
-          </div>
-
-          <div className="mini-pill">{walletData.transactions.length} movimenti</div>
-        </div>
-
-        {walletData.transactions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">◎</div>
-            <p className="empty-title">Nessuna transazione disponibile</p>
-            <p className="empty-text">
-              Quando riceverai cashback o guadagni GUFO, li vedrai in questo elenco.
-            </p>
-            <div className="empty-pill">Wallet pronto per i prossimi movimenti</div>
-          </div>
-        ) : (
-          <>
-            <div className="table-wrap desktop-only">
-              <table className="transactions-table">
-                <thead>
-                  <tr>
-                    <th>Tipo</th>
-                    <th>Merchant</th>
-                    <th>Importo</th>
-                    <th>GUFO</th>
-                    <th>Cashback</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {walletData.transactions.map((tx, index) => (
-                    <tr key={tx.id || tx.transaction_id || index}>
-                      <td>{getTransactionType(tx)}</td>
-                      <td>{getTransactionMerchant(tx)}</td>
-                      <td className="amount-green">
-                        €{getTransactionAmount(tx).toFixed(2)}
-                      </td>
-                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
-                      <td>{getTransactionCashback(tx).toFixed(2)}%</td>
-                      <td>{formatDate(tx.created_at)}</td>
+          ) : (
+            <>
+              <div className="table-wrap desktop-only">
+                <table className="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>Partner</th>
+                      <th>Data</th>
+                      <th>Tipo</th>
+                      <th>Importo</th>
+                      <th>GUFO</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {walletData.transactions.slice(0, 8).map((tx, index) => (
+                      <tr key={tx.id || tx.transaction_id || index}>
+                        <td>{getTransactionMerchant(tx)}</td>
+                        <td>{formatDate(tx.created_at)}</td>
+                        <td>
+                          <span className="type-pill">{getTransactionType(tx)}</span>
+                        </td>
+                        <td className="amount-cell">
+                          € {getTransactionAmount(tx).toFixed(2)}
+                        </td>
+                        <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mobile-only mobile-list">
+                {walletData.transactions.slice(0, 8).map((tx, index) => (
+                  <div className="mobile-tx-card" key={tx.id || tx.transaction_id || index}>
+                    <div className="mobile-tx-top">
+                      <strong>{getTransactionMerchant(tx)}</strong>
+                      <span className="type-pill">{getTransactionType(tx)}</span>
+                    </div>
+                    <div className="mobile-tx-row">
+                      <span>Data</span>
+                      <span>{formatDate(tx.created_at)}</span>
+                    </div>
+                    <div className="mobile-tx-row">
+                      <span>Importo</span>
+                      <span className="amount-cell">
+                        € {getTransactionAmount(tx).toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="mobile-tx-row">
+                      <span>GUFO</span>
+                      <span>{getTransactionGufo(tx).toFixed(2)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="right-column premium-card">
+          <div className="section-header">
+            <h2 className="section-title">Top Info</h2>
+            <span className="pro-badge">PRO</span>
+          </div>
+
+          <div className="info-stack">
+            <div className="info-card">
+              <div className="info-icon info-icon-pink" />
+              <div className="info-copy">
+                <div className="info-main">{userName}</div>
+                <div className="info-sub">Profilo attivo</div>
+              </div>
+              <div className="info-tag">{formatLevel(walletData.level).toUpperCase()}</div>
             </div>
 
-            <div className="mobile-transactions mobile-only">
-              {walletData.transactions.map((tx, index) => (
-                <div
-                  className="tx-card"
-                  key={tx.id || tx.transaction_id || index}
-                >
-                  <div className="tx-row">
-                    <span className="tx-label">Tipo</span>
-                    <span className="tx-value">{getTransactionType(tx)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Merchant</span>
-                    <span className="tx-value">{getTransactionMerchant(tx)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Importo</span>
-                    <span className="tx-value amount-green">
-                      €{getTransactionAmount(tx).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">GUFO</span>
-                    <span className="tx-value">
-                      {getTransactionGufo(tx).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Cashback</span>
-                    <span className="tx-value">
-                      {getTransactionCashback(tx).toFixed(2)}%
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Data</span>
-                    <span className="tx-value">{formatDate(tx.created_at)}</span>
-                  </div>
-                </div>
-              ))}
+            <div className="info-card">
+              <div className="info-icon info-icon-cyan" />
+              <div className="info-copy">
+                <div className="info-main">€ {walletData.seasonSpent.toFixed(2)}</div>
+                <div className="info-sub">Spesa totale stagione</div>
+              </div>
+              <div className="info-tag">TOT</div>
             </div>
-          </>
-        )}
+
+            <div className="info-card">
+              <div className="info-icon info-icon-gold" />
+              <div className="info-copy">
+                <div className="info-main">{walletData.totalGufoEarned.toFixed(2)}</div>
+                <div className="info-sub">GUFO guadagnati</div>
+              </div>
+              <div className="info-tag">EARN</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-green" />
+              <div className="info-copy">
+                <div className="info-main">€ {walletData.balanceEuro.toFixed(2)}</div>
+                <div className="info-sub">Saldo convertibile</div>
+              </div>
+              <div className="info-tag">EUR</div>
+            </div>
+
+            <div className="reset-box">
+              <div className="reset-label">Ultimo reset stagionale</div>
+              <div className="reset-value">
+                {walletData.lastSeasonReset
+                  ? formatDate(walletData.lastSeasonReset)
+                  : "Nessuno"}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -524,298 +505,235 @@ const walletStyles = `
     box-sizing: border-box;
   }
 
-  .wallet-page {
-    width: 100%;
+  .wallet-premium-page {
+    position: relative;
     min-height: 100%;
     color: #ffffff;
-    position: relative;
   }
 
-  .wallet-page::before {
+  .wallet-premium-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
+      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
     z-index: 0;
   }
 
-  .wallet-hero,
-  .top-stats-grid,
-  .panel,
-  .error-box,
-  .loading-shell {
+  .wallet-premium-page > * {
     position: relative;
     z-index: 1;
   }
 
-  .wallet-hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 28px;
-  }
-
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
+  .hero-line {
+    width: 100%;
+    height: 3px;
     border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
-  }
-
-  .wallet-title {
-    margin: 0 0 8px 0;
-    font-size: 60px;
-    font-weight: 900;
-    line-height: 0.98;
-    letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
-  }
-
-  .wallet-subtitle {
-    margin: 0;
-    font-size: 16px;
-    color: #b9c6e3;
-    line-height: 1.55;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 42px;
-    padding: 0 16px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
-  }
-
-  .hero-badge-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #4ade80, #22c55e);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
-    flex-shrink: 0;
-  }
-
-  .top-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .neon-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
-    padding: 22px;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .neon-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1.2px;
+    margin-bottom: 22px;
     background: linear-gradient(
       90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
+      rgba(34, 211, 238, 0.95),
+      rgba(132, 204, 22, 0.9),
+      rgba(250, 204, 21, 0.95),
+      rgba(251, 113, 133, 0.95),
+      rgba(196, 181, 253, 0.95)
     );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
+    box-shadow: 0 0 18px rgba(255,255,255,0.14);
   }
 
-  .card-orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(18px);
-    pointer-events: none;
-    opacity: 0.72;
+  .wallet-premium-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 420px);
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 22px;
   }
 
-  .orb-cyan {
-    top: -22px;
-    right: -18px;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
-  }
-
-  .orb-pink {
-    bottom: -34px;
-    left: -16px;
-    width: 118px;
-    height: 118px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
-  }
-
-  .big-stat-card {
-    min-height: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .big-stat-topline {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 10px;
-    color: #9fb0d3;
-    font-size: 11px;
+  .hero-eyebrow {
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    color: #f8fafc;
+    margin-bottom: 10px;
   }
 
-  .big-stat-label {
-    position: relative;
-    z-index: 1;
-    color: #d8e2f4;
-    margin-bottom: 12px;
+  .hero-title {
+    margin: 0 0 8px 0;
+    font-size: 58px;
+    line-height: 0.96;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    text-shadow: 0 0 18px rgba(255,255,255,0.12);
+    word-break: break-word;
+  }
+
+  .hero-subtitle {
+    margin: 0;
+    color: #d7e2f2;
     font-size: 15px;
   }
 
-  .big-stat-value {
-    position: relative;
-    z-index: 1;
-    font-size: 42px;
-    font-weight: 900;
-    line-height: 1.02;
-    letter-spacing: -0.03em;
-    color: #ffffff;
-    word-break: break-word;
-    text-shadow: 0 0 16px rgba(56, 189, 248, 0.10);
+  .premium-card {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.60),
+      rgba(15, 23, 42, 0.48)
+    );
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(255,255,255,0.02);
   }
 
-  .gufo-mark {
-    letter-spacing: -0.02em;
-  }
-
-  .panel {
-    margin-bottom: 24px;
-  }
-
-  .panel-header {
+  .balance-card {
+    padding: 26px;
+    min-height: 200px;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 18px;
-    position: relative;
-    z-index: 1;
   }
 
-  .panel-title {
-    margin: 0 0 6px 0;
-    font-size: 34px;
-    line-height: 1.05;
-    font-weight: 800;
-    color: #ffffff;
-  }
-
-  .panel-subtitle {
-    margin: 0;
-    color: #b9c6e3;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .mini-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 12px;
+  .balance-label {
+    color: #f8fafc;
+    font-size: 28px;
     font-weight: 700;
   }
 
-  .summary-grid {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+  .balance-value {
+    font-size: 56px;
+    font-weight: 900;
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    text-shadow:
+      0 0 18px rgba(255,255,255,0.10),
+      0 0 26px rgba(56, 189, 248, 0.12);
   }
 
-  .summary-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 18px;
-    padding: 18px;
-    min-width: 0;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  .balance-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
   }
 
-  .summary-label {
-    color: #b9c6e3;
-    margin-bottom: 8px;
-    font-size: 14px;
-  }
-
-  .summary-value {
-    font-size: 28px;
+  .action-btn {
+    border: none;
+    border-radius: 16px;
+    min-height: 50px;
+    padding: 0 22px;
+    font-size: 15px;
     font-weight: 800;
-    line-height: 1.15;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .action-btn-secondary {
+    color: #ffffff;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.92), rgba(59, 130, 246, 0.88));
+    box-shadow: 0 10px 28px rgba(59, 130, 246, 0.26);
+  }
+
+  .action-btn-primary {
+    color: #ffffff;
+    background: linear-gradient(180deg, rgba(34, 211, 238, 0.94), rgba(14, 165, 233, 0.90));
+    box-shadow: 0 10px 28px rgba(34, 211, 238, 0.28);
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .mini-stat {
+    min-height: 150px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .mini-stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
     color: #ffffff;
     word-break: break-word;
   }
 
-  .summary-value.small {
-    font-size: 18px;
+  .mini-stat-label {
+    color: #e8eefc;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .mini-stat-side {
+    color: #dbe7fb;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.92;
+    align-self: flex-end;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 340px;
+    gap: 20px;
+  }
+
+  .left-column,
+  .right-column {
+    padding: 22px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  .section-link {
+    color: #c8f2f5;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .pro-badge {
+    min-height: 32px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #d1fae5;
+    background: rgba(34, 197, 94, 0.14);
+    border: 1px solid rgba(134, 239, 172, 0.20);
   }
 
   .table-wrap {
-    position: relative;
-    z-index: 1;
     width: 100%;
     overflow-x: auto;
   }
@@ -826,105 +744,156 @@ const walletStyles = `
   }
 
   .transactions-table th {
-    color: #aebedf;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 0;
     text-align: left;
-    font-weight: 700;
+    padding: 12px 0;
+    color: #cbd5e1;
     font-size: 13px;
-    letter-spacing: 0.02em;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
   }
 
   .transactions-table td {
     padding: 16px 0;
-    color: #f4f7ff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 14px;
-    vertical-align: top;
-  }
-
-  .amount-green {
-    color: #bbf7d0 !important;
-    font-weight: 800;
-  }
-
-  .empty-state {
-    position: relative;
-    z-index: 1;
-    border-radius: 24px;
-    padding: 36px 20px;
-    text-align: center;
-    background:
-      radial-gradient(circle at center, rgba(56, 189, 248, 0.06), transparent 38%),
-      rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-  }
-
-  .empty-icon {
-    font-size: 34px;
-    margin-bottom: 12px;
-    color: #dbe4f0;
-  }
-
-  .empty-title {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 800;
     color: #ffffff;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .empty-text {
-    margin: 0 auto 18px auto;
-    color: #b9c6e3;
-    font-size: 16px;
-    max-width: 680px;
-  }
-
-  .empty-pill {
+  .type-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 50px;
-    padding: 0 22px;
+    min-height: 30px;
+    padding: 0 12px;
     border-radius: 999px;
-    color: #ffffff;
-    background: rgba(15, 23, 42, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.08);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: #eaf2ff;
+    font-size: 12px;
+    font-weight: 700;
   }
 
-  .loading-shell {
+  .amount-cell {
+    color: #d1fae5;
+    font-weight: 800;
+  }
+
+  .info-stack {
     display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .info-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: center;
-    min-height: 180px;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .loading-glow {
-    position: absolute;
-    width: 180px;
-    height: 180px;
+  .info-icon {
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
+    box-shadow: 0 0 18px rgba(255,255,255,0.10);
   }
 
-  .loading-text {
-    position: relative;
-    z-index: 1;
+  .info-icon-pink {
+    background: radial-gradient(circle at 30% 30%, #f9a8d4, #a855f7);
+  }
+
+  .info-icon-cyan {
+    background: radial-gradient(circle at 30% 30%, #67e8f9, #2563eb);
+  }
+
+  .info-icon-gold {
+    background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b);
+  }
+
+  .info-icon-green {
+    background: radial-gradient(circle at 30% 30%, #86efac, #16a34a);
+  }
+
+  .info-copy {
+    min-width: 0;
+  }
+
+  .info-main {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .info-sub {
+    color: #dbe7fb;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .info-tag {
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.9;
+  }
+
+  .reset-box {
+    border-radius: 18px;
+    padding: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  .reset-label {
+    color: #cbd5e1;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .reset-value {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .loading-box,
+  .error-box {
+    padding: 22px;
+  }
+
+  .loading-box p {
     margin: 0;
+    color: #e2e8f0;
     font-size: 15px;
-    color: #dbe4f0;
   }
 
   .error-box {
-    margin-top: 14px;
     color: #fecaca;
     background: rgba(127, 29, 29, 0.24);
     border: 1px solid rgba(248, 113, 113, 0.28);
-    padding: 16px 18px;
-    border-radius: 18px;
+    border-radius: 20px;
+  }
+
+  .empty-state {
+    padding: 28px 12px 10px 0;
+  }
+
+  .empty-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .empty-text {
+    color: #dbe7fb;
+    font-size: 14px;
   }
 
   .desktop-only {
@@ -935,128 +904,74 @@ const walletStyles = `
     display: none;
   }
 
-  .mobile-transactions {
-    position: relative;
-    z-index: 1;
+  .mobile-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
   }
 
-  .tx-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
+  .mobile-tx-card {
     padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .tx-row {
+  .mobile-tx-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .mobile-tx-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
     gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 7px 0;
+    color: #e2e8f0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .tx-row:last-child {
+  .mobile-tx-row:last-child {
     border-bottom: none;
   }
 
-  .tx-label {
-    color: #b9c6e3;
-    font-size: 13px;
-    flex: 0 0 90px;
-  }
-
-  .tx-value {
-    color: #f4f7ff;
-    font-size: 13px;
-    text-align: right;
-    word-break: break-word;
-  }
-
-  @media (max-width: 1100px) {
-    .top-stats-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+  @media (max-width: 1200px) {
+    .content-grid {
+      grid-template-columns: 1fr;
     }
 
-    .summary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .right-column {
+      order: 2;
+    }
+
+    .left-column {
+      order: 1;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .wallet-premium-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+      font-size: 42px;
+    }
+
+    .balance-value {
+      font-size: 42px;
     }
   }
 
   @media (max-width: 768px) {
-    .wallet-hero {
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 22px;
-    }
-
-    .wallet-title {
-      font-size: 40px;
-    }
-
-    .wallet-subtitle {
-      font-size: 14px;
-    }
-
-    .top-stats-grid {
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    .neon-card {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .neon-card::before {
-      border-radius: 20px;
-    }
-
-    .big-stat-card {
-      min-height: auto;
-    }
-
-    .big-stat-value {
-      font-size: 34px;
-    }
-
-    .panel-title {
-      font-size: 26px;
-    }
-
-    .summary-grid {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .summary-card {
-      padding: 16px;
-    }
-
-    .summary-value {
-      font-size: 24px;
-    }
-
-    .summary-value.small {
-      font-size: 16px;
-    }
-
-    .empty-title {
-      font-size: 18px;
-    }
-
-    .empty-text {
-      font-size: 14px;
-    }
-
-    .panel-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
     .desktop-only {
       display: none;
     }
@@ -1064,28 +979,36 @@ const walletStyles = `
     .mobile-only {
       display: block;
     }
-  }
 
-  @media (max-width: 480px) {
-    .wallet-title {
-      font-size: 32px;
+    .left-column,
+    .right-column,
+    .balance-card,
+    .mini-stat {
+      padding: 16px;
     }
 
-    .panel-title {
+    .hero-title {
+      font-size: 34px;
+    }
+
+    .balance-label {
       font-size: 22px;
     }
 
-    .big-stat-value {
-      font-size: 28px;
+    .balance-value {
+      font-size: 34px;
     }
 
-    .summary-value {
-      font-size: 22px;
+    .section-title {
+      font-size: 19px;
     }
 
-    .tx-label,
-    .tx-value {
-      font-size: 12px;
+    .balance-actions {
+      flex-direction: column;
+    }
+
+    .action-btn {
+      width: 100%;
     }
   }
 `;

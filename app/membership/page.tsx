@@ -71,6 +71,22 @@ function getTransactionAmount(tx: any) {
   );
 }
 
+function getLevelTone(level: string) {
+  const normalized = String(level).toLowerCase();
+
+  if (normalized === "basic") return "tone-basic";
+  if (normalized === "bronze") return "tone-bronze";
+  if (normalized === "silver") return "tone-silver";
+  if (normalized === "gold") return "tone-gold";
+  if (normalized === "platino") return "tone-platino";
+  if (normalized === "vip") return "tone-vip";
+  if (normalized === "elite") return "tone-elite";
+  if (normalized === "diamond") return "tone-diamond";
+  if (normalized === "millionaire") return "tone-millionaire";
+
+  return "tone-basic";
+}
+
 export default function MembershipPage() {
   const [wallet, setWallet] = useState<WalletResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -201,22 +217,27 @@ export default function MembershipPage() {
         )
       : 100;
 
+  const completedLevels = levels.filter((level) => seasonSpent >= level.min).length;
+
   if (loading) {
     return (
-      <div className="membership-page">
+      <div className="membership-premium-page">
         <style>{membershipStyles}</style>
 
-        <div className="membership-hero">
+        <div className="hero-line" />
+
+        <div className="membership-premium-hero">
           <div>
-            <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
-            <h1 className="page-title">Membership GUFO</h1>
-            <p className="page-subtitle">Caricamento membership...</p>
+            <div className="hero-eyebrow">GUFO MEMBERSHIP</div>
+            <h1 className="hero-page-title">Membership</h1>
+            <p className="hero-page-subtitle">
+              Caricamento progressi membership in corso...
+            </p>
           </div>
         </div>
 
-        <div className="loading-shell neon-card">
-          <div className="loading-glow" />
-          <p className="loading-text">Recupero progressi membership in corso...</p>
+        <div className="loading-box premium-card">
+          <p>Recupero percorso membership premium...</p>
         </div>
       </div>
     );
@@ -224,14 +245,16 @@ export default function MembershipPage() {
 
   if (error) {
     return (
-      <div className="membership-page">
+      <div className="membership-premium-page">
         <style>{membershipStyles}</style>
 
-        <div className="membership-hero">
+        <div className="hero-line" />
+
+        <div className="membership-premium-hero">
           <div>
-            <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
-            <h1 className="page-title">Membership GUFO</h1>
-            <p className="page-subtitle">Si è verificato un problema.</p>
+            <div className="hero-eyebrow">GUFO MEMBERSHIP</div>
+            <h1 className="hero-page-title">Membership</h1>
+            <p className="hero-page-subtitle">Si è verificato un problema.</p>
           </div>
         </div>
 
@@ -241,14 +264,16 @@ export default function MembershipPage() {
   }
 
   return (
-    <div className="membership-page">
+    <div className="membership-premium-page">
       <style>{membershipStyles}</style>
 
-      <div className="membership-hero">
+      <div className="hero-line" />
+
+      <div className="membership-premium-hero">
         <div>
-          <div className="eyebrow">GUFO MEMBERSHIP SYSTEM</div>
-          <h1 className="page-title">Membership GUFO</h1>
-          <p className="page-subtitle">
+          <div className="hero-eyebrow">GUFO MEMBERSHIP</div>
+          <h1 className="hero-page-title">Membership GUFO</h1>
+          <p className="hero-page-subtitle">
             Controlla il tuo livello attuale e i progressi per salire di status
           </p>
         </div>
@@ -260,18 +285,16 @@ export default function MembershipPage() {
       </div>
 
       <div className="top-grid">
-        <div className="hero-card neon-card">
-          <div className="card-orb orb-cyan" />
-          <div className="card-orb orb-pink" />
+        <div className={`main-level-card premium-card ${getLevelTone(currentLevel)}`}>
+          <div className="level-chip">{currentLevel}</div>
 
-          <div className="badge">{currentLevel}</div>
-          <h2 className="hero-title">Livello attuale: {currentLevel}</h2>
-          <p className="hero-text">
-            Il tuo status si aggiorna in base alla spesa accumulata e al tuo
-            utilizzo dell’ecosistema GUFO.
+          <h2 className="main-level-title">Livello attuale: {currentLevel}</h2>
+          <p className="main-level-text">
+            Il tuo status si aggiorna in base alla spesa stagionale e al tuo utilizzo
+            dell’ecosistema GUFO.
           </p>
 
-          <div className="progress-block">
+          <div className="progress-shell">
             <div className="progress-top">
               <span>Progressi verso il prossimo livello</span>
               <span>{progressPercent.toFixed(0)}%</span>
@@ -290,93 +313,138 @@ export default function MembershipPage() {
                 mancano <strong>€ {amountToNextLevel.toFixed(2)}</strong>
               </p>
             ) : (
-              <p className="progress-note">
-                Hai raggiunto il livello massimo.
-              </p>
+              <p className="progress-note">Hai raggiunto il livello massimo.</p>
             )}
           </div>
         </div>
 
-        <div className="stats-grid">
-          <div className="stat-card neon-card">
-            <div className="stat-topline">Wallet</div>
-            <div className="stat-label">Saldo GUFO</div>
-            <div className="stat-value">{balanceGufo.toFixed(2)}</div>
+        <div className="side-stats-grid">
+          <div className="mini-stat premium-card">
+            <div className="mini-stat-number">{balanceGufo.toFixed(2)}</div>
+            <div className="mini-stat-label">Saldo GUFO</div>
+            <div className="mini-stat-side">Wallet</div>
           </div>
 
-          <div className="stat-card neon-card">
-            <div className="stat-topline">Season</div>
-            <div className="stat-label">Spesa stagione</div>
-            <div className="stat-value smaller-value">
-              € {seasonSpent.toFixed(2)}
-            </div>
+          <div className="mini-stat premium-card">
+            <div className="mini-stat-number">€ {seasonSpent.toFixed(2)}</div>
+            <div className="mini-stat-label">Spesa stagione</div>
+            <div className="mini-stat-side">Season</div>
           </div>
 
-          <div className="stat-card neon-card">
-            <div className="stat-topline">Rewards</div>
-            <div className="stat-label">Cashback attuale</div>
-            <div className="stat-value">{cashbackPercent}%</div>
+          <div className="mini-stat premium-card">
+            <div className="mini-stat-number">{cashbackPercent}%</div>
+            <div className="mini-stat-label">Cashback attuale</div>
+            <div className="mini-stat-side">Reward</div>
           </div>
 
-          <div className="stat-card neon-card">
-            <div className="stat-topline">Activity</div>
-            <div className="stat-label">Transazioni</div>
-            <div className="stat-value">{transactions.length}</div>
+          <div className="mini-stat premium-card">
+            <div className="mini-stat-number">{transactions.length}</div>
+            <div className="mini-stat-label">Transazioni</div>
+            <div className="mini-stat-side">Activity</div>
           </div>
         </div>
       </div>
 
-      <div className="panel neon-card">
-        <div className="panel-header">
-          <div>
-            <h2 className="panel-title">Il tuo percorso Membership</h2>
-            <p className="panel-subtitle">
-              Tutti i livelli disponibili e lo stato del tuo avanzamento
-            </p>
+      <div className="content-grid">
+        <div className="levels-panel premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Il tuo percorso Membership</h2>
+              <p className="section-subtitle">
+                Tutti i livelli disponibili e lo stato del tuo avanzamento
+              </p>
+            </div>
+
+            <div className="mini-pill">Levels Map</div>
           </div>
 
-          <div className="mini-pill">Levels Map</div>
-        </div>
+          <div className="levels-grid">
+            {levels.map((level) => {
+              const isCurrent =
+                level.name.toLowerCase() === currentLevel.toLowerCase();
+              const isCompleted = seasonSpent >= level.min;
 
-        <div className="levels-grid">
-          {levels.map((level) => {
-            const isCurrent =
-              level.name.toLowerCase() === currentLevel.toLowerCase();
-            const isCompleted = seasonSpent >= level.min;
+              return (
+                <div
+                  key={level.name}
+                  className={`level-card ${isCurrent ? "current" : ""} ${
+                    isCompleted ? "completed" : ""
+                  } ${getLevelTone(level.name)}`}
+                >
+                  <div className="level-top">
+                    <h3 className="level-name">{level.name}</h3>
+                    {isCurrent && <span className="level-badge">Attuale</span>}
+                  </div>
 
-            return (
-              <div
-                key={level.name}
-                className={`level-card ${isCurrent ? "current" : ""} ${
-                  isCompleted ? "completed" : ""
-                }`}
-              >
-                <div className="level-top">
-                  <h3 className="level-name">{level.name}</h3>
-                  {isCurrent && <span className="level-badge">Attuale</span>}
-                </div>
+                  <p className="level-threshold">
+                    Soglia minima: <strong>€ {level.min}</strong>
+                  </p>
 
-                <p className="level-threshold">
-                  Soglia minima: <strong>€ {level.min}</strong>
-                </p>
+                  <p className="level-next">
+                    Soglia successiva:{" "}
+                    <strong>
+                      {level.next !== null ? `€ ${level.next}` : "Livello massimo"}
+                    </strong>
+                  </p>
 
-                <p className="level-next">
-                  Soglia successiva:{" "}
-                  <strong>
-                    {level.next !== null ? `€ ${level.next}` : "Livello massimo"}
-                  </strong>
-                </p>
-
-                <div className="level-status">
-                  {isCurrent
-                    ? "Questo è il tuo livello attuale."
-                    : isCompleted
+                  <div className="level-status">
+                    {isCurrent
+                      ? "Questo è il tuo livello attuale."
+                      : isCompleted
                       ? "Livello già raggiunto."
                       : "Livello ancora da raggiungere."}
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="insights-panel premium-card">
+          <div className="section-header">
+            <h2 className="section-title">Top Info</h2>
+            <span className="pro-badge">PRO</span>
+          </div>
+
+          <div className="info-stack">
+            <div className="info-card">
+              <div className="info-icon info-icon-cyan" />
+              <div className="info-copy">
+                <div className="info-main">{currentLevel}</div>
+                <div className="info-sub">Livello attuale</div>
               </div>
-            );
-          })}
+              <div className="info-tag">NOW</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-pink" />
+              <div className="info-copy">
+                <div className="info-main">{completedLevels}</div>
+                <div className="info-sub">Livelli raggiunti</div>
+              </div>
+              <div className="info-tag">MAP</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-gold" />
+              <div className="info-copy">
+                <div className="info-main">
+                  {nextLevelData ? nextLevelData.name : "Max"}
+                </div>
+                <div className="info-sub">Prossimo target</div>
+              </div>
+              <div className="info-tag">NEXT</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-green" />
+              <div className="info-copy">
+                <div className="info-main">€ {amountToNextLevel.toFixed(2)}</div>
+                <div className="info-sub">Mancano al prossimo livello</div>
+              </div>
+              <div className="info-tag">GO</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -388,77 +456,77 @@ const membershipStyles = `
     box-sizing: border-box;
   }
 
-  .membership-page {
-    width: 100%;
-    color: #ffffff;
-    min-height: 100%;
+  .membership-premium-page {
     position: relative;
+    min-height: 100%;
+    color: #ffffff;
   }
 
-  .membership-page::before {
+  .membership-premium-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
+      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
     z-index: 0;
   }
 
-  .membership-hero,
-  .top-grid,
-  .panel,
-  .error-box,
-  .loading-shell {
+  .membership-premium-page > * {
     position: relative;
     z-index: 1;
   }
 
-  .membership-hero {
+  .hero-line {
+    width: 100%;
+    height: 3px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+    background: linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.95),
+      rgba(132, 204, 22, 0.9),
+      rgba(250, 204, 21, 0.95),
+      rgba(251, 113, 133, 0.95),
+      rgba(196, 181, 253, 0.95)
+    );
+    box-shadow: 0 0 18px rgba(255,255,255,0.14);
+  }
+
+  .membership-premium-hero {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
 
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 11px;
+  .hero-eyebrow {
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
+    color: #f8fafc;
+    margin-bottom: 10px;
   }
 
-  .page-title {
+  .hero-page-title {
     margin: 0 0 8px 0;
-    font-size: 60px;
+    font-size: 58px;
+    line-height: 0.96;
     font-weight: 900;
-    line-height: 0.98;
     letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
+    text-shadow: 0 0 18px rgba(255,255,255,0.12);
+    word-break: break-word;
   }
 
-  .page-subtitle {
-    color: #b9c6e3;
+  .hero-page-subtitle {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.6;
+    color: #d7e2f2;
+    font-size: 15px;
+    line-height: 1.5;
   }
 
   .hero-badge {
@@ -486,96 +554,58 @@ const membershipStyles = `
     flex-shrink: 0;
   }
 
+  .premium-card {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.60),
+      rgba(15, 23, 42, 0.48)
+    );
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(255,255,255,0.02);
+  }
+
   .top-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 24px;
-    margin-bottom: 24px;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
+    gap: 20px;
+    margin-bottom: 22px;
     align-items: stretch;
   }
 
-  .neon-card {
+  .main-level-card {
+    padding: 24px;
     position: relative;
     overflow: hidden;
-    border-radius: 24px;
-    padding: 22px;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
-  .neon-card::before {
+  .main-level-card::after {
     content: "";
     position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1.2px;
-    background: linear-gradient(
-      90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
-  }
-
-  .card-orb {
-    position: absolute;
+    right: -60px;
+    top: -60px;
+    width: 180px;
+    height: 180px;
     border-radius: 999px;
-    filter: blur(18px);
+    background: radial-gradient(circle, rgba(255,255,255,0.10), transparent 70%);
     pointer-events: none;
-    opacity: 0.72;
   }
 
-  .orb-cyan {
-    top: -22px;
-    right: -18px;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
-  }
-
-  .orb-pink {
-    bottom: -34px;
-    left: -16px;
-    width: 118px;
-    height: 118px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
-  }
-
-  .hero-title,
-  .hero-text,
-  .progress-block,
-  .badge,
-  .stat-topline,
-  .stat-label,
-  .stat-value,
-  .panel-title,
-  .panel-subtitle,
-  .levels-grid {
-    position: relative;
-    z-index: 1;
-  }
-
-  .badge {
-    display: inline-block;
-    margin-bottom: 16px;
-    padding: 8px 14px;
+  .level-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
     border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    color: #0f172a;
     background: linear-gradient(
       90deg,
       rgba(244, 114, 182, 0.96),
@@ -583,34 +613,29 @@ const membershipStyles = `
       rgba(74, 222, 128, 0.96),
       rgba(250, 204, 21, 0.96)
     );
-    color: #111827;
-    font-weight: 800;
-    font-size: 14px;
-    box-shadow:
-      0 0 20px rgba(96, 165, 250, 0.12),
-      0 0 28px rgba(236, 72, 153, 0.08);
   }
 
-  .hero-title {
-    font-size: 32px;
+  .main-level-title {
     margin: 0 0 12px 0;
-    line-height: 1.15;
+    font-size: 34px;
+    line-height: 1.08;
     color: #ffffff;
+    font-weight: 900;
   }
 
-  .hero-text {
-    color: #b9c6e3;
-    font-size: 16px;
+  .main-level-text {
+    color: #dbe7fb;
+    font-size: 15px;
     line-height: 1.7;
-    margin: 0 0 22px 0;
+    margin: 0 0 20px 0;
+    max-width: 760px;
   }
 
-  .progress-block {
-    background: rgba(255, 255, 255, 0.03);
+  .progress-shell {
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 18px;
     padding: 18px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .progress-top {
@@ -654,68 +679,72 @@ const membershipStyles = `
     line-height: 1.6;
   }
 
-  .stats-grid {
+  .side-stats-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
 
-  .stat-card {
-    min-width: 0;
-  }
-
-  .stat-topline {
-    margin-bottom: 10px;
-    color: #9fb0d3;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .stat-label {
-    color: #d8e2f4;
-    margin-bottom: 12px;
-    font-size: 14px;
-  }
-
-  .stat-value {
-    font-size: 34px;
-    font-weight: 900;
-    line-height: 1.05;
-    word-break: break-word;
-    color: #ffffff;
-  }
-
-  .smaller-value {
-    font-size: 30px;
-  }
-
-  .panel {
-    overflow: hidden;
-  }
-
-  .panel-header {
+  .mini-stat {
+    min-height: 150px;
+    padding: 22px;
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
   }
 
-  .panel-title {
-    margin: 0 0 6px 0;
-    font-size: 28px;
-    line-height: 1.05;
+  .mini-stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
     color: #ffffff;
-    font-weight: 800;
+    word-break: break-word;
   }
 
-  .panel-subtitle {
+  .mini-stat-label {
+    color: #e8eefc;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .mini-stat-side {
+    color: #dbe7fb;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.92;
+    align-self: flex-end;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 340px;
+    gap: 20px;
+  }
+
+  .levels-panel,
+  .insights-panel {
+    padding: 22px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
     margin: 0;
-    color: #b9c6e3;
+    font-size: 22px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  .section-subtitle {
+    margin: 6px 0 0 0;
+    color: #d7e2f2;
     font-size: 14px;
     line-height: 1.5;
   }
@@ -735,31 +764,44 @@ const membershipStyles = `
     font-weight: 700;
   }
 
+  .pro-badge {
+    min-height: 32px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #d1fae5;
+    background: rgba(34, 197, 94, 0.14);
+    border: 1px solid rgba(134, 239, 172, 0.20);
+  }
+
   .levels-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18px;
+    gap: 16px;
   }
 
   .level-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 18px;
     padding: 18px;
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
+  .level-card:hover {
+    transform: translateY(-2px);
+  }
+
   .level-card.completed {
-    border-color: rgba(74, 222, 128, 0.35);
+    border-color: rgba(74, 222, 128, 0.24);
   }
 
   .level-card.current {
-    border-color: rgba(96, 165, 250, 0.7);
-    background:
-      linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
-    box-shadow:
-      0 0 20px rgba(96, 165, 250, 0.10),
-      inset 0 1px 0 rgba(255,255,255,0.03);
+    border-color: rgba(96, 165, 250, 0.52);
+    box-shadow: 0 0 22px rgba(96, 165, 250, 0.08);
   }
 
   .level-top {
@@ -778,15 +820,17 @@ const membershipStyles = `
   }
 
   .level-badge {
-    display: inline-block;
-    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0 10px;
     border-radius: 999px;
-    background: #3b82f6;
-    color: white;
+    background: rgba(59, 130, 246, 0.18);
+    border: 1px solid rgba(147, 197, 253, 0.24);
+    color: #dbeafe;
     font-size: 12px;
-    font-weight: 800;
+    font-weight: 900;
     white-space: nowrap;
-    box-shadow: 0 0 14px rgba(59, 130, 246, 0.18);
   }
 
   .level-threshold,
@@ -804,37 +848,133 @@ const membershipStyles = `
     line-height: 1.5;
   }
 
-  .loading-shell {
+  .info-stack {
     display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .info-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: center;
-    min-height: 180px;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .loading-glow {
-    position: absolute;
-    width: 180px;
-    height: 180px;
+  .info-icon {
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
+    box-shadow: 0 0 18px rgba(255,255,255,0.10);
   }
 
-  .loading-text {
-    position: relative;
-    z-index: 1;
+  .info-icon-cyan {
+    background: radial-gradient(circle at 30% 30%, #67e8f9, #2563eb);
+  }
+
+  .info-icon-pink {
+    background: radial-gradient(circle at 30% 30%, #f9a8d4, #a855f7);
+  }
+
+  .info-icon-gold {
+    background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b);
+  }
+
+  .info-icon-green {
+    background: radial-gradient(circle at 30% 30%, #86efac, #16a34a);
+  }
+
+  .info-copy {
+    min-width: 0;
+  }
+
+  .info-main {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .info-sub {
+    color: #dbe7fb;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .info-tag {
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.9;
+  }
+
+  .loading-box,
+  .error-box {
+    padding: 22px;
+  }
+
+  .loading-box p {
     margin: 0;
+    color: #e2e8f0;
     font-size: 15px;
-    color: #dbe4f0;
   }
 
   .error-box {
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.10);
-    color: #fca5a5;
-    padding: 16px 18px;
-    border-radius: 18px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.24);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 20px;
+  }
+
+  .tone-basic {
+    box-shadow: 0 16px 38px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .tone-bronze {
+    border-color: rgba(180, 120, 70, 0.28);
+  }
+
+  .tone-silver {
+    border-color: rgba(203, 213, 225, 0.26);
+  }
+
+  .tone-gold {
+    border-color: rgba(250, 204, 21, 0.30);
+  }
+
+  .tone-platino {
+    border-color: rgba(125, 211, 252, 0.28);
+  }
+
+  .tone-vip {
+    border-color: rgba(216, 180, 254, 0.30);
+  }
+
+  .tone-elite {
+    border-color: rgba(74, 222, 128, 0.28);
+  }
+
+  .tone-diamond {
+    border-color: rgba(147, 197, 253, 0.34);
+  }
+
+  .tone-millionaire {
+    border-color: rgba(253, 224, 71, 0.36);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      0 0 24px rgba(253, 224, 71, 0.08),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  @media (max-width: 1200px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -848,41 +988,28 @@ const membershipStyles = `
   }
 
   @media (max-width: 768px) {
-    .membership-hero {
+    .membership-premium-hero {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 22px;
     }
 
-    .page-title {
-      font-size: 40px;
+    .hero-page-title {
+      font-size: 34px;
     }
 
-    .page-subtitle {
-      font-size: 14px;
-    }
-
-    .neon-card {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .neon-card::before {
-      border-radius: 20px;
-    }
-
-    .hero-title {
+    .main-level-title {
       font-size: 26px;
     }
 
-    .hero-text {
-      font-size: 15px;
-      margin-bottom: 18px;
+    .main-level-card,
+    .levels-panel,
+    .insights-panel,
+    .mini-stat {
+      padding: 16px;
     }
 
-    .progress-block {
+    .progress-shell {
       padding: 16px;
-      border-radius: 16px;
     }
 
     .progress-top {
@@ -891,65 +1018,20 @@ const membershipStyles = `
       gap: 6px;
     }
 
-    .stats-grid {
+    .side-stats-grid {
       grid-template-columns: 1fr;
       gap: 14px;
     }
 
-    .stat-value {
-      font-size: 28px;
-    }
-
-    .smaller-value {
-      font-size: 26px;
-    }
-
-    .panel-header {
+    .section-header {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 16px;
-    }
-
-    .panel-title {
-      font-size: 22px;
-      margin-bottom: 0;
-    }
-
-    .level-card {
-      padding: 16px;
-      border-radius: 16px;
     }
 
     .level-top {
       flex-direction: column;
       align-items: flex-start;
       gap: 8px;
-    }
-
-    .level-name {
-      font-size: 20px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .page-title {
-      font-size: 32px;
-    }
-
-    .hero-title {
-      font-size: 22px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-    }
-
-    .smaller-value {
-      font-size: 22px;
-    }
-
-    .level-name {
-      font-size: 18px;
     }
   }
 `;

@@ -91,7 +91,7 @@ function formatDate(value?: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
-  return date.toLocaleString("it-IT");
+  return date.toLocaleDateString("it-IT");
 }
 
 function extractTransactions(payload: any): any[] {
@@ -100,6 +100,17 @@ function extractTransactions(payload: any): any[] {
   if (Array.isArray(payload?.transactions)) return payload.transactions;
   if (Array.isArray(payload?.data?.transactions)) return payload.data.transactions;
   return [];
+}
+
+function getTypeClass(type: string) {
+  const normalized = String(type).toLowerCase();
+
+  if (normalized.includes("cashback")) return "type-pill type-cashback";
+  if (normalized.includes("bonus")) return "type-pill type-bonus";
+  if (normalized.includes("payment")) return "type-pill type-payment";
+  if (normalized.includes("withdraw")) return "type-pill type-withdraw";
+
+  return "type-pill";
 }
 
 export default function TransactionsPage() {
@@ -225,22 +236,29 @@ export default function TransactionsPage() {
     0
   );
 
+  const cashbackTransactions = filteredTransactions.filter((tx) =>
+    String(getTransactionType(tx)).toLowerCase().includes("cashback")
+  ).length;
+
   if (loading) {
     return (
-      <div className="transactions-page">
+      <div className="transactions-premium-page">
         <style>{transactionsStyles}</style>
 
-        <div className="transactions-hero">
+        <div className="hero-line" />
+
+        <div className="transactions-premium-hero">
           <div>
-            <div className="eyebrow">GUFO TRANSACTION CENTER</div>
-            <h1 className="page-title">Transazioni</h1>
-            <p className="page-subtitle">Caricamento transazioni...</p>
+            <div className="hero-eyebrow">GUFO LEDGER</div>
+            <h1 className="hero-title">Transazioni</h1>
+            <p className="hero-subtitle">
+              Caricamento storico movimenti in corso...
+            </p>
           </div>
         </div>
 
-        <div className="loading-shell neon-card">
-          <div className="loading-glow" />
-          <p className="loading-text">Recupero storico transazioni in corso...</p>
+        <div className="loading-box premium-card">
+          <p>Recupero transazioni premium...</p>
         </div>
       </div>
     );
@@ -248,14 +266,16 @@ export default function TransactionsPage() {
 
   if (error) {
     return (
-      <div className="transactions-page">
+      <div className="transactions-premium-page">
         <style>{transactionsStyles}</style>
 
-        <div className="transactions-hero">
+        <div className="hero-line" />
+
+        <div className="transactions-premium-hero">
           <div>
-            <div className="eyebrow">GUFO TRANSACTION CENTER</div>
-            <h1 className="page-title">Transazioni</h1>
-            <p className="page-subtitle">Si è verificato un problema.</p>
+            <div className="hero-eyebrow">GUFO LEDGER</div>
+            <h1 className="hero-title">Transazioni</h1>
+            <p className="hero-subtitle">Si è verificato un problema.</p>
           </div>
         </div>
 
@@ -265,14 +285,18 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="transactions-page">
+    <div className="transactions-premium-page">
       <style>{transactionsStyles}</style>
 
-      <div className="transactions-hero">
+      <div className="hero-line" />
+
+      <div className="transactions-premium-hero">
         <div>
-          <div className="eyebrow">GUFO TRANSACTION CENTER</div>
-          <h1 className="page-title">Transazioni</h1>
-          <p className="page-subtitle">Storico completo delle transazioni utente</p>
+          <div className="hero-eyebrow">GUFO LEDGER</div>
+          <h1 className="hero-title">Transazioni</h1>
+          <p className="hero-subtitle">
+            Storico completo dei movimenti utente con filtro live
+          </p>
         </div>
 
         <div className="hero-badge">
@@ -281,33 +305,162 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card neon-card">
-          <div className="card-orb orb-cyan" />
-          <div className="stat-topline">Filtered Data</div>
-          <div className="stat-label">Transazioni filtrate</div>
-          <div className="stat-value">{filteredTransactions.length}</div>
+      <div className="stats-row">
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">{filteredTransactions.length}</div>
+          <div className="mini-stat-label">Transazioni filtrate</div>
+          <div className="mini-stat-side">Live</div>
         </div>
 
-        <div className="stat-card neon-card">
-          <div className="card-orb orb-pink" />
-          <div className="stat-topline">Amount</div>
-          <div className="stat-label">Importo totale</div>
-          <div className="stat-value smaller-value">€ {totalAmount.toFixed(2)}</div>
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">€ {totalAmount.toFixed(2)}</div>
+          <div className="mini-stat-label">Importo totale</div>
+          <div className="mini-stat-side">Amount</div>
         </div>
 
-        <div className="stat-card neon-card">
-          <div className="stat-topline">Rewards</div>
-          <div className="stat-label">GUFO totali</div>
-          <div className="stat-value">{totalGufo.toFixed(2)}</div>
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">{totalGufo.toFixed(2)}</div>
+          <div className="mini-stat-label">GUFO totali</div>
+          <div className="mini-stat-side">Rewards</div>
         </div>
       </div>
 
-      <div className="panel neon-card">
-        <div className="panel-header">
+      <div className="content-grid">
+        <div className="left-column premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Tutte le transazioni</h2>
+              <p className="section-subtitle">
+                Storico completo filtrato in tempo reale
+              </p>
+            </div>
+            <span className="section-count">Totale: {filteredTransactions.length}</span>
+          </div>
+
+          {filteredTransactions.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-title">Nessuna transazione trovata</div>
+              <div className="empty-text">
+                Quando userai GUFO, qui vedrai tutti i movimenti filtrabili per tipo e merchant.
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="table-wrap desktop-only">
+                <table className="transactions-table">
+                  <thead>
+                    <tr>
+                      <th>Merchant</th>
+                      <th>Tipo</th>
+                      <th>Importo</th>
+                      <th>GUFO</th>
+                      <th>Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredTransactions.map((tx, index) => (
+                      <tr key={tx.id || tx.transaction_id || index}>
+                        <td>{getTransactionMerchant(tx)}</td>
+                        <td>
+                          <span className={getTypeClass(getTransactionType(tx))}>
+                            {getTransactionType(tx)}
+                          </span>
+                        </td>
+                        <td className="amount-cell">
+                          € {getTransactionAmount(tx).toFixed(2)}
+                        </td>
+                        <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                        <td>{formatDate(tx.created_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mobile-only mobile-list">
+                {filteredTransactions.map((tx, index) => (
+                  <div className="mobile-tx-card" key={tx.id || tx.transaction_id || index}>
+                    <div className="mobile-tx-top">
+                      <strong>{getTransactionMerchant(tx)}</strong>
+                      <span className={getTypeClass(getTransactionType(tx))}>
+                        {getTransactionType(tx)}
+                      </span>
+                    </div>
+
+                    <div className="mobile-tx-row">
+                      <span>Importo</span>
+                      <span className="amount-cell">
+                        € {getTransactionAmount(tx).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="mobile-tx-row">
+                      <span>GUFO</span>
+                      <span>{getTransactionGufo(tx).toFixed(2)}</span>
+                    </div>
+
+                    <div className="mobile-tx-row">
+                      <span>Data</span>
+                      <span>{formatDate(tx.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="right-column premium-card">
+          <div className="section-header">
+            <h2 className="section-title">Insights</h2>
+            <span className="pro-badge">PRO</span>
+          </div>
+
+          <div className="info-stack">
+            <div className="info-card">
+              <div className="info-icon info-icon-cyan" />
+              <div className="info-copy">
+                <div className="info-main">{filteredTransactions.length}</div>
+                <div className="info-sub">Movimenti visibili</div>
+              </div>
+              <div className="info-tag">LIVE</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-pink" />
+              <div className="info-copy">
+                <div className="info-main">€ {totalAmount.toFixed(2)}</div>
+                <div className="info-sub">Volume filtrato</div>
+              </div>
+              <div className="info-tag">TOT</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-gold" />
+              <div className="info-copy">
+                <div className="info-main">{totalGufo.toFixed(2)}</div>
+                <div className="info-sub">GUFO generati</div>
+              </div>
+              <div className="info-tag">EARN</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-green" />
+              <div className="info-copy">
+                <div className="info-main">{cashbackTransactions}</div>
+                <div className="info-sub">Cashback registrati</div>
+              </div>
+              <div className="info-tag">CB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="filters-panel premium-card">
+        <div className="section-header filters-header">
           <div>
-            <h2 className="panel-title">Filtri</h2>
-            <p className="panel-subtitle">
+            <h2 className="section-title">Filtri</h2>
+            <p className="section-subtitle">
               Seleziona tipo transazione o cerca per merchant
             </p>
           </div>
@@ -339,95 +492,10 @@ export default function TransactionsPage() {
               value={merchantFilter}
               onChange={(e) => setMerchantFilter(e.target.value)}
               className="input-control"
-              placeholder="Es. Adidas"
+              placeholder="Es. Coop, Eni, Adidas"
             />
           </div>
         </div>
-      </div>
-
-      <div className="panel neon-card">
-        <div className="panel-header">
-          <div>
-            <h2 className="panel-title no-margin">Tutte le transazioni</h2>
-            <p className="panel-subtitle">
-              Storico completo filtrato in tempo reale
-            </p>
-          </div>
-
-          <span className="panel-count">Totale: {filteredTransactions.length}</span>
-        </div>
-
-        {filteredTransactions.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">◎</div>
-            <p className="empty-title">Nessuna transazione trovata</p>
-            <p className="empty-text">
-              Quando userai GUFO, qui vedrai tutti i movimenti filtrabili per tipo e merchant.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="table-wrap desktop-only">
-              <table className="transactions-table">
-                <thead>
-                  <tr>
-                    <th>Merchant</th>
-                    <th>Tipo</th>
-                    <th>Importo</th>
-                    <th>GUFO</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredTransactions.map((tx, index) => (
-                    <tr key={tx.id || tx.transaction_id || index}>
-                      <td>{getTransactionMerchant(tx)}</td>
-                      <td>{getTransactionType(tx)}</td>
-                      <td className="amount-green">
-                        €{getTransactionAmount(tx).toFixed(2)}
-                      </td>
-                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
-                      <td>{formatDate(tx.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mobile-transactions mobile-only">
-              {filteredTransactions.map((tx, index) => (
-                <div className="tx-card" key={tx.id || tx.transaction_id || index}>
-                  <div className="tx-row">
-                    <span className="tx-label">Merchant</span>
-                    <span className="tx-value">{getTransactionMerchant(tx)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Tipo</span>
-                    <span className="tx-value">{getTransactionType(tx)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Importo</span>
-                    <span className="tx-value amount-green">
-                      €{getTransactionAmount(tx).toFixed(2)}
-                    </span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">GUFO</span>
-                    <span className="tx-value">{getTransactionGufo(tx).toFixed(2)}</span>
-                  </div>
-
-                  <div className="tx-row">
-                    <span className="tx-label">Data</span>
-                    <span className="tx-value">{formatDate(tx.created_at)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
@@ -438,77 +506,77 @@ const transactionsStyles = `
     box-sizing: border-box;
   }
 
-  .transactions-page {
-    width: 100%;
-    color: #ffffff;
-    min-height: 100%;
+  .transactions-premium-page {
     position: relative;
+    min-height: 100%;
+    color: #ffffff;
   }
 
-  .transactions-page::before {
+  .transactions-premium-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
+      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
     z-index: 0;
   }
 
-  .transactions-hero,
-  .stats-grid,
-  .panel,
-  .error-box,
-  .loading-shell {
+  .transactions-premium-page > * {
     position: relative;
     z-index: 1;
   }
 
-  .transactions-hero {
+  .hero-line {
+    width: 100%;
+    height: 3px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+    background: linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.95),
+      rgba(132, 204, 22, 0.9),
+      rgba(250, 204, 21, 0.95),
+      rgba(251, 113, 133, 0.95),
+      rgba(196, 181, 253, 0.95)
+    );
+    box-shadow: 0 0 18px rgba(255,255,255,0.14);
+  }
+
+  .transactions-premium-hero {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
 
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 11px;
+  .hero-eyebrow {
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
+    color: #f8fafc;
+    margin-bottom: 10px;
   }
 
-  .page-title {
+  .hero-title {
     margin: 0 0 8px 0;
-    font-size: 60px;
+    font-size: 58px;
+    line-height: 0.96;
     font-weight: 900;
-    line-height: 0.98;
     letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
+    text-shadow: 0 0 18px rgba(255,255,255,0.12);
+    word-break: break-word;
   }
 
-  .page-subtitle {
-    color: #b9c6e3;
+  .hero-subtitle {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.55;
+    color: #d7e2f2;
+    font-size: 15px;
+    line-height: 1.5;
   }
 
   .hero-badge {
@@ -536,166 +604,100 @@ const transactionsStyles = `
     flex-shrink: 0;
   }
 
-  .stats-grid {
+  .premium-card {
+    background: linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.60),
+      rgba(15, 23, 42, 0.48)
+    );
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(255,255,255,0.02);
+  }
+
+  .stats-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 18px;
+    margin-bottom: 22px;
   }
 
-  .neon-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
+  .mini-stat {
+    min-height: 150px;
     padding: 22px;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .neon-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1.2px;
-    background: linear-gradient(
-      90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
-  }
-
-  .card-orb {
-    position: absolute;
-    border-radius: 999px;
-    filter: blur(18px);
-    pointer-events: none;
-    opacity: 0.72;
-  }
-
-  .orb-cyan {
-    top: -22px;
-    right: -18px;
-    width: 110px;
-    height: 110px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.22), transparent 70%);
-  }
-
-  .orb-pink {
-    bottom: -34px;
-    left: -16px;
-    width: 118px;
-    height: 118px;
-    background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 72%);
-  }
-
-  .stat-card {
-    min-width: 0;
-  }
-
-  .stat-topline {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 10px;
-    color: #9fb0d3;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .stat-label {
-    color: #d8e2f4;
-    margin-bottom: 12px;
-    font-size: 15px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .stat-value {
-    font-size: 38px;
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    word-break: break-word;
-    color: #ffffff;
-    position: relative;
-    z-index: 1;
-  }
-
-  .smaller-value {
-    font-size: 34px;
-  }
-
-  .panel {
-    margin-bottom: 24px;
-  }
-
-  .panel-title {
-    margin: 0 0 6px 0;
-    font-size: 28px;
-    line-height: 1.05;
-    font-weight: 800;
-    color: #ffffff;
-    position: relative;
-    z-index: 1;
-  }
-
-  .panel-title.no-margin {
-    margin: 0;
-  }
-
-  .panel-subtitle {
-    margin: 0;
-    color: #b9c6e3;
-    font-size: 14px;
-    line-height: 1.5;
-    position: relative;
-    z-index: 1;
-  }
-
-  .panel-header {
     display: flex;
-    align-items: flex-start;
+    flex-direction: column;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
-    position: relative;
-    z-index: 1;
   }
 
-  .panel-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 12px;
+  .mini-stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    word-break: break-word;
+  }
+
+  .mini-stat-label {
+    color: #e8eefc;
+    font-size: 15px;
     font-weight: 700;
   }
 
+  .mini-stat-side {
+    color: #dbe7fb;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.92;
+    align-self: flex-end;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) 340px;
+    gap: 20px;
+    margin-bottom: 22px;
+  }
+
+  .left-column,
+  .right-column,
+  .filters-panel {
+    padding: 22px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .filters-header {
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  .section-subtitle {
+    margin: 6px 0 0 0;
+    color: #d7e2f2;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .section-count,
   .mini-pill {
     display: inline-flex;
     align-items: center;
@@ -711,12 +713,158 @@ const transactionsStyles = `
     font-weight: 700;
   }
 
+  .pro-badge {
+    min-height: 32px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #d1fae5;
+    background: rgba(34, 197, 94, 0.14);
+    border: 1px solid rgba(134, 239, 172, 0.20);
+  }
+
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .transactions-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .transactions-table th {
+    text-align: left;
+    padding: 12px 0;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .transactions-table td {
+    padding: 16px 0;
+    color: #ffffff;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    vertical-align: middle;
+  }
+
+  .type-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: #eaf2ff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .type-cashback {
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(134, 239, 172, 0.22);
+    color: #dcfce7;
+  }
+
+  .type-bonus {
+    background: rgba(168, 85, 247, 0.16);
+    border-color: rgba(216, 180, 254, 0.22);
+    color: #f3e8ff;
+  }
+
+  .type-payment {
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(147, 197, 253, 0.22);
+    color: #dbeafe;
+  }
+
+  .type-withdraw {
+    background: rgba(251, 146, 60, 0.16);
+    border-color: rgba(253, 186, 116, 0.24);
+    color: #ffedd5;
+  }
+
+  .amount-cell {
+    color: #d1fae5;
+    font-weight: 800;
+  }
+
+  .info-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .info-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+  }
+
+  .info-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    box-shadow: 0 0 18px rgba(255,255,255,0.10);
+  }
+
+  .info-icon-cyan {
+    background: radial-gradient(circle at 30% 30%, #67e8f9, #2563eb);
+  }
+
+  .info-icon-pink {
+    background: radial-gradient(circle at 30% 30%, #f9a8d4, #a855f7);
+  }
+
+  .info-icon-gold {
+    background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b);
+  }
+
+  .info-icon-green {
+    background: radial-gradient(circle at 30% 30%, #86efac, #16a34a);
+  }
+
+  .info-copy {
+    min-width: 0;
+  }
+
+  .info-main {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .info-sub {
+    color: #dbe7fb;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .info-tag {
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.9;
+  }
+
   .filters-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
-    position: relative;
-    z-index: 1;
   }
 
   .input-label {
@@ -754,103 +902,38 @@ const transactionsStyles = `
     color: #ffffff;
   }
 
-  .table-wrap {
-    width: 100%;
-    overflow-x: auto;
-    position: relative;
-    z-index: 1;
+  .loading-box,
+  .error-box {
+    padding: 22px;
   }
 
-  .transactions-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  .transactions-table th {
-    color: #aebedf;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 12px 0;
-    text-align: left;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-  }
-
-  .transactions-table td {
-    padding: 16px 0;
-    color: #f4f7ff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 14px;
-    vertical-align: top;
-  }
-
-  .amount-green {
-    color: #bbf7d0 !important;
-    font-weight: 800;
-  }
-
-  .empty-state {
-    position: relative;
-    z-index: 1;
-    border-radius: 24px;
-    padding: 36px 20px;
-    text-align: center;
-    background:
-      radial-gradient(circle at center, rgba(56, 189, 248, 0.06), transparent 38%),
-      rgba(255, 255, 255, 0.03);
-    border: 1px dashed rgba(255, 255, 255, 0.12);
-  }
-
-  .empty-icon {
-    font-size: 34px;
-    margin-bottom: 12px;
-    color: #dbe4f0;
-  }
-
-  .empty-title {
-    margin: 0 0 8px 0;
-    font-size: 22px;
-    font-weight: 800;
-    color: #ffffff;
-  }
-
-  .empty-text {
-    color: #b9c6e3;
+  .loading-box p {
     margin: 0;
-    font-size: 16px;
-  }
-
-  .loading-shell {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 180px;
-  }
-
-  .loading-glow {
-    position: absolute;
-    width: 180px;
-    height: 180px;
-    border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
-  }
-
-  .loading-text {
-    position: relative;
-    z-index: 1;
-    margin: 0;
+    color: #e2e8f0;
     font-size: 15px;
-    color: #dbe4f0;
   }
 
   .error-box {
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.10);
-    color: #fca5a5;
-    padding: 16px 18px;
-    border-radius: 18px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.24);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 20px;
+  }
+
+  .empty-state {
+    padding: 28px 12px 10px 0;
+  }
+
+  .empty-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 8px;
+  }
+
+  .empty-text {
+    color: #dbe7fb;
+    font-size: 14px;
   }
 
   .desktop-only {
@@ -861,94 +944,72 @@ const transactionsStyles = `
     display: none;
   }
 
-  .mobile-transactions {
+  .mobile-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    position: relative;
-    z-index: 1;
+    gap: 12px;
   }
 
-  .tx-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
+  .mobile-tx-card {
     padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .tx-row {
+  .mobile-tx-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .mobile-tx-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
     gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 7px 0;
+    color: #e2e8f0;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .tx-row:last-child {
+  .mobile-tx-row:last-child {
     border-bottom: none;
   }
 
-  .tx-label {
-    color: #b9c6e3;
-    font-size: 13px;
-    flex: 0 0 90px;
-  }
-
-  .tx-value {
-    color: #f4f7ff;
-    font-size: 13px;
-    text-align: right;
-    word-break: break-word;
-  }
-
-  @media (max-width: 1024px) {
-    .stats-grid {
+  @media (max-width: 1200px) {
+    .content-grid {
       grid-template-columns: 1fr;
     }
   }
 
+  @media (max-width: 980px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-title {
+      font-size: 42px;
+    }
+  }
+
   @media (max-width: 768px) {
-    .transactions-hero {
+    .transactions-premium-hero {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 22px;
     }
 
-    .page-title {
-      font-size: 40px;
+    .hero-title {
+      font-size: 34px;
     }
 
-    .page-subtitle {
-      font-size: 14px;
-    }
-
-    .neon-card {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .neon-card::before {
-      border-radius: 20px;
-    }
-
-    .stat-value {
-      font-size: 30px;
-    }
-
-    .smaller-value {
-      font-size: 28px;
-    }
-
-    .panel-title {
-      font-size: 22px;
-      margin-bottom: 0;
-    }
-
-    .panel-header {
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 16px;
+    .left-column,
+    .right-column,
+    .filters-panel,
+    .mini-stat {
+      padding: 16px;
     }
 
     .filters-grid {
@@ -956,12 +1017,9 @@ const transactionsStyles = `
       gap: 14px;
     }
 
-    .empty-title {
-      font-size: 18px;
-    }
-
-    .empty-text {
-      font-size: 14px;
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .desktop-only {
@@ -970,25 +1028,6 @@ const transactionsStyles = `
 
     .mobile-only {
       display: block;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .page-title {
-      font-size: 32px;
-    }
-
-    .stat-value {
-      font-size: 26px;
-    }
-
-    .smaller-value {
-      font-size: 24px;
-    }
-
-    .tx-label,
-    .tx-value {
-      font-size: 12px;
     }
   }
 `;

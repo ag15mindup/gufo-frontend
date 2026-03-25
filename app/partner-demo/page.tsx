@@ -205,14 +205,16 @@ export default function PartnerDemoPage() {
     : 0;
 
   return (
-    <div className="partner-page">
+    <div className="partner-premium-page">
       <style>{partnerDemoStyles}</style>
 
-      <div className="partner-hero">
+      <div className="hero-line" />
+
+      <div className="partner-premium-hero">
         <div>
-          <div className="eyebrow">GUFO PARTNER CENTER</div>
-          <h1 className="page-title">Partner Demo</h1>
-          <p className="page-subtitle">
+          <div className="hero-eyebrow">GUFO PARTNER CENTER</div>
+          <h1 className="hero-page-title">Partner Demo</h1>
+          <p className="hero-page-subtitle">
             Cerca il cliente tramite codice GUFO e simula un pagamento partner
           </p>
         </div>
@@ -223,233 +225,262 @@ export default function PartnerDemoPage() {
         </div>
       </div>
 
-      <div className="partner-container">
-        <div className="main-card neon-card">
-          <div className="form-grid">
-            <form onSubmit={handleSearchCustomer} className="panel inner-panel">
-              <div className="panel-head">
-                <div>
-                  <h2 className="panel-title">Cerca cliente</h2>
-                  <p className="panel-subtitle">
-                    Recupera dati wallet e membership dal codice GUFO
-                  </p>
-                </div>
+      <div className="stats-row">
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {customer ? customer.customer_code : "--"}
+          </div>
+          <div className="mini-stat-label">Cliente selezionato</div>
+          <div className="mini-stat-side">Lookup</div>
+        </div>
 
-                <div className="mini-pill">Lookup</div>
-              </div>
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {customer ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%` : "--"}
+          </div>
+          <div className="mini-stat-label">Cashback cliente</div>
+          <div className="mini-stat-side">Reward</div>
+        </div>
 
-              <div className="field-group">
-                <label className="field-label">Codice cliente</label>
-                <input
-                  type="text"
-                  value={customerCode}
-                  onChange={(e) => setCustomerCode(e.target.value)}
-                  className="field-input"
-                  placeholder="Es. GUFO-915728"
-                />
-              </div>
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"}
+          </div>
+          <div className="mini-stat-label">GUFO previsti</div>
+          <div className="mini-stat-side">Preview</div>
+        </div>
+      </div>
 
-              <button
-                type="submit"
-                disabled={loadingCustomer}
-                className="primary-button"
-              >
-                {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
-              </button>
+      <div className="forms-grid">
+        <form onSubmit={handleSearchCustomer} className="panel-card premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Cerca cliente</h2>
+              <p className="section-subtitle">
+                Recupera dati wallet e membership dal codice GUFO
+              </p>
+            </div>
 
-              {customer && (
-                <div className="info-box blue-box">
-                  <h3 className="info-title blue-title">Cliente trovato</h3>
-
-                  <div className="info-grid">
-                    <div className="mini-card">
-                      <p className="mini-label">Codice cliente</p>
-                      <p className="mini-value">{customer.customer_code}</p>
-                    </div>
-
-                    <div className="mini-card">
-                      <p className="mini-label">Livello</p>
-                      <p className="mini-value">{formatLevel(customer.level)}</p>
-                    </div>
-
-                    <div className="mini-card">
-                      <p className="mini-label">Saldo GUFO</p>
-                      <p className="mini-value">
-                        {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
-                      </p>
-                    </div>
-
-                    <div className="mini-card">
-                      <p className="mini-label">Cashback</p>
-                      <p className="mini-value">
-                        {toNumberSafe(customer.cashback_percent).toFixed(2)}%
-                      </p>
-                    </div>
-
-                    <div className="mini-card">
-                      <p className="mini-label">Saldo €</p>
-                      <p className="mini-value">
-                        €{toNumberSafe(customer.balance_eur).toFixed(2)}
-                      </p>
-                    </div>
-
-                    <div className="mini-card">
-                      <p className="mini-label">Spesa stagione</p>
-                      <p className="mini-value">
-                        €{toNumberSafe(customer.season_spent).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </form>
-
-            <form onSubmit={handlePayment} className="panel inner-panel">
-              <div className="panel-head">
-                <div>
-                  <h2 className="panel-title">Registra pagamento</h2>
-                  <p className="panel-subtitle">
-                    Simula una transazione partner e il cashback GUFO
-                  </p>
-                </div>
-
-                <div className="mini-pill">Payment</div>
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Merchant</label>
-                <input
-                  type="text"
-                  value={merchantName}
-                  onChange={(e) => setMerchantName(e.target.value)}
-                  className="field-input"
-                  placeholder="Es. Coop"
-                />
-              </div>
-
-              <div className="field-group">
-                <label className="field-label">Importo (€)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="field-input"
-                  placeholder="Es. 120"
-                />
-              </div>
-
-              {customer && previewAmount > 0 && (
-                <div className="preview-box">
-                  <h3 className="preview-title">Riepilogo pagamento</h3>
-
-                  <div className="preview-list">
-                    <p>
-                      <span>Cliente:</span> {customer.customer_code}
-                    </p>
-                    <p>
-                      <span>Merchant:</span> {merchantName.trim() || "-"}
-                    </p>
-                    <p>
-                      <span>Importo:</span> €{previewAmount.toFixed(2)}
-                    </p>
-                    <p>
-                      <span>Cashback applicato:</span>{" "}
-                      {toNumberSafe(customer.cashback_percent).toFixed(2)}%
-                    </p>
-                    <p>
-                      <span>GUFO previsti:</span> {previewCashback.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loadingPayment || !customer}
-                className="secondary-button"
-              >
-                {loadingPayment ? "Pagamento in corso..." : "Esegui pagamento"}
-              </button>
-
-              {!customer && (
-                <p className="helper-text">
-                  Cerca prima un cliente per abilitare il pagamento.
-                </p>
-              )}
-            </form>
+            <div className="mini-pill">Lookup</div>
           </div>
 
-          {error && <div className="error-box">{error}</div>}
+          <div className="field-group">
+            <label className="field-label">Codice cliente</label>
+            <input
+              type="text"
+              value={customerCode}
+              onChange={(e) => setCustomerCode(e.target.value)}
+              className="field-input"
+              placeholder="Es. GUFO-915728"
+            />
+          </div>
 
-          {result?.success && (
-            <div className="info-box green-box result-box">
-              <div className="result-head">
-                <div>
-                  <h2 className="info-title green-title">Pagamento completato</h2>
-                  <p className="panel-subtitle">
-                    La simulazione partner è stata registrata correttamente
-                  </p>
-                </div>
+          <button
+            type="submit"
+            disabled={loadingCustomer}
+            className="primary-button"
+          >
+            {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
+          </button>
 
-                <div className="mini-pill">Success</div>
+          {customer && (
+            <div className="info-box blue-box">
+              <div className="section-header small-gap">
+                <h3 className="info-title blue-title">Cliente trovato</h3>
+                <span className="mini-pill">Found</span>
               </div>
 
               <div className="info-grid">
                 <div className="mini-card">
-                  <p className="mini-label">Merchant</p>
+                  <p className="mini-label">Codice cliente</p>
+                  <p className="mini-value">{customer.customer_code}</p>
+                </div>
+
+                <div className="mini-card">
+                  <p className="mini-label">Livello</p>
+                  <p className="mini-value">{formatLevel(customer.level)}</p>
+                </div>
+
+                <div className="mini-card">
+                  <p className="mini-label">Saldo GUFO</p>
                   <p className="mini-value">
-                    {result.merchant_name || result.transaction?.benefit || "-"}
+                    {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
                   </p>
                 </div>
 
                 <div className="mini-card">
-                  <p className="mini-label">ID transazione</p>
-                  <p className="mini-value">{getTransactionId(result) || "-"}</p>
-                </div>
-
-                <div className="mini-card">
-                  <p className="mini-label">Importo</p>
+                  <p className="mini-label">Cashback</p>
                   <p className="mini-value">
-                    €{toNumberSafe(result.transaction?.amount).toFixed(2)}
+                    {toNumberSafe(customer.cashback_percent).toFixed(2)}%
                   </p>
                 </div>
 
                 <div className="mini-card">
-                  <p className="mini-label">GUFO guadagnati</p>
+                  <p className="mini-label">Saldo €</p>
                   <p className="mini-value">
-                    {toNumberSafe(
-                      result.gufo_earned || result.transaction?.gufo_earned
-                    ).toFixed(2)}
+                    €{toNumberSafe(customer.balance_eur).toFixed(2)}
                   </p>
                 </div>
 
                 <div className="mini-card">
-                  <p className="mini-label">Nuovo saldo</p>
+                  <p className="mini-label">Spesa stagione</p>
                   <p className="mini-value">
-                    {toNumberSafe(result.new_balance).toFixed(2)} GUFO
-                  </p>
-                </div>
-
-                <div className="mini-card">
-                  <p className="mini-label">Tipo</p>
-                  <p className="mini-value">{result.transaction?.tipo || "-"}</p>
-                </div>
-
-                <div className="mini-card">
-                  <p className="mini-label">Data</p>
-                  <p className="mini-value">
-                    {result.transaction?.created_at
-                      ? new Date(result.transaction.created_at).toLocaleString("it-IT")
-                      : "-"}
+                    €{toNumberSafe(customer.season_spent).toFixed(2)}
                   </p>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </form>
+
+        <form onSubmit={handlePayment} className="panel-card premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Registra pagamento</h2>
+              <p className="section-subtitle">
+                Simula una transazione partner e il cashback GUFO
+              </p>
+            </div>
+
+            <div className="mini-pill">Payment</div>
+          </div>
+
+          <div className="field-group">
+            <label className="field-label">Merchant</label>
+            <input
+              type="text"
+              value={merchantName}
+              onChange={(e) => setMerchantName(e.target.value)}
+              className="field-input"
+              placeholder="Es. Coop"
+            />
+          </div>
+
+          <div className="field-group">
+            <label className="field-label">Importo (€)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="field-input"
+              placeholder="Es. 120"
+            />
+          </div>
+
+          {customer && previewAmount > 0 && (
+            <div className="preview-box">
+              <h3 className="preview-title">Riepilogo pagamento</h3>
+
+              <div className="preview-grid">
+                <div className="preview-row">
+                  <span>Cliente</span>
+                  <strong>{customer.customer_code}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Merchant</span>
+                  <strong>{merchantName.trim() || "-"}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Importo</span>
+                  <strong>€{previewAmount.toFixed(2)}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Cashback applicato</span>
+                  <strong>{toNumberSafe(customer.cashback_percent).toFixed(2)}%</strong>
+                </div>
+                <div className="preview-row">
+                  <span>GUFO previsti</span>
+                  <strong>{previewCashback.toFixed(2)}</strong>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loadingPayment || !customer}
+            className="secondary-button"
+          >
+            {loadingPayment ? "Pagamento in corso..." : "Esegui pagamento"}
+          </button>
+
+          {!customer && (
+            <p className="helper-text">
+              Cerca prima un cliente per abilitare il pagamento.
+            </p>
+          )}
+        </form>
       </div>
+
+      {error && <div className="error-box">{error}</div>}
+
+      {result?.success && (
+        <div className="result-card premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title success-title">Pagamento completato</h2>
+              <p className="section-subtitle">
+                La simulazione partner è stata registrata correttamente
+              </p>
+            </div>
+
+            <div className="mini-pill">Success</div>
+          </div>
+
+          <div className="info-grid">
+            <div className="mini-card">
+              <p className="mini-label">Merchant</p>
+              <p className="mini-value">
+                {result.merchant_name || result.transaction?.benefit || "-"}
+              </p>
+            </div>
+
+            <div className="mini-card">
+              <p className="mini-label">ID transazione</p>
+              <p className="mini-value">{getTransactionId(result) || "-"}</p>
+            </div>
+
+            <div className="mini-card">
+              <p className="mini-label">Importo</p>
+              <p className="mini-value">
+                €{toNumberSafe(result.transaction?.amount).toFixed(2)}
+              </p>
+            </div>
+
+            <div className="mini-card">
+              <p className="mini-label">GUFO guadagnati</p>
+              <p className="mini-value">
+                {toNumberSafe(
+                  result.gufo_earned || result.transaction?.gufo_earned
+                ).toFixed(2)}
+              </p>
+            </div>
+
+            <div className="mini-card">
+              <p className="mini-label">Nuovo saldo</p>
+              <p className="mini-value">
+                {toNumberSafe(result.new_balance).toFixed(2)} GUFO
+              </p>
+            </div>
+
+            <div className="mini-card">
+              <p className="mini-label">Tipo</p>
+              <p className="mini-value">{result.transaction?.tipo || "-"}</p>
+            </div>
+
+            <div className="mini-card full-span">
+              <p className="mini-label">Data</p>
+              <p className="mini-value">
+                {result.transaction?.created_at
+                  ? new Date(result.transaction.created_at).toLocaleString("it-IT")
+                  : "-"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -459,76 +490,78 @@ const partnerDemoStyles = `
     box-sizing: border-box;
   }
 
-  .partner-page {
-    width: 100%;
-    color: #ffffff;
-    min-height: 100%;
+  .partner-premium-page {
     position: relative;
+    min-height: 100%;
+    color: #ffffff;
   }
 
-  .partner-page::before {
+  .partner-premium-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
+      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
     z-index: 0;
   }
 
-  .partner-hero,
-  .partner-container,
-  .error-box {
+  .partner-premium-page > * {
     position: relative;
     z-index: 1;
   }
 
-  .partner-hero {
+  .hero-line {
+    width: 100%;
+    height: 3px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+    background: linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.95),
+      rgba(132, 204, 22, 0.9),
+      rgba(250, 204, 21, 0.95),
+      rgba(251, 113, 133, 0.95),
+      rgba(196, 181, 253, 0.95)
+    );
+    box-shadow: 0 0 18px rgba(255,255,255,0.14);
+  }
+
+  .partner-premium-hero {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
 
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 11px;
+  .hero-eyebrow {
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
+    color: #f8fafc;
+    margin-bottom: 10px;
   }
 
-  .page-title {
+  .hero-page-title {
     margin: 0 0 8px 0;
-    font-size: 60px;
+    font-size: 58px;
+    line-height: 0.96;
     font-weight: 900;
-    line-height: 0.98;
     letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
+    text-shadow: 0 0 18px rgba(255,255,255,0.12);
+    word-break: break-word;
   }
 
-  .page-subtitle {
+  .hero-page-subtitle {
     margin: 0;
     max-width: 760px;
-    color: #b9c6e3;
-    font-size: 16px;
-    line-height: 1.65;
+    color: #d7e2f2;
+    font-size: 15px;
+    line-height: 1.6;
   }
 
   .hero-badge {
@@ -556,89 +589,96 @@ const partnerDemoStyles = `
     flex-shrink: 0;
   }
 
-  .partner-container {
-    max-width: 1150px;
-    margin: 0 auto;
-  }
-
-  .neon-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
-    padding: 24px;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .neon-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1.2px;
+  .premium-card {
     background: linear-gradient(
-      90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
+      180deg,
+      rgba(15, 23, 42, 0.60),
+      rgba(15, 23, 42, 0.48)
     );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(255,255,255,0.02);
   }
 
-  .main-card > * {
-    position: relative;
-    z-index: 1;
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
   }
 
-  .form-grid {
+  .mini-stat {
+    min-height: 150px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .mini-stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: #ffffff;
+    word-break: break-word;
+  }
+
+  .mini-stat-label {
+    color: #e8eefc;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .mini-stat-side {
+    color: #dbe7fb;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.92;
+    align-self: flex-end;
+  }
+
+  .forms-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
+    gap: 20px;
   }
 
-  .inner-panel {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 22px;
+  .panel-card {
     padding: 22px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
   }
 
-  .panel-head,
-  .result-head {
+  .section-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 18px;
   }
 
-  .panel-title {
-    margin: 0 0 6px 0;
-    font-size: 28px;
-    line-height: 1.05;
-    font-weight: 800;
+  .section-header.small-gap {
+    margin-bottom: 14px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
     color: #ffffff;
   }
 
-  .panel-subtitle {
-    margin: 0;
-    color: #b9c6e3;
+  .success-title {
+    color: #86efac;
+  }
+
+  .section-subtitle {
+    margin: 6px 0 0 0;
+    color: #d7e2f2;
     font-size: 14px;
     line-height: 1.5;
   }
@@ -754,24 +794,26 @@ const partnerDemoStyles = `
     color: #ffffff;
   }
 
-  .preview-list {
+  .preview-grid {
     display: grid;
-    gap: 8px;
-    font-size: 14px;
+    gap: 10px;
+  }
+
+  .preview-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     color: #dbe4f0;
-    word-break: break-word;
+    font-size: 14px;
   }
 
-  .preview-list p {
-    margin: 0;
-  }
-
-  .preview-list span {
+  .preview-row span {
     color: #99a8c7;
   }
 
   .info-box {
-    margin-top: 24px;
+    margin-top: 22px;
     border-radius: 20px;
     padding: 18px;
   }
@@ -781,28 +823,15 @@ const partnerDemoStyles = `
     background: rgba(59, 130, 246, 0.10);
   }
 
-  .green-box {
-    border: 1px solid rgba(34, 197, 94, 0.28);
-    background: rgba(34, 197, 94, 0.10);
-  }
-
-  .result-box {
-    margin-top: 24px;
-  }
-
   .info-title {
-    margin: 0 0 6px 0;
-    font-size: 24px;
-    font-weight: 800;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
     line-height: 1.1;
   }
 
   .blue-title {
     color: #93c5fd;
-  }
-
-  .green-title {
-    color: #86efac;
   }
 
   .info-grid {
@@ -834,74 +863,59 @@ const partnerDemoStyles = `
     word-break: break-word;
   }
 
-  .error-box {
-    margin-top: 24px;
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.10);
-    color: #fca5a5;
-    padding: 16px 18px;
-    border-radius: 18px;
+  .result-card {
+    margin-top: 22px;
+    padding: 22px;
   }
 
-  @media (max-width: 1024px) {
-    .form-grid {
+  .full-span {
+    grid-column: 1 / -1;
+  }
+
+  .error-box {
+    margin-top: 22px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.24);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 20px;
+    padding: 18px;
+  }
+
+  @media (max-width: 1100px) {
+    .forms-grid {
       grid-template-columns: 1fr;
     }
   }
 
+  @media (max-width: 980px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-page-title {
+      font-size: 42px;
+    }
+  }
+
   @media (max-width: 768px) {
-    .partner-hero {
+    .partner-premium-hero {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 22px;
     }
 
-    .page-title {
-      font-size: 40px;
+    .hero-page-title {
+      font-size: 34px;
     }
 
-    .page-subtitle {
-      font-size: 14px;
+    .panel-card,
+    .result-card,
+    .mini-stat {
+      padding: 16px;
     }
 
-    .neon-card {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .neon-card::before {
-      border-radius: 20px;
-    }
-
-    .inner-panel {
-      padding: 18px 14px;
-      border-radius: 18px;
-    }
-
-    .panel-head,
-    .result-head {
+    .section-header {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 16px;
-    }
-
-    .panel-title {
-      font-size: 22px;
-      margin-bottom: 0;
-    }
-
-    .field-group {
-      margin-bottom: 16px;
-    }
-
-    .info-box {
-      margin-top: 18px;
-      padding: 16px 14px;
-      border-radius: 18px;
-    }
-
-    .info-title {
-      font-size: 20px;
     }
 
     .info-grid {
@@ -917,19 +931,24 @@ const partnerDemoStyles = `
     .mini-value {
       font-size: 16px;
     }
+
+    .preview-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 
   @media (max-width: 480px) {
-    .page-title {
-      font-size: 32px;
+    .hero-page-title {
+      font-size: 30px;
     }
 
-    .panel-title {
+    .section-title {
       font-size: 20px;
     }
 
-    .mini-value {
-      font-size: 15px;
+    .mini-stat-number {
+      font-size: 26px;
     }
   }
 `;

@@ -143,20 +143,21 @@ export default function CustomerCodePage() {
 
   if (loading) {
     return (
-      <div className="customer-page">
+      <div className="customer-premium-page">
         <style>{customerStyles}</style>
 
-        <div className="customer-hero">
+        <div className="hero-line" />
+
+        <div className="customer-premium-hero">
           <div>
-            <div className="eyebrow">GUFO CUSTOMER ID</div>
-            <h1 className="page-title">Il tuo codice GUFO</h1>
-            <p className="page-subtitle">Caricamento...</p>
+            <div className="hero-eyebrow">GUFO CUSTOMER ID</div>
+            <h1 className="hero-page-title">Il tuo codice GUFO</h1>
+            <p className="hero-page-subtitle">Caricamento in corso...</p>
           </div>
         </div>
 
-        <div className="loading-shell neon-card">
-          <div className="loading-glow" />
-          <p className="loading-text">Recupero codice cliente in corso...</p>
+        <div className="loading-box premium-card">
+          <p>Recupero customer code premium...</p>
         </div>
       </div>
     );
@@ -164,14 +165,16 @@ export default function CustomerCodePage() {
 
   if (error) {
     return (
-      <div className="customer-page">
+      <div className="customer-premium-page">
         <style>{customerStyles}</style>
 
-        <div className="customer-hero">
+        <div className="hero-line" />
+
+        <div className="customer-premium-hero">
           <div>
-            <div className="eyebrow">GUFO CUSTOMER ID</div>
-            <h1 className="page-title">Il tuo codice GUFO</h1>
-            <p className="page-subtitle">Si è verificato un problema.</p>
+            <div className="hero-eyebrow">GUFO CUSTOMER ID</div>
+            <h1 className="hero-page-title">Il tuo codice GUFO</h1>
+            <p className="hero-page-subtitle">Si è verificato un problema.</p>
           </div>
         </div>
 
@@ -181,14 +184,16 @@ export default function CustomerCodePage() {
   }
 
   return (
-    <div className="customer-page">
+    <div className="customer-premium-page">
       <style>{customerStyles}</style>
 
-      <div className="customer-hero">
+      <div className="hero-line" />
+
+      <div className="customer-premium-hero">
         <div>
-          <div className="eyebrow">GUFO CUSTOMER ID</div>
-          <h1 className="page-title">Il tuo codice GUFO</h1>
-          <p className="page-subtitle">
+          <div className="hero-eyebrow">GUFO CUSTOMER ID</div>
+          <h1 className="hero-page-title">Il tuo codice GUFO</h1>
+          <p className="hero-page-subtitle">
             Mostra questo codice al negozio partner per ricevere cashback e GUFO
           </p>
         </div>
@@ -199,34 +204,45 @@ export default function CustomerCodePage() {
         </div>
       </div>
 
-      <div className="customer-container">
-        <div className="main-card neon-card">
-          <div className="stats-grid">
-            <div className="stat-card">
-              <div className="stat-topline">Wallet</div>
-              <p className="stat-label">Saldo GUFO</p>
-              <p className="stat-value">
-                {toNumberSafe(customer?.balance_gufo).toFixed(2)}
+      <div className="stats-row">
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {toNumberSafe(customer?.balance_gufo).toFixed(2)}
+          </div>
+          <div className="mini-stat-label">Saldo GUFO</div>
+          <div className="mini-stat-side">Wallet</div>
+        </div>
+
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {formatLevel(
+              String(customer?.current_level ?? customer?.level ?? "Basic")
+            )}
+          </div>
+          <div className="mini-stat-label">Livello attuale</div>
+          <div className="mini-stat-side">Membership</div>
+        </div>
+
+        <div className="mini-stat premium-card">
+          <div className="mini-stat-number">
+            {toNumberSafe(customer?.cashback_percent).toFixed(2)}%
+          </div>
+          <div className="mini-stat-label">Cashback attuale</div>
+          <div className="mini-stat-side">Rewards</div>
+        </div>
+      </div>
+
+      <div className="content-grid">
+        <div className="left-column premium-card">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Customer QR</h2>
+              <p className="section-subtitle">
+                Il partner può scansionare questo QR code per identificarti
               </p>
             </div>
 
-            <div className="stat-card">
-              <div className="stat-topline">Membership</div>
-              <p className="stat-label">Livello</p>
-              <p className="stat-value">
-                {formatLevel(
-                  String(customer?.current_level ?? customer?.level ?? "Basic")
-                )}
-              </p>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-topline">Rewards</div>
-              <p className="stat-label">Cashback</p>
-              <p className="stat-value">
-                {toNumberSafe(customer?.cashback_percent).toFixed(2)}%
-              </p>
-            </div>
+            <div className="mini-pill">Scan Ready</div>
           </div>
 
           <div className="code-card">
@@ -241,8 +257,61 @@ export default function CustomerCodePage() {
           </div>
 
           <p className="qr-note">
-            Il negozio partner può scansionare questo QR code per identificarti.
+            Mostra questo QR o il codice cliente al partner per registrare la transazione.
           </p>
+        </div>
+
+        <div className="right-column premium-card">
+          <div className="section-header">
+            <h2 className="section-title">Top Info</h2>
+            <span className="pro-badge">PRO</span>
+          </div>
+
+          <div className="info-stack">
+            <div className="info-card">
+              <div className="info-icon info-icon-gold" />
+              <div className="info-copy">
+                <div className="info-main">{customerCode}</div>
+                <div className="info-sub">Customer code attivo</div>
+              </div>
+              <div className="info-tag">ID</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-cyan" />
+              <div className="info-copy">
+                <div className="info-main">
+                  {toNumberSafe(customer?.balance_gufo).toFixed(2)}
+                </div>
+                <div className="info-sub">GUFO disponibili</div>
+              </div>
+              <div className="info-tag">BAL</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-pink" />
+              <div className="info-copy">
+                <div className="info-main">
+                  {formatLevel(
+                    String(customer?.current_level ?? customer?.level ?? "Basic")
+                  )}
+                </div>
+                <div className="info-sub">Livello membership</div>
+              </div>
+              <div className="info-tag">LVL</div>
+            </div>
+
+            <div className="info-card">
+              <div className="info-icon info-icon-green" />
+              <div className="info-copy">
+                <div className="info-main">
+                  € {toNumberSafe(customer?.season_spent).toFixed(2)}
+                </div>
+                <div className="info-sub">Spesa stagione</div>
+              </div>
+              <div className="info-tag">TOT</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -254,76 +323,77 @@ const customerStyles = `
     box-sizing: border-box;
   }
 
-  .customer-page {
-    width: 100%;
-    color: #ffffff;
-    min-height: 100%;
+  .customer-premium-page {
     position: relative;
+    min-height: 100%;
+    color: #ffffff;
   }
 
-  .customer-page::before {
+  .customer-premium-page::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.10), transparent 20%),
-      radial-gradient(circle at 80% 18%, rgba(236, 72, 153, 0.10), transparent 22%),
-      radial-gradient(circle at 18% 85%, rgba(34, 197, 94, 0.08), transparent 18%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 18%);
+      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
+      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
+      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
+      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
+      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
     z-index: 0;
   }
 
-  .customer-hero,
-  .customer-container,
-  .error-box,
-  .loading-shell {
+  .customer-premium-page > * {
     position: relative;
     z-index: 1;
   }
 
-  .customer-hero {
+  .hero-line {
+    width: 100%;
+    height: 3px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+    background: linear-gradient(
+      90deg,
+      rgba(34, 211, 238, 0.95),
+      rgba(132, 204, 22, 0.9),
+      rgba(250, 204, 21, 0.95),
+      rgba(251, 113, 133, 0.95),
+      rgba(196, 181, 253, 0.95)
+    );
+    box-shadow: 0 0 18px rgba(255,255,255,0.14);
+  }
+
+  .customer-premium-hero {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 18px;
-    margin-bottom: 28px;
+    margin-bottom: 22px;
   }
 
-  .eyebrow {
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 7px 12px;
-    border-radius: 999px;
-    font-size: 11px;
+  .hero-eyebrow {
+    font-size: 13px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #dbeafe;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.04),
-      0 0 18px rgba(56, 189, 248, 0.08);
+    color: #f8fafc;
+    margin-bottom: 10px;
   }
 
-  .page-title {
+  .hero-page-title {
     margin: 0 0 8px 0;
-    font-size: 60px;
+    font-size: 58px;
+    line-height: 0.96;
     font-weight: 900;
-    line-height: 0.98;
     letter-spacing: -0.04em;
-    color: #ffffff;
-    text-shadow:
-      0 0 18px rgba(56, 189, 248, 0.16),
-      0 0 28px rgba(139, 92, 246, 0.10);
+    text-shadow: 0 0 18px rgba(255,255,255,0.12);
+    word-break: break-word;
   }
 
-  .page-subtitle {
-    color: #b9c6e3;
+  .hero-page-subtitle {
     margin: 0;
-    font-size: 16px;
-    line-height: 1.6;
+    color: #d7e2f2;
+    font-size: 15px;
+    line-height: 1.5;
     max-width: 760px;
   }
 
@@ -352,93 +422,119 @@ const customerStyles = `
     flex-shrink: 0;
   }
 
-  .customer-container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .neon-card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 24px;
-    padding: 24px;
-    background:
-      linear-gradient(180deg, rgba(10, 16, 32, 0.82), rgba(15, 23, 42, 0.78));
-    border: 1px solid rgba(255,255,255,0.07);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow:
-      0 16px 40px rgba(0, 0, 0, 0.30),
-      0 0 22px rgba(56, 189, 248, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  }
-
-  .neon-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 24px;
-    padding: 1.2px;
+  .premium-card {
     background: linear-gradient(
-      90deg,
-      rgba(236, 72, 153, 0.92),
-      rgba(56, 189, 248, 0.92),
-      rgba(34, 197, 94, 0.86),
-      rgba(250, 204, 21, 0.86),
-      rgba(168, 85, 247, 0.92)
+      180deg,
+      rgba(15, 23, 42, 0.60),
+      rgba(15, 23, 42, 0.48)
     );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-    opacity: 0.9;
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow:
+      0 16px 38px rgba(0,0,0,0.28),
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      0 0 0 1px rgba(255,255,255,0.02);
   }
 
-  .main-card > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .stats-grid {
+  .stats-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
+    gap: 18px;
+    margin-bottom: 22px;
   }
 
-  .stat-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 20px;
-    min-width: 0;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+  .mini-stat {
+    min-height: 150px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
-  .stat-topline {
-    margin: 0 0 10px 0;
-    color: #9fb0d3;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-  }
-
-  .stat-label {
-    margin: 0 0 8px 0;
-    color: #d8e2f4;
-    font-size: 14px;
-  }
-
-  .stat-value {
-    margin: 0;
+  .mini-stat-number {
     font-size: 32px;
     font-weight: 900;
-    line-height: 1.05;
-    word-break: break-word;
+    line-height: 1;
+    letter-spacing: -0.03em;
     color: #ffffff;
+    word-break: break-word;
+  }
+
+  .mini-stat-label {
+    color: #e8eefc;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .mini-stat-side {
+    color: #dbe7fb;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0.92;
+    align-self: flex-end;
+  }
+
+  .content-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) 340px;
+    gap: 20px;
+  }
+
+  .left-column,
+  .right-column {
+    padding: 22px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .section-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 900;
+    color: #ffffff;
+  }
+
+  .section-subtitle {
+    margin: 6px 0 0 0;
+    color: #d7e2f2;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .mini-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #eef2ff;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .pro-badge {
+    min-height: 32px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #d1fae5;
+    background: rgba(34, 197, 94, 0.14);
+    border: 1px solid rgba(134, 239, 172, 0.20);
   }
 
   .code-card {
@@ -449,7 +545,7 @@ const customerStyles = `
     border-radius: 24px;
     padding: 28px 20px;
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
 
   .code-kicker {
@@ -501,76 +597,124 @@ const customerStyles = `
     line-height: 1.6;
   }
 
-  .loading-shell {
+  .info-stack {
     display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .info-card {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: center;
-    min-height: 180px;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .loading-glow {
-    position: absolute;
-    width: 180px;
-    height: 180px;
+  .info-icon {
+    width: 42px;
+    height: 42px;
     border-radius: 999px;
-    background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-    filter: blur(20px);
-    pointer-events: none;
+    box-shadow: 0 0 18px rgba(255,255,255,0.10);
   }
 
-  .loading-text {
-    position: relative;
-    z-index: 1;
+  .info-icon-gold {
+    background: radial-gradient(circle at 30% 30%, #fde68a, #f59e0b);
+  }
+
+  .info-icon-cyan {
+    background: radial-gradient(circle at 30% 30%, #67e8f9, #2563eb);
+  }
+
+  .info-icon-pink {
+    background: radial-gradient(circle at 30% 30%, #f9a8d4, #a855f7);
+  }
+
+  .info-icon-green {
+    background: radial-gradient(circle at 30% 30%, #86efac, #16a34a);
+  }
+
+  .info-copy {
+    min-width: 0;
+  }
+
+  .info-main {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.1;
+    word-break: break-word;
+  }
+
+  .info-sub {
+    color: #dbe7fb;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  .info-tag {
+    color: #dbeafe;
+    font-size: 12px;
+    font-weight: 900;
+    opacity: 0.9;
+  }
+
+  .loading-box,
+  .error-box {
+    padding: 22px;
+  }
+
+  .loading-box p {
     margin: 0;
+    color: #e2e8f0;
     font-size: 15px;
-    color: #dbe4f0;
   }
 
   .error-box {
-    border: 1px solid rgba(248, 113, 113, 0.3);
-    background: rgba(239, 68, 68, 0.10);
-    color: #fca5a5;
-    padding: 16px 18px;
-    border-radius: 18px;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.24);
+    border: 1px solid rgba(248, 113, 113, 0.28);
+    border-radius: 20px;
+  }
+
+  @media (max-width: 1200px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 980px) {
+    .stats-row {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-page-title {
+      font-size: 42px;
+    }
   }
 
   @media (max-width: 768px) {
-    .customer-hero {
+    .customer-premium-hero {
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 22px;
     }
 
-    .page-title {
-      font-size: 40px;
+    .hero-page-title {
+      font-size: 34px;
     }
 
-    .page-subtitle {
-      font-size: 14px;
+    .left-column,
+    .right-column,
+    .mini-stat {
+      padding: 16px;
     }
 
-    .neon-card {
-      padding: 18px 14px;
-      border-radius: 20px;
-    }
-
-    .neon-card::before {
-      border-radius: 20px;
-    }
-
-    .stats-grid {
-      grid-template-columns: 1fr;
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .stat-card {
-      padding: 18px;
-      border-radius: 16px;
-    }
-
-    .stat-value {
-      font-size: 28px;
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
     .code-card {
@@ -595,12 +739,12 @@ const customerStyles = `
   }
 
   @media (max-width: 480px) {
-    .page-title {
-      font-size: 32px;
+    .hero-page-title {
+      font-size: 30px;
     }
 
-    .stat-value {
-      font-size: 24px;
+    .mini-stat-number {
+      font-size: 26px;
     }
 
     .code-value {

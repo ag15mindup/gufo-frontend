@@ -36,14 +36,15 @@ export default function HomePage() {
             </h1>
 
             <p className="hero-subtitle">
-              Il cashback intelligente per utenti e negozi locali.
+              Il cashback intelligente che collega utenti, partner e loyalty in
+              un’unica esperienza premium.
             </p>
 
             <p className="hero-description">
-              GUFO collega clienti e partner in un ecosistema semplice e moderno:
-              il cliente mostra il proprio codice o QR, il partner registra il
-              pagamento e il wallet si aggiorna in tempo reale con cashback,
-              livello membership e storico transazioni.
+              GUFO permette al cliente di mostrare il proprio codice o QR, al
+              partner di registrare il pagamento e al wallet di aggiornarsi in
+              tempo reale con cashback, livello membership, saldo e storico
+              transazioni.
             </p>
 
             <div className="hero-buttons">
@@ -61,21 +62,23 @@ export default function HomePage() {
             </div>
 
             <div className="hero-tags">
-              <span className="hero-tag">Wallet utente</span>
+              <span className="hero-tag">Wallet live</span>
               <span className="hero-tag">Membership</span>
               <span className="hero-tag">QR cliente</span>
               <span className="hero-tag">Dashboard partner</span>
-              <span className="hero-tag">Cashback live</span>
+              <span className="hero-tag">Cashback in tempo reale</span>
             </div>
           </div>
 
           <div className="hero-visual">
-            <div className="logo-shell">
-              <div className="logo-card neon-border">
-                <div className="logo-orb orb-one" />
-                <div className="logo-orb orb-two" />
-                <div className="logo-orb orb-three" />
+            <div className="visual-card neon-border">
+              <div className="visual-orb orb-one" />
+              <div className="visual-orb orb-two" />
+              <div className="visual-orb orb-three" />
 
+              <div className="visual-topline">GUFO PREMIUM INTERFACE</div>
+
+              <div className="logo-shell">
                 <Image
                   src="/logo-gufo.png"
                   alt="Logo GUFO"
@@ -84,6 +87,23 @@ export default function HomePage() {
                   className="hero-logo"
                   priority
                 />
+              </div>
+
+              <div className="visual-stats">
+                <div className="visual-stat">
+                  <span className="visual-stat-label">Wallet</span>
+                  <strong className="visual-stat-value">Saldo + Rewards</strong>
+                </div>
+
+                <div className="visual-stat">
+                  <span className="visual-stat-label">Partner</span>
+                  <strong className="visual-stat-value">Pagamento live</strong>
+                </div>
+
+                <div className="visual-stat">
+                  <span className="visual-stat-label">Membership</span>
+                  <strong className="visual-stat-value">Livelli & progressi</strong>
+                </div>
               </div>
             </div>
           </div>
@@ -94,7 +114,7 @@ export default function HomePage() {
             <div className="hero-stat-label">Wallet</div>
             <div className="hero-stat-value">Saldo + GUFO</div>
             <div className="hero-stat-text">
-              Controlla saldo, cashback e movimenti in un’unica dashboard.
+              Controlla saldo, cashback, valore accumulato e movimenti in un’unica dashboard.
             </div>
           </div>
 
@@ -110,7 +130,7 @@ export default function HomePage() {
             <div className="hero-stat-label">Partner</div>
             <div className="hero-stat-value">Cashback registrato</div>
             <div className="hero-stat-text">
-              Il partner cerca il cliente e registra il pagamento in pochi secondi.
+              Il partner cerca il cliente, registra il pagamento e il wallet si aggiorna.
             </div>
           </div>
         </section>
@@ -120,7 +140,7 @@ export default function HomePage() {
             <h2 className="section-title">Perché GUFO</h2>
             <p className="section-text">
               Un sistema loyalty moderno, visivo e semplice da usare, pensato
-              per clienti reali e negozi locali.
+              per clienti reali, negozi locali e demo startup di alto livello.
             </p>
           </div>
 
@@ -129,8 +149,7 @@ export default function HomePage() {
               <div className="feature-number">01</div>
               <h3 className="feature-title">Cashback automatico</h3>
               <p className="feature-text">
-                Ogni pagamento aggiorna il saldo GUFO e il cashback in base al
-                livello del cliente.
+                Ogni pagamento aggiorna il saldo GUFO e il cashback in base al livello del cliente.
               </p>
             </div>
 
@@ -138,8 +157,7 @@ export default function HomePage() {
               <div className="feature-number">02</div>
               <h3 className="feature-title">Esperienza semplice</h3>
               <p className="feature-text">
-                Codice cliente, QR code, ricerca rapida e registrazione
-                pagamento in pochi secondi.
+                Codice cliente, QR code, ricerca rapida e registrazione pagamento in pochi secondi.
               </p>
             </div>
 
@@ -147,8 +165,7 @@ export default function HomePage() {
               <div className="feature-number">03</div>
               <h3 className="feature-title">Controllo completo</h3>
               <p className="feature-text">
-                Dashboard, wallet, membership, profilo e transazioni in
-                un’unica esperienza coerente.
+                Dashboard, wallet, membership, profilo e transazioni in un’unica esperienza coerente.
               </p>
             </div>
           </div>
@@ -167,7 +184,7 @@ export default function HomePage() {
               <div className="step-number">1</div>
               <h3 className="step-title">Registrati o accedi</h3>
               <p className="step-text">
-                L’utente crea il proprio account e accede alla piattaforma GUFO.
+                L’utente entra nella piattaforma e accede alla propria area personale GUFO.
               </p>
             </div>
 
@@ -175,7 +192,7 @@ export default function HomePage() {
               <div className="step-number">2</div>
               <h3 className="step-title">Mostra codice o QR</h3>
               <p className="step-text">
-                Il cliente apre il proprio codice GUFO da mostrare al partner.
+                Il cliente apre il codice GUFO e lo mostra al partner per essere riconosciuto.
               </p>
             </div>
 
@@ -183,7 +200,7 @@ export default function HomePage() {
               <div className="step-number">3</div>
               <h3 className="step-title">Wallet aggiornato</h3>
               <p className="step-text">
-                Cashback, saldo, membership e storico si aggiornano in tempo reale.
+                Cashback, saldo, livello membership e storico si aggiornano in tempo reale.
               </p>
             </div>
           </div>
@@ -193,7 +210,7 @@ export default function HomePage() {
           <div className="section-header">
             <h2 className="section-title">Accesso rapido</h2>
             <p className="section-text">
-              Le sezioni principali del prodotto già disponibili nella web app.
+              Le sezioni principali della web app già disponibili.
             </p>
           </div>
 
@@ -262,7 +279,7 @@ export default function HomePage() {
           <p className="cta-text">
             La piattaforma GUFO integra frontend, backend, wallet, membership,
             profilo, codice cliente, dashboard partner e demo pagamento in
-            un’unica esperienza moderna.
+            un’unica esperienza moderna, pronta per test reali e demo investitori.
           </p>
 
           <div className="cta-buttons">
@@ -510,12 +527,6 @@ const homeStyles = `
     align-items: center;
   }
 
-  .logo-shell {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-
   .neon-border {
     position: relative;
   }
@@ -542,11 +553,11 @@ const homeStyles = `
     pointer-events: none;
   }
 
-  .logo-card {
+  .visual-card {
     position: relative;
     width: 100%;
-    max-width: 460px;
-    min-height: 430px;
+    max-width: 470px;
+    min-height: 500px;
     background:
       linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
     border-radius: 30px;
@@ -554,13 +565,21 @@ const homeStyles = `
     box-shadow:
       0 24px 60px rgba(0,0,0,0.28),
       inset 0 1px 0 rgba(255,255,255,0.04);
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow: hidden;
   }
 
-  .logo-orb {
+  .visual-topline {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 20px;
+    color: #9fb0d3;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .visual-orb {
     position: absolute;
     border-radius: 999px;
     filter: blur(26px);
@@ -591,14 +610,50 @@ const homeStyles = `
     left: 80px;
   }
 
+  .logo-shell {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
   .hero-logo {
     width: 100%;
     height: auto;
-    max-width: 300px;
+    max-width: 280px;
     object-fit: contain;
     border-radius: 18px;
+  }
+
+  .visual-stats {
     position: relative;
     z-index: 1;
+    display: grid;
+    gap: 12px;
+  }
+
+  .visual-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .visual-stat-label {
+    color: #9fb0d3;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .visual-stat-value {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
   }
 
   .hero-stats {
@@ -850,9 +905,9 @@ const homeStyles = `
       font-size: 12px;
     }
 
-    .logo-card {
+    .visual-card {
       max-width: 340px;
-      min-height: 320px;
+      min-height: 390px;
       padding: 18px;
       border-radius: 22px;
     }
@@ -927,11 +982,6 @@ const homeStyles = `
 
     .cta-title {
       font-size: 24px;
-    }
-
-    .page-title,
-    .hero-stat-value {
-      word-break: break-word;
     }
   }
 `;
