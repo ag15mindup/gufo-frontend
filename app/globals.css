@@ -67,7 +67,7 @@ body.gufo-body {
   overflow-x: hidden;
 }
 
-/* stelle globali più leggere */
+/* stelle globali */
 body.gufo-body::before {
   content: "";
   position: fixed;
@@ -88,7 +88,7 @@ body.gufo-body::before {
   opacity: 0.32;
 }
 
-/* glow globale più leggero */
+/* glow globale */
 body.gufo-body::after {
   content: "";
   position: fixed;
@@ -153,11 +153,36 @@ footer {
   padding: 24px;
   z-index: 1;
   background: transparent;
+  overflow: hidden;
+}
+
+.app-main::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(5, 10, 20, 0.78), rgba(5, 10, 20, 0.9)),
+    url("/dashboard-space.jpg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.42;
+}
+
+.app-main > * {
+  position: relative;
+  z-index: 1;
 }
 
 .app-main.public-page {
   padding: 0;
   background: transparent;
+}
+
+.app-main.public-page::before {
+  display: none;
 }
 
 .app-main.private-page {
@@ -170,6 +195,22 @@ footer {
   min-height: calc(100vh - 48px);
   z-index: 1;
   background: transparent;
+}
+
+.gufo-page-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 0 22%),
+    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 0 20%);
+  z-index: 0;
+}
+
+.gufo-page-frame > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* testi */
@@ -332,6 +373,11 @@ textarea {
 
   .gufo-card {
     border-radius: 18px;
+  }
+
+  .app-main::before {
+    background-position: center;
+    opacity: 0.34;
   }
 }
 
