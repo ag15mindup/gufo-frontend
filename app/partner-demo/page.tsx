@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
+import styles from "./partner-demo.module.css";
 
 type CustomerResponse = {
   id: string;
@@ -205,72 +206,99 @@ export default function PartnerDemoPage() {
     : 0;
 
   return (
-    <div className="partner-premium-page">
-      <style>{partnerDemoStyles}</style>
+    <div className={styles.page}>
+      <div className={styles.bgOverlay} />
+      <div className={styles.rainbowLine} />
 
-      <div className="hero-line" />
-
-      <div className="partner-premium-hero">
+      <div className={styles.hero}>
         <div>
-          <div className="hero-eyebrow">GUFO PARTNER CENTER</div>
-          <h1 className="hero-page-title">Partner Demo</h1>
-          <p className="hero-page-subtitle">
+          <p className={styles.welcome}>GUFO PARTNER CENTER</p>
+          <h1 className={styles.userName}>Partner Demo</h1>
+          <p className={styles.email}>
             Cerca il cliente tramite codice GUFO e simula un pagamento partner
           </p>
         </div>
 
-        <div className="hero-badge">
-          <span className="hero-badge-dot" />
-          Partner Flow Active
-        </div>
-      </div>
-
-      <div className="stats-row">
-        <div className="mini-stat premium-card">
-          <div className="mini-stat-number">
+        <div className={styles.balanceCard}>
+          <span className={styles.balanceLabel}>Partner flow</span>
+          <h2 className={styles.balanceValue}>
             {customer ? customer.customer_code : "--"}
-          </div>
-          <div className="mini-stat-label">Cliente selezionato</div>
-          <div className="mini-stat-side">Lookup</div>
-        </div>
+          </h2>
+          <div className={styles.balanceSubValue}>Partner Flow Active</div>
 
-        <div className="mini-stat premium-card">
-          <div className="mini-stat-number">
-            {customer ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%` : "--"}
+          <div className={styles.balanceButtons}>
+            <button type="button" className={styles.primaryBtn}>
+              {customer
+                ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%`
+                : "--"}
+            </button>
+            <button type="button" className={styles.secondaryBtn}>
+              {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"} GUFO
+            </button>
           </div>
-          <div className="mini-stat-label">Cashback cliente</div>
-          <div className="mini-stat-side">Reward</div>
-        </div>
-
-        <div className="mini-stat premium-card">
-          <div className="mini-stat-number">
-            {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"}
-          </div>
-          <div className="mini-stat-label">GUFO previsti</div>
-          <div className="mini-stat-side">Preview</div>
         </div>
       </div>
 
-      <div className="forms-grid">
-        <form onSubmit={handleSearchCustomer} className="panel-card premium-card">
-          <div className="section-header">
+      <div className={styles.statsGrid}>
+        <div className={`${styles.statCard} ${styles.cyan}`}>
+          <div>
+            <div className={styles.statValue}>
+              {customer ? customer.customer_code : "--"}
+            </div>
+            <div className={styles.statLabel}>Cliente selezionato</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>C</div>
+            <div className={styles.statHint}>Lookup</div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.purple}`}>
+          <div>
+            <div className={styles.statValue}>
+              {customer ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%` : "--"}
+            </div>
+            <div className={styles.statLabel}>Cashback cliente</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>%</div>
+            <div className={styles.statHint}>Reward</div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.orange}`}>
+          <div>
+            <div className={styles.statValue}>
+              {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"}
+            </div>
+            <div className={styles.statLabel}>GUFO previsti</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>G</div>
+            <div className={styles.statHint}>Preview</div>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.formsGrid}>
+        <form onSubmit={handleSearchCustomer} className={styles.panel}>
+          <div className={styles.panelHeader}>
             <div>
-              <h2 className="section-title">Cerca cliente</h2>
-              <p className="section-subtitle">
+              <h3>Cerca cliente</h3>
+              <p className={styles.panelSubtext}>
                 Recupera dati wallet e membership dal codice GUFO
               </p>
             </div>
-
-            <div className="mini-pill">Lookup</div>
+            <span>Lookup</span>
           </div>
 
-          <div className="field-group">
-            <label className="field-label">Codice cliente</label>
+          <div className={styles.fieldGroup}>
+            <label className={styles.inputLabel}>Codice cliente</label>
             <input
               type="text"
               value={customerCode}
               onChange={(e) => setCustomerCode(e.target.value)}
-              className="field-input"
+              className={styles.inputControl}
               placeholder="Es. GUFO-915728"
             />
           </div>
@@ -278,54 +306,54 @@ export default function PartnerDemoPage() {
           <button
             type="submit"
             disabled={loadingCustomer}
-            className="primary-button"
+            className={styles.primaryBtnWide}
           >
             {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
           </button>
 
           {customer && (
-            <div className="info-box blue-box">
-              <div className="section-header small-gap">
-                <h3 className="info-title blue-title">Cliente trovato</h3>
-                <span className="mini-pill">Found</span>
+            <div className={styles.infoBox}>
+              <div className={styles.panelHeader}>
+                <h3>Cliente trovato</h3>
+                <span>Found</span>
               </div>
 
-              <div className="info-grid">
-                <div className="mini-card">
-                  <p className="mini-label">Codice cliente</p>
-                  <p className="mini-value">{customer.customer_code}</p>
+              <div className={styles.infoGrid}>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Codice cliente</p>
+                  <p className={styles.infoMiniValue}>{customer.customer_code}</p>
                 </div>
 
-                <div className="mini-card">
-                  <p className="mini-label">Livello</p>
-                  <p className="mini-value">{formatLevel(customer.level)}</p>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Livello</p>
+                  <p className={styles.infoMiniValue}>{formatLevel(customer.level)}</p>
                 </div>
 
-                <div className="mini-card">
-                  <p className="mini-label">Saldo GUFO</p>
-                  <p className="mini-value">
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Saldo GUFO</p>
+                  <p className={styles.infoMiniValue}>
                     {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
                   </p>
                 </div>
 
-                <div className="mini-card">
-                  <p className="mini-label">Cashback</p>
-                  <p className="mini-value">
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Cashback</p>
+                  <p className={styles.infoMiniValue}>
                     {toNumberSafe(customer.cashback_percent).toFixed(2)}%
                   </p>
                 </div>
 
-                <div className="mini-card">
-                  <p className="mini-label">Saldo €</p>
-                  <p className="mini-value">
-                    €{toNumberSafe(customer.balance_eur).toFixed(2)}
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Saldo €</p>
+                  <p className={styles.infoMiniValue}>
+                    € {toNumberSafe(customer.balance_eur).toFixed(2)}
                   </p>
                 </div>
 
-                <div className="mini-card">
-                  <p className="mini-label">Spesa stagione</p>
-                  <p className="mini-value">
-                    €{toNumberSafe(customer.season_spent).toFixed(2)}
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Spesa stagione</p>
+                  <p className={styles.infoMiniValue}>
+                    € {toNumberSafe(customer.season_spent).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -333,64 +361,65 @@ export default function PartnerDemoPage() {
           )}
         </form>
 
-        <form onSubmit={handlePayment} className="panel-card premium-card">
-          <div className="section-header">
+        <form onSubmit={handlePayment} className={styles.panel}>
+          <div className={styles.panelHeader}>
             <div>
-              <h2 className="section-title">Registra pagamento</h2>
-              <p className="section-subtitle">
+              <h3>Registra pagamento</h3>
+              <p className={styles.panelSubtext}>
                 Simula una transazione partner e il cashback GUFO
               </p>
             </div>
-
-            <div className="mini-pill">Payment</div>
+            <span>Payment</span>
           </div>
 
-          <div className="field-group">
-            <label className="field-label">Merchant</label>
+          <div className={styles.fieldGroup}>
+            <label className={styles.inputLabel}>Merchant</label>
             <input
               type="text"
               value={merchantName}
               onChange={(e) => setMerchantName(e.target.value)}
-              className="field-input"
+              className={styles.inputControl}
               placeholder="Es. Coop"
             />
           </div>
 
-          <div className="field-group">
-            <label className="field-label">Importo (€)</label>
+          <div className={styles.fieldGroup}>
+            <label className={styles.inputLabel}>Importo (€)</label>
             <input
               type="number"
               step="0.01"
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="field-input"
+              className={styles.inputControl}
               placeholder="Es. 120"
             />
           </div>
 
           {customer && previewAmount > 0 && (
-            <div className="preview-box">
-              <h3 className="preview-title">Riepilogo pagamento</h3>
+            <div className={styles.previewBox}>
+              <h4 className={styles.previewTitle}>Riepilogo pagamento</h4>
 
-              <div className="preview-grid">
-                <div className="preview-row">
+              <div className={styles.previewGrid}>
+                <div className={styles.previewRow}>
                   <span>Cliente</span>
                   <strong>{customer.customer_code}</strong>
                 </div>
-                <div className="preview-row">
+                <div className={styles.previewRow}>
                   <span>Merchant</span>
                   <strong>{merchantName.trim() || "-"}</strong>
                 </div>
-                <div className="preview-row">
+                <div className={styles.previewRow}>
                   <span>Importo</span>
-                  <strong>€{previewAmount.toFixed(2)}</strong>
+                  <strong>€ {previewAmount.toFixed(2)}</strong>
                 </div>
-                <div className="preview-row">
+                <div className={styles.previewRow}>
                   <span>Cashback applicato</span>
-                  <strong>{toNumberSafe(customer.cashback_percent).toFixed(2)}%</strong>
+                  <strong>
+                    {toNumberSafe(customer.cashback_percent).toFixed(2)}%
+                  </strong>
                 </div>
-                <div className="preview-row">
+                <div className={styles.previewRow}>
                   <span>GUFO previsti</span>
                   <strong>{previewCashback.toFixed(2)}</strong>
                 </div>
@@ -401,78 +430,77 @@ export default function PartnerDemoPage() {
           <button
             type="submit"
             disabled={loadingPayment || !customer}
-            className="secondary-button"
+            className={styles.secondaryBtnWide}
           >
             {loadingPayment ? "Pagamento in corso..." : "Esegui pagamento"}
           </button>
 
           {!customer && (
-            <p className="helper-text">
+            <p className={styles.helperText}>
               Cerca prima un cliente per abilitare il pagamento.
             </p>
           )}
         </form>
       </div>
 
-      {error && <div className="error-box">{error}</div>}
+      {error && <div className={styles.errorBox}>{error}</div>}
 
       {result?.success && (
-        <div className="result-card premium-card">
-          <div className="section-header">
+        <div className={styles.resultCard}>
+          <div className={styles.panelHeader}>
             <div>
-              <h2 className="section-title success-title">Pagamento completato</h2>
-              <p className="section-subtitle">
+              <h3 className={styles.successTitle}>Pagamento completato</h3>
+              <p className={styles.panelSubtext}>
                 La simulazione partner è stata registrata correttamente
               </p>
             </div>
-
-            <div className="mini-pill">Success</div>
+            <span>Success</span>
           </div>
 
-          <div className="info-grid">
-            <div className="mini-card">
-              <p className="mini-label">Merchant</p>
-              <p className="mini-value">
+          <div className={styles.infoGrid}>
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>Merchant</p>
+              <p className={styles.infoMiniValue}>
                 {result.merchant_name || result.transaction?.benefit || "-"}
               </p>
             </div>
 
-            <div className="mini-card">
-              <p className="mini-label">ID transazione</p>
-              <p className="mini-value">{getTransactionId(result) || "-"}</p>
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>ID transazione</p>
+              <p className={styles.infoMiniValue}>{getTransactionId(result) || "-"}</p>
             </div>
 
-            <div className="mini-card">
-              <p className="mini-label">Importo</p>
-              <p className="mini-value">
-                €{toNumberSafe(result.transaction?.amount).toFixed(2)}
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>Importo</p>
+              <p className={styles.infoMiniValue}>
+                € {toNumberSafe(result.transaction?.amount).toFixed(2)}
               </p>
             </div>
 
-            <div className="mini-card">
-              <p className="mini-label">GUFO guadagnati</p>
-              <p className="mini-value">
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>GUFO guadagnati</p>
+              <p className={styles.infoMiniValue}>
                 {toNumberSafe(
                   result.gufo_earned || result.transaction?.gufo_earned
                 ).toFixed(2)}
               </p>
             </div>
 
-            <div className="mini-card">
-              <p className="mini-label">Nuovo saldo</p>
-              <p className="mini-value">
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>Nuovo saldo</p>
+              <p className={styles.infoMiniValue}>
                 {toNumberSafe(result.new_balance).toFixed(2)} GUFO
               </p>
             </div>
 
-            <div className="mini-card">
-              <p className="mini-label">Tipo</p>
-              <p className="mini-value">{result.transaction?.tipo || "-"}</p>
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>Tipo</p>
+              <p className={styles.infoMiniValue}>{result.transaction?.tipo || "-"}</p>
             </div>
 
-            <div className="mini-card full-span">
-              <p className="mini-label">Data</p>
-              <p className="mini-value">
+            <div className={`${styles.infoMiniCard} ${styles.fullSpan}`}>
+              <p className={styles.infoMiniLabel}>Data</p>
+              <p className={styles.infoMiniValue}>
                 {result.transaction?.created_at
                   ? new Date(result.transaction.created_at).toLocaleString("it-IT")
                   : "-"}
@@ -484,471 +512,3 @@ export default function PartnerDemoPage() {
     </div>
   );
 }
-
-const partnerDemoStyles = `
-  * {
-    box-sizing: border-box;
-  }
-
-  .partner-premium-page {
-    position: relative;
-    min-height: 100%;
-    color: #ffffff;
-  }
-
-  .partner-premium-page::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(180deg, rgba(6, 10, 20, 0.18), rgba(6, 10, 20, 0.34)),
-      radial-gradient(circle at 18% 20%, rgba(56, 189, 248, 0.10), transparent 24%),
-      radial-gradient(circle at 84% 18%, rgba(236, 72, 153, 0.10), transparent 24%),
-      radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.08), transparent 20%),
-      radial-gradient(circle at 82% 80%, rgba(250, 204, 21, 0.08), transparent 22%);
-    z-index: 0;
-  }
-
-  .partner-premium-page > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .hero-line {
-    width: 100%;
-    height: 3px;
-    border-radius: 999px;
-    margin-bottom: 22px;
-    background: linear-gradient(
-      90deg,
-      rgba(34, 211, 238, 0.95),
-      rgba(132, 204, 22, 0.9),
-      rgba(250, 204, 21, 0.95),
-      rgba(251, 113, 133, 0.95),
-      rgba(196, 181, 253, 0.95)
-    );
-    box-shadow: 0 0 18px rgba(255,255,255,0.14);
-  }
-
-  .partner-premium-hero {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 18px;
-    margin-bottom: 22px;
-  }
-
-  .hero-eyebrow {
-    font-size: 13px;
-    font-weight: 800;
-    color: #f8fafc;
-    margin-bottom: 10px;
-  }
-
-  .hero-page-title {
-    margin: 0 0 8px 0;
-    font-size: 58px;
-    line-height: 0.96;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    text-shadow: 0 0 18px rgba(255,255,255,0.12);
-    word-break: break-word;
-  }
-
-  .hero-page-subtitle {
-    margin: 0;
-    max-width: 760px;
-    color: #d7e2f2;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 42px;
-    padding: 0 16px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 0 18px rgba(56, 189, 248, 0.06);
-  }
-
-  .hero-badge-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #4ade80, #22c55e);
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.55);
-    flex-shrink: 0;
-  }
-
-  .premium-card {
-    background: linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.60),
-      rgba(15, 23, 42, 0.48)
-    );
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 24px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    box-shadow:
-      0 16px 38px rgba(0,0,0,0.28),
-      inset 0 1px 0 rgba(255,255,255,0.05),
-      0 0 0 1px rgba(255,255,255,0.02);
-  }
-
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    margin-bottom: 22px;
-  }
-
-  .mini-stat {
-    min-height: 150px;
-    padding: 22px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-
-  .mini-stat-number {
-    font-size: 32px;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.03em;
-    color: #ffffff;
-    word-break: break-word;
-  }
-
-  .mini-stat-label {
-    color: #e8eefc;
-    font-size: 15px;
-    font-weight: 700;
-  }
-
-  .mini-stat-side {
-    color: #dbe7fb;
-    font-size: 14px;
-    font-weight: 700;
-    opacity: 0.92;
-    align-self: flex-end;
-  }
-
-  .forms-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-
-  .panel-card {
-    padding: 22px;
-  }
-
-  .section-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 18px;
-  }
-
-  .section-header.small-gap {
-    margin-bottom: 14px;
-  }
-
-  .section-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 900;
-    color: #ffffff;
-  }
-
-  .success-title {
-    color: #86efac;
-  }
-
-  .section-subtitle {
-    margin: 6px 0 0 0;
-    color: #d7e2f2;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-
-  .mini-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 36px;
-    padding: 0 12px;
-    border-radius: 999px;
-    white-space: nowrap;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #eef2ff;
-    font-size: 12px;
-    font-weight: 700;
-  }
-
-  .field-group {
-    margin-bottom: 18px;
-  }
-
-  .field-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #b9c6e3;
-    font-size: 14px;
-  }
-
-  .field-input {
-    width: 100%;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 14px 16px;
-    color: white;
-    outline: none;
-    font-size: 14px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
-  }
-
-  .field-input::placeholder {
-    color: #99a8c7;
-  }
-
-  .field-input:focus {
-    border-color: rgba(56, 189, 248, 0.35);
-    box-shadow:
-      0 0 0 1px rgba(56, 189, 248, 0.16),
-      0 0 18px rgba(56, 189, 248, 0.06);
-  }
-
-  .primary-button,
-  .secondary-button {
-    width: 100%;
-    border: none;
-    border-radius: 16px;
-    padding: 14px 16px;
-    color: white;
-    font-weight: 800;
-    font-size: 15px;
-    cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .primary-button:hover,
-  .secondary-button:hover {
-    opacity: 0.97;
-    transform: translateY(-1px);
-  }
-
-  .primary-button:disabled,
-  .secondary-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  .primary-button {
-    background: linear-gradient(90deg, #4f46e5 0%, #2563eb 100%);
-    box-shadow:
-      0 12px 24px rgba(37, 99, 235, 0.18),
-      0 0 18px rgba(79, 70, 229, 0.10);
-  }
-
-  .secondary-button {
-    background: linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%);
-    box-shadow:
-      0 12px 24px rgba(14, 165, 233, 0.18),
-      0 0 18px rgba(37, 99, 235, 0.10);
-  }
-
-  .helper-text {
-    margin: 12px 0 0 0;
-    font-size: 13px;
-    color: #99a8c7;
-  }
-
-  .preview-box {
-    margin-bottom: 18px;
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.03);
-    padding: 16px;
-  }
-
-  .preview-title {
-    margin: 0 0 12px 0;
-    font-size: 18px;
-    font-weight: 800;
-    color: #ffffff;
-  }
-
-  .preview-grid {
-    display: grid;
-    gap: 10px;
-  }
-
-  .preview-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    color: #dbe4f0;
-    font-size: 14px;
-  }
-
-  .preview-row span {
-    color: #99a8c7;
-  }
-
-  .info-box {
-    margin-top: 22px;
-    border-radius: 20px;
-    padding: 18px;
-  }
-
-  .blue-box {
-    border: 1px solid rgba(59, 130, 246, 0.28);
-    background: rgba(59, 130, 246, 0.10);
-  }
-
-  .info-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1.1;
-  }
-
-  .blue-title {
-    color: #93c5fd;
-  }
-
-  .info-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .mini-card {
-    background: rgba(15, 23, 42, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 16px;
-    min-width: 0;
-  }
-
-  .mini-label {
-    margin: 0 0 8px 0;
-    color: #99a8c7;
-    font-size: 13px;
-  }
-
-  .mini-value {
-    margin: 0;
-    color: white;
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1.4;
-    word-break: break-word;
-  }
-
-  .result-card {
-    margin-top: 22px;
-    padding: 22px;
-  }
-
-  .full-span {
-    grid-column: 1 / -1;
-  }
-
-  .error-box {
-    margin-top: 22px;
-    color: #fecaca;
-    background: rgba(127, 29, 29, 0.24);
-    border: 1px solid rgba(248, 113, 113, 0.28);
-    border-radius: 20px;
-    padding: 18px;
-  }
-
-  @media (max-width: 1100px) {
-    .forms-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  @media (max-width: 980px) {
-    .stats-row {
-      grid-template-columns: 1fr;
-    }
-
-    .hero-page-title {
-      font-size: 42px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .partner-premium-hero {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .hero-page-title {
-      font-size: 34px;
-    }
-
-    .panel-card,
-    .result-card,
-    .mini-stat {
-      padding: 16px;
-    }
-
-    .section-header {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .info-grid {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .mini-card {
-      padding: 14px;
-      border-radius: 16px;
-    }
-
-    .mini-value {
-      font-size: 16px;
-    }
-
-    .preview-row {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .hero-page-title {
-      font-size: 30px;
-    }
-
-    .section-title {
-      font-size: 20px;
-    }
-
-    .mini-stat-number {
-      font-size: 26px;
-    }
-  }
-`;
