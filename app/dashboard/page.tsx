@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./dashboard.module.css";
 import { createClient } from "@/lib/supabase/client";
@@ -60,7 +61,6 @@ type DashboardData = {
   totalSpent: number;
   totalGufoEarned: number;
   level: string;
-  cashbackPercent: number;
   transactions: Transaction[];
   monthlyExpenses: number[];
   profileName: string;
@@ -77,7 +77,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function formatLevel(level?: string) {
-  if (!level) return "Basic";
+  if (!level) return "Bronze";
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
 
@@ -135,6 +135,21 @@ function getTransactionType(tx: Transaction) {
   return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "cashback";
 }
 
+function formatTransactionType(type?: string) {
+  const value = String(type || "cashback").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    default:
+      return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     method: "GET",
@@ -157,8 +172,7 @@ export default function DashboardPage() {
     totalTransactions: 0,
     totalSpent: 0,
     totalGufoEarned: 0,
-    level: "Basic",
-    cashbackPercent: 2,
+    level: "Bronze",
     transactions: [],
     monthlyExpenses: Array(12).fill(0),
     profileName: "Utente GUFO",
@@ -253,10 +267,7 @@ export default function DashboardPage() {
           totalGufoEarned: toNumberSafe(
             stats?.gufo_earned ?? wallet?.balance_gufo ?? 0
           ),
-          level: String(stats?.level ?? wallet?.current_level ?? "Basic"),
-          cashbackPercent: toNumberSafe(
-            stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
-          ),
+          level: String(stats?.level ?? wallet?.current_level ?? "Bronze"),
           transactions: normalizedTransactions,
           monthlyExpenses:
             monthlyExpenses.length === 12
@@ -297,7 +308,7 @@ export default function DashboardPage() {
 
         <div className={styles.hero}>
           <div>
-            <p className={styles.welcome}>Welcome back!</p>
+            <p className={styles.welcome}>Bentornato 👋</p>
             <h1 className={styles.userName}>Dashboard</h1>
             <p className={styles.email}>Caricamento dati account...</p>
           </div>
@@ -316,7 +327,7 @@ export default function DashboardPage() {
 
         <div className={styles.hero}>
           <div>
-            <p className={styles.welcome}>Welcome back!</p>
+            <p className={styles.welcome}>Bentornato 👋</p>
             <h1 className={styles.userName}>Dashboard</h1>
             <p className={styles.email}>Si è verificato un problema.</p>
           </div>
@@ -327,194 +338,189 @@ export default function DashboardPage() {
     );
   }
 
- return (
-  <div className={styles.page}>
-    <div className={styles.bgOverlay} />
-    <div className={styles.rainbowLine} />
+  return (
+    <div className={styles.page}>
+      <div className={styles.bgOverlay} />
+      <div className={styles.rainbowLine} />
 
-    <div className={styles.hero}>
-      <div>
-        <p className={styles.welcome}>Bentornato 👋</p>
-        <h1 className={styles.userName}>{dashboardData.profileName}</h1>
-        {dashboardData.profileEmail && (
-          <p className={styles.email}>{dashboardData.profileEmail}</p>
-        )}
-      </div>
-
-      <div className={styles.balanceCard}>
-        <span className={styles.balanceLabel}>Saldo disponibile</span>
-        <h2 className={styles.balanceValue}>
-          {dashboardData.balanceGufo.toFixed(2)} GUFO
-        </h2>
-
-        <div className={styles.balanceButtons}>
-          <button type="button" className={styles.primaryBtn}>
-            Il mio codice
-          </button>
-          <button type="button" className={styles.secondaryBtn}>
-            Wallet
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div className={styles.statsGrid}>
-      <div className={`${styles.statCard} ${styles.cyan}`}>
+      <div className={styles.hero}>
         <div>
-          <div className={styles.statValue}>
-            {dashboardData.totalTransactions}
+          <p className={styles.welcome}>Bentornato 👋</p>
+          <h1 className={styles.userName}>{dashboardData.profileName}</h1>
+          {dashboardData.profileEmail ? (
+            <p className={styles.email}>{dashboardData.profileEmail}</p>
+          ) : null}
+        </div>
+
+        <div className={styles.balanceCard}>
+          <span className={styles.balanceLabel}>Saldo disponibile</span>
+          <h2 className={styles.balanceValue}>
+            {dashboardData.balanceGufo.toFixed(2)} GUFO
+          </h2>
+
+          <div className={styles.balanceButtons}>
+            <Link href="/customer-code" className={styles.primaryBtn}>
+              Il mio codice
+            </Link>
+            <Link href="/wallet" className={styles.secondaryBtn}>
+              Wallet
+            </Link>
           </div>
-          <div className={styles.statLabel}>Transazioni</div>
-        </div>
-        <div className={styles.statSide}>
-          <div className={styles.statMini}>↗</div>
-          <div className={styles.statHint}>Attive</div>
         </div>
       </div>
 
-      <div className={`${styles.statCard} ${styles.purple}`}>
-        <div>
-          <div className={styles.statValue}>
-            {formatLevel(dashboardData.level)}
+      <div className={styles.statsGrid}>
+        <div className={`${styles.statCard} ${styles.cyan}`}>
+          <div>
+            <div className={styles.statValue}>
+              {dashboardData.totalTransactions}
+            </div>
+            <div className={styles.statLabel}>Transazioni</div>
           </div>
-          <div className={styles.statLabel}>Livello</div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>↗</div>
+            <div className={styles.statHint}>Attive</div>
+          </div>
         </div>
-        <div className={styles.statSide}>
-          <div className={styles.statMini}>⬢</div>
-          <div className={styles.statHint}>Stagionale</div>
+
+        <div className={`${styles.statCard} ${styles.purple}`}>
+          <div>
+            <div className={styles.statValue}>
+              {formatLevel(dashboardData.level)}
+            </div>
+            <div className={styles.statLabel}>Livello</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>⬢</div>
+            <div className={styles.statHint}>Stagionale</div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.orange}`}>
+          <div>
+            <div className={styles.statValue}>Variabile</div>
+            <div className={styles.statLabel}>Cashback</div>
+          </div>
+          <div className={styles.statSide}>
+            <div className={styles.statMini}>%</div>
+            <div className={styles.statHint}>Deciso dai partner</div>
+          </div>
         </div>
       </div>
 
-      {/* 🔥 CARD CORRETTA */}
-      <div className={`${styles.statCard} ${styles.orange}`}>
-        <div>
-          <div className={styles.statValue}>Variabile</div>
-          <div className={styles.statLabel}>Cashback</div>
-        </div>
-        <div className={styles.statSide}>
-          <div className={styles.statMini}>%</div>
-          <div className={styles.statHint}>Deciso dai partner</div>
-        </div>
-      </div>
-    </div>
+      <div className={styles.bottomGrid}>
+        <section className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h3>Transazioni recenti</h3>
+            <span>Ultime</span>
+          </div>
 
-    <div className={styles.bottomGrid}>
-      <section className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <h3>Transazioni recenti</h3>
-          <span>Ultime</span>
-        </div>
-
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Partner</th>
-                <th>Data</th>
-                <th>Tipo</th>
-                <th>Importo</th>
-                <th>GUFO</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentTransactions.length === 0 ? (
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan={5} className={styles.emptyRow}>
-                    Nessuna transazione
-                  </td>
+                  <th>Partner</th>
+                  <th>Data</th>
+                  <th>Tipo</th>
+                  <th>Importo</th>
+                  <th>GUFO</th>
                 </tr>
-              ) : (
-                recentTransactions.map((tx, index) => (
-                  <tr key={tx.id || index}>
-                    <td className={styles.partnerCell}>
-                      {getTransactionMerchant(tx)}
+              </thead>
+              <tbody>
+                {recentTransactions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className={styles.emptyRow}>
+                      Nessuna transazione
                     </td>
-                    <td>
-                      {tx.created_at
-                        ? new Date(tx.created_at).toLocaleDateString("it-IT")
-                        : "-"}
-                    </td>
-                    <td>
-                      <span className={styles.badge}>
-                        {getTransactionType(tx)}
-                      </span>
-                    </td>
-                    <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
-                    <td>{getTransactionGufo(tx).toFixed(2)}</td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  recentTransactions.map((tx, index) => (
+                    <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
+                      <td className={styles.partnerCell}>
+                        {getTransactionMerchant(tx)}
+                      </td>
+                      <td>
+                        {tx.created_at
+                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
+                          : "-"}
+                      </td>
+                      <td>
+                        <span className={styles.badge}>
+                          {formatTransactionType(getTransactionType(tx))}
+                        </span>
+                      </td>
+                      <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
+                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside className={styles.panel}>
+          <div className={styles.panelHeader}>
+            <h3>Riepilogo</h3>
+            <span>GUFO</span>
+          </div>
+
+          <div className={styles.topList}>
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>{dashboardData.profileInitial}</div>
+              <div>
+                <strong>{dashboardData.profileName}</strong>
+                <p>Profilo attivo</p>
+              </div>
+              <span>{formatLevel(dashboardData.level)}</span>
+            </div>
+
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>€</div>
+              <div>
+                <strong>€ {dashboardData.totalSpent.toFixed(2)}</strong>
+                <p>Spesa stagione</p>
+              </div>
+              <span>spesa</span>
+            </div>
+
+            <div className={styles.topItem}>
+              <div className={styles.avatar}>G</div>
+              <div>
+                <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
+                <p>GUFO guadagnati</p>
+              </div>
+              <span>reward</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section className={styles.chartPanel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <h3>Andamento spese</h3>
+            <span>Ultimi 12 mesi</span>
+          </div>
+        </div>
+
+        <div className={styles.chartWrap}>
+          {dashboardData.monthlyExpenses.map((value, index) => {
+            const height =
+              value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
+
+            return (
+              <div className={styles.chartItem} key={index}>
+                <span className={styles.chartValue}>€{value.toFixed(0)}</span>
+                <div className={styles.chartBarShell}>
+                  <div className={styles.chartBar} style={{ height }} />
+                </div>
+                <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
+              </div>
+            );
+          })}
         </div>
       </section>
-
-      <aside className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <h3>Riepilogo</h3>
-          <span>GUFO</span>
-        </div>
-
-        <div className={styles.topList}>
-          <div className={styles.topItem}>
-            <div className={styles.avatar}>
-              {dashboardData.profileInitial}
-            </div>
-            <div>
-              <strong>{dashboardData.profileName}</strong>
-              <p>Profilo attivo</p>
-            </div>
-            <span>{formatLevel(dashboardData.level)}</span>
-          </div>
-
-          <div className={styles.topItem}>
-            <div className={styles.avatar}>€</div>
-            <div>
-              <strong>€ {dashboardData.totalSpent.toFixed(2)}</strong>
-              <p>Spesa stagione</p>
-            </div>
-            <span>spesa</span>
-          </div>
-
-          <div className={styles.topItem}>
-            <div className={styles.avatar}>G</div>
-            <div>
-              <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
-              <p>GUFO guadagnati</p>
-            </div>
-            <span>reward</span>
-          </div>
-        </div>
-      </aside>
     </div>
-
-    <section className={styles.chartPanel}>
-      <div className={styles.panelHeader}>
-        <div>
-          <h3>Andamento spese</h3>
-          <span>Ultimi 12 mesi</span>
-        </div>
-      </div>
-
-      <div className={styles.chartWrap}>
-        {dashboardData.monthlyExpenses.map((value, index) => {
-          const height =
-            value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
-
-          return (
-            <div className={styles.chartItem} key={index}>
-              <span className={styles.chartValue}>€{value.toFixed(0)}</span>
-              <div className={styles.chartBarShell}>
-                <div className={styles.chartBar} style={{ height }} />
-              </div>
-              <span className={styles.chartLabel}>
-                {getMonthLabel(index)}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  </div>
-);
+  );
 }
