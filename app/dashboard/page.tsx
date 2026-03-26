@@ -327,193 +327,194 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <div className={styles.page}>
-      <div className={styles.bgOverlay} />
-      <div className={styles.rainbowLine} />
+ return (
+  <div className={styles.page}>
+    <div className={styles.bgOverlay} />
+    <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+    <div className={styles.hero}>
+      <div>
+        <p className={styles.welcome}>Bentornato 👋</p>
+        <h1 className={styles.userName}>{dashboardData.profileName}</h1>
+        {dashboardData.profileEmail && (
+          <p className={styles.email}>{dashboardData.profileEmail}</p>
+        )}
+      </div>
+
+      <div className={styles.balanceCard}>
+        <span className={styles.balanceLabel}>Saldo disponibile</span>
+        <h2 className={styles.balanceValue}>
+          {dashboardData.balanceGufo.toFixed(2)} GUFO
+        </h2>
+
+        <div className={styles.balanceButtons}>
+          <button type="button" className={styles.primaryBtn}>
+            Il mio codice
+          </button>
+          <button type="button" className={styles.secondaryBtn}>
+            Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div className={styles.statsGrid}>
+      <div className={`${styles.statCard} ${styles.cyan}`}>
         <div>
-          <p className={styles.welcome}>Welcome back!</p>
-          <h1 className={styles.userName}>{dashboardData.profileName}</h1>
-          {dashboardData.profileEmail ? (
-            <p className={styles.email}>{dashboardData.profileEmail}</p>
-          ) : null}
-        </div>
-
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Balance</span>
-          <h2 className={styles.balanceValue}>
-            {dashboardData.balanceGufo.toFixed(2)} GUFO
-          </h2>
-
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
-              + Deposit
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              + Withdraw
-            </button>
+          <div className={styles.statValue}>
+            {dashboardData.totalTransactions}
           </div>
+          <div className={styles.statLabel}>Transazioni</div>
+        </div>
+        <div className={styles.statSide}>
+          <div className={styles.statMini}>↗</div>
+          <div className={styles.statHint}>Attive</div>
         </div>
       </div>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>
-              {dashboardData.totalTransactions}
-            </div>
-            <div className={styles.statLabel}>Active Transactions</div>
+      <div className={`${styles.statCard} ${styles.purple}`}>
+        <div>
+          <div className={styles.statValue}>
+            {formatLevel(dashboardData.level)}
           </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>↗</div>
-            <div className={styles.statHint}>Live</div>
-          </div>
+          <div className={styles.statLabel}>Livello</div>
         </div>
-
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>
-              {formatLevel(dashboardData.level)}
-            </div>
-            <div className={styles.statLabel}>Membership Level</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>⬢</div>
-            <div className={styles.statHint}>User tier</div>
-          </div>
-        </div>
-
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>
-              {dashboardData.cashbackPercent}%
-            </div>
-            <div className={styles.statLabel}>Cashback Rate</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>⤴</div>
-            <div className={styles.statHint}>Current</div>
-          </div>
+        <div className={styles.statSide}>
+          <div className={styles.statMini}>⬢</div>
+          <div className={styles.statHint}>Stagionale</div>
         </div>
       </div>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Recent Transactions</h3>
-            <span>View All</span>
-          </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Partner</th>
-                  <th>Data</th>
-                  <th>Tipo</th>
-                  <th>Importo</th>
-                  <th>GUFO</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTransactions.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className={styles.emptyRow}>
-                      Nessuna transazione disponibile
-                    </td>
-                  </tr>
-                ) : (
-                  recentTransactions.map((tx, index) => (
-                    <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
-                      <td className={styles.partnerCell}>
-                        {getTransactionMerchant(tx)}
-                      </td>
-                      <td>
-                        {tx.created_at
-                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
-                          : "-"}
-                      </td>
-                      <td>
-                        <span className={styles.badge}>
-                          {getTransactionType(tx)}
-                        </span>
-                      </td>
-                      <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
-                      <td>{getTransactionGufo(tx).toFixed(2)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Top Info</h3>
-            <span>PRO</span>
-          </div>
-
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>
-                {dashboardData.profileInitial}
-              </div>
-              <div>
-                <strong>{dashboardData.profileName}</strong>
-                <p>Profilo attivo</p>
-              </div>
-              <span>{formatLevel(dashboardData.level)}</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {dashboardData.totalSpent.toFixed(2)}</strong>
-                <p>Spesa totale</p>
-              </div>
-              <span>tot</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>G</div>
-              <div>
-                <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
-                <p>GUFO guadagnati</p>
-              </div>
-              <span>earn</span>
-            </div>
-          </div>
-        </aside>
+      {/* 🔥 CARD CORRETTA */}
+      <div className={`${styles.statCard} ${styles.orange}`}>
+        <div>
+          <div className={styles.statValue}>Variabile</div>
+          <div className={styles.statLabel}>Cashback</div>
+        </div>
+        <div className={styles.statSide}>
+          <div className={styles.statMini}>%</div>
+          <div className={styles.statHint}>Deciso dai partner</div>
+        </div>
       </div>
+    </div>
 
-      <section className={styles.chartPanel}>
+    <div className={styles.bottomGrid}>
+      <section className={styles.panel}>
         <div className={styles.panelHeader}>
-          <div>
-            <h3>Andamento spese</h3>
-            <span>Ultimi 12 mesi</span>
-          </div>
+          <h3>Transazioni recenti</h3>
+          <span>Ultime</span>
         </div>
 
-        <div className={styles.chartWrap}>
-          {dashboardData.monthlyExpenses.map((value, index) => {
-            const height =
-              value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
-
-            return (
-              <div className={styles.chartItem} key={index}>
-                <span className={styles.chartValue}>€{value.toFixed(0)}</span>
-                <div className={styles.chartBarShell}>
-                  <div className={styles.chartBar} style={{ height }} />
-                </div>
-                <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
-              </div>
-            );
-          })}
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Partner</th>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Importo</th>
+                <th>GUFO</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentTransactions.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className={styles.emptyRow}>
+                    Nessuna transazione
+                  </td>
+                </tr>
+              ) : (
+                recentTransactions.map((tx, index) => (
+                  <tr key={tx.id || index}>
+                    <td className={styles.partnerCell}>
+                      {getTransactionMerchant(tx)}
+                    </td>
+                    <td>
+                      {tx.created_at
+                        ? new Date(tx.created_at).toLocaleDateString("it-IT")
+                        : "-"}
+                    </td>
+                    <td>
+                      <span className={styles.badge}>
+                        {getTransactionType(tx)}
+                      </span>
+                    </td>
+                    <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
+                    <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
+
+      <aside className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <h3>Riepilogo</h3>
+          <span>GUFO</span>
+        </div>
+
+        <div className={styles.topList}>
+          <div className={styles.topItem}>
+            <div className={styles.avatar}>
+              {dashboardData.profileInitial}
+            </div>
+            <div>
+              <strong>{dashboardData.profileName}</strong>
+              <p>Profilo attivo</p>
+            </div>
+            <span>{formatLevel(dashboardData.level)}</span>
+          </div>
+
+          <div className={styles.topItem}>
+            <div className={styles.avatar}>€</div>
+            <div>
+              <strong>€ {dashboardData.totalSpent.toFixed(2)}</strong>
+              <p>Spesa stagione</p>
+            </div>
+            <span>spesa</span>
+          </div>
+
+          <div className={styles.topItem}>
+            <div className={styles.avatar}>G</div>
+            <div>
+              <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
+              <p>GUFO guadagnati</p>
+            </div>
+            <span>reward</span>
+          </div>
+        </div>
+      </aside>
     </div>
-  );
+
+    <section className={styles.chartPanel}>
+      <div className={styles.panelHeader}>
+        <div>
+          <h3>Andamento spese</h3>
+          <span>Ultimi 12 mesi</span>
+        </div>
+      </div>
+
+      <div className={styles.chartWrap}>
+        {dashboardData.monthlyExpenses.map((value, index) => {
+          const height =
+            value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
+
+          return (
+            <div className={styles.chartItem} key={index}>
+              <span className={styles.chartValue}>€{value.toFixed(0)}</span>
+              <div className={styles.chartBarShell}>
+                <div className={styles.chartBar} style={{ height }} />
+              </div>
+              <span className={styles.chartLabel}>
+                {getMonthLabel(index)}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  </div>
+);
 }
