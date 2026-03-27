@@ -44,7 +44,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function formatLevel(level: string) {
-  if (!level) return "Basic";
+  if (!level) return "Bronze";
 
   const normalized = String(level).toLowerCase().trim();
 
@@ -88,7 +88,7 @@ export default function PartnerDemoPage() {
         customer_code: payload.customer_code,
         balance_gufo: toNumberSafe(payload.balance_gufo),
         balance_eur: toNumberSafe(payload.balance_eur),
-        level: String(payload.level || "basic"),
+        level: String(payload.level || "bronze"),
         cashback_percent: toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
       });
@@ -127,7 +127,7 @@ export default function PartnerDemoPage() {
         customer_code: payload.customer_code,
         balance_gufo: toNumberSafe(payload.balance_gufo),
         balance_eur: toNumberSafe(payload.balance_eur),
-        level: String(payload.level || "basic"),
+        level: String(payload.level || "bronze"),
         cashback_percent: toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
       });
@@ -210,86 +210,91 @@ export default function PartnerDemoPage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+      <section className={styles.hero}>
         <div>
-          <p className={styles.welcome}>GUFO PARTNER CENTER</p>
-          <h1 className={styles.userName}>Partner Demo</h1>
-          <p className={styles.email}>
-            Cerca il cliente tramite codice GUFO e simula un pagamento partner
+          <p className={styles.eyebrow}>GUFO Partner Console</p>
+          <h1 className={styles.title}>Demo operativa partner</h1>
+          <p className={styles.subtitle}>
+            Cerca il cliente tramite customer code, verifica il profilo e registra una transazione demo.
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.operatorCard}>
+        <div className={styles.operatorCardLeft}>
+          <div className={styles.operatorTopRow}>
+            <span className={styles.operatorChip}>Partner flow</span>
+            <span className={styles.operatorStatus}>Console attiva</span>
+          </div>
+
+          <p className={styles.operatorLabel}>Cliente selezionato</p>
+          <h2 className={styles.operatorValue}>
+            {customer ? customer.customer_code : "--"}
+          </h2>
+
+          <p className={styles.operatorNote}>
+            Il flusso partner consente di identificare il cliente e simulare il pagamento con accredito GUFO.
           </p>
         </div>
 
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Partner flow</span>
-          <h2 className={styles.balanceValue}>
-            {customer ? customer.customer_code : "--"}
-          </h2>
-          <div className={styles.balanceSubValue}>Partner Flow Active</div>
-
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
+        <div className={styles.operatorCardRight}>
+          <div className={styles.operatorMiniCard}>
+            <span>Cashback cliente</span>
+            <strong>
               {customer
                 ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%`
                 : "--"}
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"} GUFO
-            </button>
+            </strong>
           </div>
-        </div>
-      </div>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>
-              {customer ? customer.customer_code : "--"}
-            </div>
-            <div className={styles.statLabel}>Cliente selezionato</div>
+          <div className={styles.operatorMiniCard}>
+            <span>Importo preview</span>
+            <strong>€ {previewAmount.toFixed(2)}</strong>
           </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>C</div>
-            <div className={styles.statHint}>Lookup</div>
-          </div>
-        </div>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>
-              {customer ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%` : "--"}
-            </div>
-            <div className={styles.statLabel}>Cashback cliente</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>%</div>
-            <div className={styles.statHint}>Reward</div>
-          </div>
-        </div>
-
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>
+          <div className={styles.operatorMiniCard}>
+            <span>GUFO previsti</span>
+            <strong>
               {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"}
-            </div>
-            <div className={styles.statLabel}>GUFO previsti</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>G</div>
-            <div className={styles.statHint}>Preview</div>
+            </strong>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.formsGrid}>
+      <section className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Cliente attivo</p>
+          <h3 className={styles.metricValue}>
+            {customer ? customer.customer_code : "--"}
+          </h3>
+          <span className={styles.metricHint}>Customer code in lavorazione</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Cashback cliente</p>
+          <h3 className={styles.metricValue}>
+            {customer ? `${toNumberSafe(customer.cashback_percent).toFixed(2)}%` : "--"}
+          </h3>
+          <span className={styles.metricHint}>Reward applicabile alla transazione</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>GUFO previsti</p>
+          <h3 className={styles.metricValue}>
+            {customer && previewAmount > 0 ? previewCashback.toFixed(2) : "0.00"}
+          </h3>
+          <span className={styles.metricHint}>Stima cashback calcolata live</span>
+        </div>
+      </section>
+
+      <section className={styles.formsGrid}>
         <form onSubmit={handleSearchCustomer} className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Customer Lookup</p>
               <h3>Cerca cliente</h3>
-              <p className={styles.panelSubtext}>
-                Recupera dati wallet e membership dal codice GUFO
-              </p>
             </div>
-            <span>Lookup</span>
+            <span className={styles.panelBadge}>Lookup</span>
           </div>
 
           <div className={styles.fieldGroup}>
@@ -313,14 +318,14 @@ export default function PartnerDemoPage() {
 
           {customer && (
             <div className={styles.infoBox}>
-              <div className={styles.panelHeader}>
-                <h3>Cliente trovato</h3>
-                <span>Found</span>
+              <div className={styles.infoHeader}>
+                <h4>Cliente trovato</h4>
+                <span>Ready</span>
               </div>
 
               <div className={styles.infoGrid}>
                 <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Codice cliente</p>
+                  <p className={styles.infoMiniLabel}>Customer code</p>
                   <p className={styles.infoMiniValue}>{customer.customer_code}</p>
                 </div>
 
@@ -364,12 +369,10 @@ export default function PartnerDemoPage() {
         <form onSubmit={handlePayment} className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Payment Action</p>
               <h3>Registra pagamento</h3>
-              <p className={styles.panelSubtext}>
-                Simula una transazione partner e il cashback GUFO
-              </p>
             </div>
-            <span>Payment</span>
+            <span className={styles.panelBadge}>Payment</span>
           </div>
 
           <div className={styles.fieldGroup}>
@@ -398,7 +401,7 @@ export default function PartnerDemoPage() {
 
           {customer && previewAmount > 0 && (
             <div className={styles.previewBox}>
-              <h4 className={styles.previewTitle}>Riepilogo pagamento</h4>
+              <h4 className={styles.previewTitle}>Riepilogo operazione</h4>
 
               <div className={styles.previewGrid}>
                 <div className={styles.previewRow}>
@@ -441,20 +444,18 @@ export default function PartnerDemoPage() {
             </p>
           )}
         </form>
-      </div>
+      </section>
 
       {error && <div className={styles.errorBox}>{error}</div>}
 
       {result?.success && (
-        <div className={styles.resultCard}>
+        <section className={styles.resultCard}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Transaction Result</p>
               <h3 className={styles.successTitle}>Pagamento completato</h3>
-              <p className={styles.panelSubtext}>
-                La simulazione partner è stata registrata correttamente
-              </p>
             </div>
-            <span>Success</span>
+            <span className={styles.panelBadge}>Success</span>
           </div>
 
           <div className={styles.infoGrid}>
@@ -507,7 +508,7 @@ export default function PartnerDemoPage() {
               </p>
             </div>
           </div>
-        </div>
+        </section>
       )}
     </div>
   );

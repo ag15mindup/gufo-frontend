@@ -49,7 +49,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function formatLevel(level: string) {
-  if (!level) return "Basic";
+  if (!level) return "Bronze";
 
   const normalized = String(level).toLowerCase().trim();
 
@@ -75,37 +75,29 @@ function getTransactionAmount(tx: any) {
 function getLevelTone(level: string) {
   const normalized = String(level).toLowerCase();
 
-  if (normalized === "basic") return styles.toneBasic;
   if (normalized === "bronze") return styles.toneBronze;
   if (normalized === "silver") return styles.toneSilver;
   if (normalized === "gold") return styles.toneGold;
-  if (normalized === "platino") return styles.tonePlatino;
   if (normalized === "vip") return styles.toneVip;
   if (normalized === "elite") return styles.toneElite;
-  if (normalized === "diamond") return styles.toneDiamond;
-  if (normalized === "millionaire") return styles.toneMillionaire;
 
-  return styles.toneBasic;
+  return styles.toneBronze;
 }
 
 export default function MembershipPage() {
   const [wallet, setWallet] = useState<WalletResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [cashbackPercent, setCashbackPercent] = useState(2);
+  const [cashbackPercent, setCashbackPercent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const levels = useMemo(
     () => [
-      { name: "Basic", min: 0, next: 100 },
-      { name: "Bronze", min: 100, next: 500 },
-      { name: "Silver", min: 500, next: 1000 },
+      { name: "Bronze", min: 0, next: 300 },
+      { name: "Silver", min: 300, next: 1000 },
       { name: "Gold", min: 1000, next: 2500 },
-      { name: "Platino", min: 2500, next: 5000 },
-      { name: "VIP", min: 5000, next: 10000 },
-      { name: "Elite", min: 10000, next: 25000 },
-      { name: "Diamond", min: 25000, next: 50000 },
-      { name: "Millionaire", min: 50000, next: null },
+      { name: "VIP", min: 2500, next: 6000 },
+      { name: "Elite", min: 6000, next: null },
     ],
     []
   );
@@ -152,7 +144,7 @@ export default function MembershipPage() {
         setTransactions(txs);
         setCashbackPercent(
           toNumberSafe(
-            stats?.cashback_percent ?? walletData?.cashback_percent ?? 2
+            stats?.cashback_percent ?? walletData?.cashback_percent ?? 0
           )
         );
       } catch (err: any) {
@@ -184,7 +176,7 @@ export default function MembershipPage() {
   const balanceGufo = toNumberSafe(wallet?.balance_gufo ?? wallet?.balance);
 
   const currentLevelRaw = String(
-    wallet?.level_name ?? wallet?.current_level ?? wallet?.level ?? "Basic"
+    wallet?.level_name ?? wallet?.current_level ?? wallet?.level ?? "Bronze"
   );
 
   const currentLevel = formatLevel(currentLevelRaw);
@@ -206,7 +198,7 @@ export default function MembershipPage() {
     : 0;
 
   const progressPercent =
-    nextLevelData && currentLevelData && nextLevelData.min > currentLevelData.min
+    nextLevelData && nextLevelData.min > currentLevelData.min
       ? Math.max(
           0,
           Math.min(
@@ -226,13 +218,11 @@ export default function MembershipPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO MEMBERSHIP</p>
-            <h1 className={styles.userName}>Membership</h1>
-            <p className={styles.email}>Caricamento progressi membership...</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Membership</p>
+          <h1 className={styles.title}>Status e progressione</h1>
+          <p className={styles.subtitle}>Caricamento progressi membership...</p>
+        </section>
 
         <div className={styles.loadingBox}>Recupero percorso membership...</div>
       </div>
@@ -245,13 +235,11 @@ export default function MembershipPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO MEMBERSHIP</p>
-            <h1 className={styles.userName}>Membership</h1>
-            <p className={styles.email}>Si è verificato un problema.</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Membership</p>
+          <h1 className={styles.title}>Status e progressione</h1>
+          <p className={styles.subtitle}>Si è verificato un problema.</p>
+        </section>
 
         <div className={styles.errorBox}>{error}</div>
       </div>
@@ -263,41 +251,47 @@ export default function MembershipPage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+      <section className={styles.hero}>
         <div>
-          <p className={styles.welcome}>GUFO MEMBERSHIP</p>
-          <h1 className={styles.userName}>Membership GUFO</h1>
-          <p className={styles.email}>
-            Controlla il tuo livello attuale e i progressi per salire di status
+          <p className={styles.eyebrow}>GUFO Membership</p>
+          <h1 className={styles.title}>Il tuo percorso status</h1>
+          <p className={styles.subtitle}>
+            Controlla il livello attuale, i progressi stagionali e quanto manca al prossimo traguardo.
           </p>
         </div>
+      </section>
 
-        <div className={`${styles.balanceCard} ${getLevelTone(currentLevel)}`}>
-          <span className={styles.balanceLabel}>Livello attuale</span>
-          <h2 className={styles.balanceValue}>{currentLevel}</h2>
-          <div className={styles.balanceSubValue}>
-            Cashback attuale: {cashbackPercent}%
-          </div>
-
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
-              € {seasonSpent.toFixed(2)}
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              {balanceGufo.toFixed(2)} GUFO
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <section className={`${styles.membershipHeroCard} ${getLevelTone(currentLevel)}`}>
+      <section className={`${styles.statusHeroCard} ${getLevelTone(currentLevel)}`}>
         <div className={styles.levelChip}>{currentLevel}</div>
 
-        <h2 className={styles.mainLevelTitle}>Livello attuale: {currentLevel}</h2>
-        <p className={styles.mainLevelText}>
-          Il tuo status si aggiorna in base alla spesa stagionale e al tuo utilizzo
-          dell’ecosistema GUFO.
-        </p>
+        <div className={styles.statusGrid}>
+          <div>
+            <p className={styles.heroLabel}>Livello attuale</p>
+            <h2 className={styles.mainLevelTitle}>{currentLevel}</h2>
+            <p className={styles.mainLevelText}>
+              Il tuo status si aggiorna in base alla spesa stagionale registrata dentro l’ecosistema GUFO.
+            </p>
+          </div>
+
+          <div className={styles.statusSideInfo}>
+            <div className={styles.sideMiniCard}>
+              <span>Spesa stagione</span>
+              <strong>€ {seasonSpent.toFixed(2)}</strong>
+            </div>
+
+            <div className={styles.sideMiniCard}>
+              <span>Saldo GUFO</span>
+              <strong>{balanceGufo.toFixed(2)}</strong>
+            </div>
+
+            <div className={styles.sideMiniCard}>
+              <span>Cashback attuale</span>
+              <strong>
+                {cashbackPercent > 0 ? `${cashbackPercent}%` : "Variabile"}
+              </strong>
+            </div>
+          </div>
+        </div>
 
         <div className={styles.progressShell}>
           <div className={styles.progressTop}>
@@ -314,60 +308,53 @@ export default function MembershipPage() {
 
           {nextLevelData ? (
             <p className={styles.progressNote}>
-              Prossimo livello: <strong>{nextLevelData.name}</strong> · Ti mancano{" "}
+              Prossimo livello: <strong>{nextLevelData.name}</strong> · Mancano{" "}
               <strong>€ {amountToNextLevel.toFixed(2)}</strong>
             </p>
           ) : (
-            <p className={styles.progressNote}>Hai raggiunto il livello massimo.</p>
+            <p className={styles.progressNote}>
+              Hai raggiunto il livello massimo disponibile.
+            </p>
           )}
         </div>
       </section>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>{balanceGufo.toFixed(2)}</div>
-            <div className={styles.statLabel}>Saldo GUFO</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>G</div>
-            <div className={styles.statHint}>Wallet</div>
-          </div>
+      <section className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Livello attuale</p>
+          <h3 className={styles.metricValue}>{currentLevel}</h3>
+          <span className={styles.metricHint}>Status membership corrente</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>€ {seasonSpent.toFixed(2)}</div>
-            <div className={styles.statLabel}>Spesa stagione</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>€</div>
-            <div className={styles.statHint}>Season</div>
-          </div>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Spesa stagione</p>
+          <h3 className={styles.metricValue}>€ {seasonSpent.toFixed(2)}</h3>
+          <span className={styles.metricHint}>Volume valido per la progressione</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>{cashbackPercent}%</div>
-            <div className={styles.statLabel}>Cashback attuale</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>%</div>
-            <div className={styles.statHint}>Reward</div>
-          </div>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Livelli raggiunti</p>
+          <h3 className={styles.metricValue}>{completedLevels}</h3>
+          <span className={styles.metricHint}>Step già sbloccati nel percorso</span>
         </div>
-      </div>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Prossimo target</p>
+          <h3 className={styles.metricValue}>
+            {nextLevelData ? nextLevelData.name : "MAX"}
+          </h3>
+          <span className={styles.metricHint}>Obiettivo successivo</span>
+        </div>
+      </section>
+
+      <section className={styles.mainGrid}>
+        <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Levels Map</p>
               <h3>Il tuo percorso Membership</h3>
-              <p className={styles.panelSubtext}>
-                Tutti i livelli disponibili e lo stato del tuo avanzamento
-              </p>
             </div>
-            <span>Levels Map</span>
+            <span className={styles.panelBadge}>Progressione</span>
           </div>
 
           <div className={styles.levelsGrid}>
@@ -393,7 +380,7 @@ export default function MembershipPage() {
                   </p>
 
                   <p className={styles.levelNext}>
-                    Soglia successiva:{" "}
+                    Prossimo step:{" "}
                     <strong>
                       {level.next !== null ? `€ ${level.next}` : "Livello massimo"}
                     </strong>
@@ -410,62 +397,34 @@ export default function MembershipPage() {
               );
             })}
           </div>
-        </section>
+        </div>
 
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Top Info</h3>
-            <span>PRO</span>
+        <aside className={styles.sideColumn}>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Livello attuale</p>
+            <h4>{currentLevel}</h4>
+            <span>Status membership corrente</span>
           </div>
 
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>L</div>
-              <div>
-                <strong>{currentLevel}</strong>
-                <p>Livello attuale</p>
-              </div>
-              <span>now</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Prossimo livello</p>
+            <h4>{nextLevelData ? nextLevelData.name : "MAX"}</h4>
+            <span>Target successivo del percorso</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>#</div>
-              <div>
-                <strong>{completedLevels}</strong>
-                <p>Livelli raggiunti</p>
-              </div>
-              <span>map</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Mancano</p>
+            <h4>€ {amountToNextLevel.toFixed(2)}</h4>
+            <span>Spesa necessaria per salire</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>N</div>
-              <div>
-                <strong>{nextLevelData ? nextLevelData.name : "Max"}</strong>
-                <p>Prossimo target</p>
-              </div>
-              <span>next</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {amountToNextLevel.toFixed(2)}</strong>
-                <p>Mancano al prossimo livello</p>
-              </div>
-              <span>go</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>T</div>
-              <div>
-                <strong>{transactions.length}</strong>
-                <p>Transazioni registrate</p>
-              </div>
-              <span>act</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Transazioni registrate</p>
+            <h4>{transactions.length}</h4>
+            <span>Movimenti considerati nello storico</span>
           </div>
         </aside>
-      </div>
+      </section>
     </div>
   );
 }

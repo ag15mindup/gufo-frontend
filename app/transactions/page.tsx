@@ -88,10 +88,8 @@ function getTransactionGufo(tx: any) {
 
 function formatDate(value?: string | null) {
   if (!value) return "-";
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
-
   return date.toLocaleDateString("it-IT");
 }
 
@@ -247,13 +245,11 @@ export default function TransactionsPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO LEDGER</p>
-            <h1 className={styles.userName}>Transazioni</h1>
-            <p className={styles.email}>Caricamento storico movimenti...</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Ledger</p>
+          <h1 className={styles.title}>Transazioni</h1>
+          <p className={styles.subtitle}>Caricamento storico movimenti...</p>
+        </section>
 
         <div className={styles.loadingBox}>Recupero transazioni in corso...</div>
       </div>
@@ -266,13 +262,11 @@ export default function TransactionsPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO LEDGER</p>
-            <h1 className={styles.userName}>Transazioni</h1>
-            <p className={styles.email}>Si è verificato un problema.</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Ledger</p>
+          <h1 className={styles.title}>Transazioni</h1>
+          <p className={styles.subtitle}>Si è verificato un problema.</p>
+        </section>
 
         <div className={styles.errorBox}>{error}</div>
       </div>
@@ -284,76 +278,91 @@ export default function TransactionsPage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+      <section className={styles.hero}>
         <div>
-          <p className={styles.welcome}>GUFO LEDGER</p>
-          <h1 className={styles.userName}>Transazioni</h1>
-          <p className={styles.email}>
-            Storico completo dei movimenti utente con filtro live
+          <p className={styles.eyebrow}>GUFO Ledger</p>
+          <h1 className={styles.title}>Storico transazioni</h1>
+          <p className={styles.subtitle}>
+            Archivio completo dei movimenti con ricerca e filtri in tempo reale.
           </p>
         </div>
+      </section>
 
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Ledger Active</span>
-          <h2 className={styles.balanceValue}>{filteredTransactions.length}</h2>
-          <div className={styles.balanceSubValue}>movimenti filtrati visibili</div>
-
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
-              € {totalAmount.toFixed(2)}
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              {totalGufo.toFixed(2)} GUFO
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
+      <section className={styles.filterPanel}>
+        <div className={styles.filterPanelHeader}>
           <div>
-            <div className={styles.statValue}>{filteredTransactions.length}</div>
-            <div className={styles.statLabel}>Transazioni filtrate</div>
+            <p className={styles.sectionEyebrow}>Search & Filter</p>
+            <h3>Filtri transazioni</h3>
           </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>↗</div>
-            <div className={styles.statHint}>Live</div>
-          </div>
+          <span className={styles.filterCount}>
+            {filteredTransactions.length} risultati
+          </span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
+        <div className={styles.filtersGrid}>
           <div>
-            <div className={styles.statValue}>€ {totalAmount.toFixed(2)}</div>
-            <div className={styles.statLabel}>Importo totale</div>
+            <label className={styles.inputLabel}>Tipo transazione</label>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className={styles.inputControl}
+            >
+              <option value="all">Tutti</option>
+              {transactionTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>€</div>
-            <div className={styles.statHint}>Amount</div>
-          </div>
-        </div>
 
-        <div className={`${styles.statCard} ${styles.orange}`}>
           <div>
-            <div className={styles.statValue}>{totalGufo.toFixed(2)}</div>
-            <div className={styles.statLabel}>GUFO totali</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>G</div>
-            <div className={styles.statHint}>Rewards</div>
+            <label className={styles.inputLabel}>Cerca merchant</label>
+            <input
+              type="text"
+              value={merchantFilter}
+              onChange={(e) => setMerchantFilter(e.target.value)}
+              className={styles.inputControl}
+              placeholder="Es. Coop, Eni, Adidas"
+            />
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
+      <section className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Movimenti visibili</p>
+          <h3 className={styles.metricValue}>{filteredTransactions.length}</h3>
+          <span className={styles.metricHint}>Totale righe filtrate</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Importo totale</p>
+          <h3 className={styles.metricValue}>€ {totalAmount.toFixed(2)}</h3>
+          <span className={styles.metricHint}>Volume dei movimenti selezionati</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>GUFO generati</p>
+          <h3 className={styles.metricValue}>{totalGufo.toFixed(2)}</h3>
+          <span className={styles.metricHint}>Rewards tracciate nello storico</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Cashback registrati</p>
+          <h3 className={styles.metricValue}>{cashbackTransactions}</h3>
+          <span className={styles.metricHint}>Movimenti di tipo cashback</span>
+        </div>
+      </section>
+
+      <section className={styles.mainGrid}>
+        <div className={styles.tablePanel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Full history</p>
               <h3>Tutte le transazioni</h3>
-              <p className={styles.panelSubtext}>
-                Storico completo filtrato in tempo reale
-              </p>
             </div>
-            <span>Totale: {filteredTransactions.length}</span>
+            <span className={styles.panelBadge}>Ordinamento recente</span>
           </div>
 
           {filteredTransactions.length === 0 ? (
@@ -402,7 +411,10 @@ export default function TransactionsPage() {
 
               <div className={styles.mobileList}>
                 {filteredTransactions.map((tx, index) => (
-                  <div className={styles.mobileTxCard} key={tx.id || tx.transaction_id || index}>
+                  <div
+                    className={styles.mobileTxCard}
+                    key={tx.id || tx.transaction_id || index}
+                  >
                     <div className={styles.mobileTxTop}>
                       <strong>{getTransactionMerchant(tx)}</strong>
                       <span
@@ -433,93 +445,33 @@ export default function TransactionsPage() {
               </div>
             </>
           )}
-        </section>
+        </div>
 
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Insights</h3>
-            <span>PRO</span>
+        <aside className={styles.sideColumn}>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Movimenti visibili</p>
+            <h4>{filteredTransactions.length}</h4>
+            <span>Risultati correnti dopo i filtri</span>
           </div>
 
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>L</div>
-              <div>
-                <strong>{filteredTransactions.length}</strong>
-                <p>Movimenti visibili</p>
-              </div>
-              <span>live</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Volume filtrato</p>
+            <h4>€ {totalAmount.toFixed(2)}</h4>
+            <span>Somma degli importi selezionati</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {totalAmount.toFixed(2)}</strong>
-                <p>Volume filtrato</p>
-              </div>
-              <span>tot</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>GUFO rewards</p>
+            <h4>{totalGufo.toFixed(2)}</h4>
+            <span>Totale rewards generate</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>G</div>
-              <div>
-                <strong>{totalGufo.toFixed(2)}</strong>
-                <p>GUFO generati</p>
-              </div>
-              <span>earn</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>C</div>
-              <div>
-                <strong>{cashbackTransactions}</strong>
-                <p>Cashback registrati</p>
-              </div>
-              <span>cb</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Cashback count</p>
+            <h4>{cashbackTransactions}</h4>
+            <span>Numero movimenti cashback</span>
           </div>
         </aside>
-      </div>
-
-      <section className={styles.filterPanel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h3>Filtri</h3>
-            <p className={styles.panelSubtext}>
-              Seleziona tipo transazione o cerca per merchant
-            </p>
-          </div>
-          <span>Search & Filter</span>
-        </div>
-
-        <div className={styles.filtersGrid}>
-          <div>
-            <label className={styles.inputLabel}>Tipo transazione</label>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className={styles.inputControl}
-            >
-              <option value="all">Tutti</option>
-              {transactionTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className={styles.inputLabel}>Cerca merchant</label>
-            <input
-              type="text"
-              value={merchantFilter}
-              onChange={(e) => setMerchantFilter(e.target.value)}
-              className={styles.inputControl}
-              placeholder="Es. Coop, Eni, Adidas"
-            />
-          </div>
-        </div>
       </section>
     </div>
   );

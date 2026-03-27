@@ -5,7 +5,7 @@
   color: #ffffff;
   overflow: hidden;
   background-image:
-    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.56)),
+    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.62)),
     url("/dashboard-space.jpg");
   background-size: cover;
   background-position: center;
@@ -17,10 +17,10 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at 15% 80%, rgba(0, 255, 255, 0.22), transparent 22%),
-    radial-gradient(circle at 85% 76%, rgba(255, 90, 0, 0.18), transparent 24%),
-    radial-gradient(circle at 60% 18%, rgba(0, 120, 255, 0.18), transparent 22%),
-    radial-gradient(circle at 30% 55%, rgba(140, 0, 255, 0.12), transparent 24%);
+    radial-gradient(circle at 16% 82%, rgba(0, 255, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 84% 72%, rgba(255, 136, 0, 0.1), transparent 26%),
+    radial-gradient(circle at 58% 18%, rgba(0, 122, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 30% 46%, rgba(155, 0, 255, 0.08), transparent 26%);
   z-index: 0;
 }
 
@@ -42,13 +42,14 @@
   );
   box-shadow:
     0 0 12px rgba(0, 198, 255, 0.55),
-    0 0 24px rgba(255, 123, 123, 0.45),
-    0 0 36px rgba(179, 136, 255, 0.35);
+    0 0 24px rgba(255, 123, 123, 0.28),
+    0 0 36px rgba(179, 136, 255, 0.2);
   z-index: 1;
 }
 
 .hero,
-.statsGrid,
+.operatorCard,
+.metricsGrid,
 .formsGrid,
 .resultCard,
 .loadingBox,
@@ -58,38 +59,37 @@
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
-  gap: 24px;
-  align-items: start;
   margin-top: 34px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
-.welcome {
-  margin: 0 0 10px;
-  font-size: 20px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.92);
-}
-
-.userName {
-  margin: 0;
-  font-size: 52px;
-  line-height: 1.02;
+.eyebrow {
+  margin: 0 0 12px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8fd7ff;
 }
 
-.email {
-  margin-top: 10px;
+.title {
+  margin: 0;
+  font-size: 54px;
+  line-height: 0.98;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  margin-top: 14px;
   max-width: 760px;
   color: rgba(255, 255, 255, 0.72);
-  font-size: 15px;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
-.balanceCard,
-.statCard,
+.operatorCard,
+.metricCard,
 .panel,
 .resultCard,
 .loadingBox,
@@ -99,19 +99,19 @@
   -webkit-backdrop-filter: blur(14px);
   background: linear-gradient(
     180deg,
-    rgba(8, 18, 52, 0.72),
-    rgba(7, 16, 42, 0.52)
+    rgba(8, 18, 52, 0.74),
+    rgba(7, 16, 42, 0.56)
   );
-  border: 1px solid rgba(110, 170, 255, 0.42);
+  border: 1px solid rgba(110, 170, 255, 0.3);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 18px rgba(42, 117, 255, 0.18),
-    0 0 34px rgba(0, 0, 0, 0.28);
-  border-radius: 22px;
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 0 18px rgba(42, 117, 255, 0.12),
+    0 0 34px rgba(0, 0, 0, 0.2);
+  border-radius: 24px;
 }
 
-.balanceCard::before,
-.statCard::before,
+.operatorCard::before,
+.metricCard::before,
 .panel::before,
 .resultCard::before {
   content: "";
@@ -121,12 +121,12 @@
   padding: 1px;
   background: linear-gradient(
     90deg,
-    rgba(0, 198, 255, 0.95),
-    rgba(110, 168, 255, 0.95),
-    rgba(179, 136, 255, 0.95),
-    rgba(255, 94, 168, 0.95),
-    rgba(255, 230, 109, 0.95),
-    rgba(0, 245, 160, 0.95)
+    rgba(0, 198, 255, 0.88),
+    rgba(110, 168, 255, 0.88),
+    rgba(179, 136, 255, 0.88),
+    rgba(255, 94, 168, 0.88),
+    rgba(255, 230, 109, 0.88),
+    rgba(0, 245, 160, 0.88)
   );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
@@ -134,76 +134,234 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  opacity: 0.85;
+  opacity: 0.72;
 }
 
-.balanceCard {
+.operatorCard {
   padding: 24px;
-  max-width: 420px;
-  justify-self: end;
-  width: 100%;
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 24px;
 }
 
-.balanceLabel {
-  display: block;
-  margin-bottom: 10px;
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 16px;
+.operatorCardLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.balanceValue {
-  margin: 0 0 12px;
-  font-size: 34px;
+.operatorTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.operatorChip,
+.operatorStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
   font-weight: 700;
-  line-height: 1.04;
+}
+
+.operatorChip {
+  background: rgba(127, 208, 255, 0.12);
+  border: 1px solid rgba(127, 208, 255, 0.2);
+  color: #cfe9ff;
+}
+
+.operatorStatus {
+  background: rgba(74, 222, 128, 0.14);
+  border: 1px solid rgba(134, 239, 172, 0.24);
+  color: #dcfce7;
+}
+
+.operatorLabel {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.operatorValue {
+  margin: 0;
+  font-size: 48px;
+  line-height: 1.02;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  color: #f8fbff;
   word-break: break-word;
 }
 
-.balanceSubValue {
-  margin-bottom: 22px;
-  color: rgba(255, 255, 255, 0.74);
+.operatorNote {
+  margin: 16px 0 0;
+  color: #dbe7fb;
   font-size: 15px;
+  line-height: 1.7;
+  max-width: 640px;
 }
 
-.balanceButtons {
+.operatorCardRight {
   display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.primaryBtn,
-.secondaryBtn,
-.primaryBtnWide,
-.secondaryBtnWide {
-  border: none;
-  border-radius: 14px;
-  color: white;
-  font-size: 15px;
+.operatorMiniCard {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.operatorMiniCard span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.operatorMiniCard strong {
+  font-size: 24px;
+  font-weight: 760;
+  color: #ffffff;
+  word-break: break-word;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.metricCard {
+  padding: 20px;
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.metricLabel {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.metricValue {
+  margin: 10px 0;
+  font-size: 34px;
+  line-height: 1.04;
+  font-weight: 760;
+  letter-spacing: -0.03em;
+  word-break: break-word;
+}
+
+.metricHint {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.formsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.panel,
+.resultCard {
+  padding: 22px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.panelHeader h3 {
+  margin: 0;
+  font-size: 28px;
   font-weight: 700;
 }
 
-.primaryBtn,
-.secondaryBtn {
-  flex: 1;
-  padding: 14px 18px;
-  cursor: default;
+.sectionEyebrow {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8fd7ff;
+}
+
+.panelBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 94px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(127, 208, 255, 0.12);
+  border: 1px solid rgba(127, 208, 255, 0.2);
+  font-size: 13px;
+  color: #9fe0ff;
+}
+
+.fieldGroup {
+  margin-bottom: 18px;
+}
+
+.inputLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: #b9c6e3;
+  font-size: 14px;
+}
+
+.inputControl {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 14px 16px;
+  color: #ffffff;
+  outline: none;
+  font-size: 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.inputControl::placeholder {
+  color: #99a8c7;
+}
+
+.inputControl:focus {
+  border-color: rgba(56, 189, 248, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.16),
+    0 0 18px rgba(56, 189, 248, 0.06);
 }
 
 .primaryBtnWide,
 .secondaryBtnWide {
   width: 100%;
   padding: 14px 16px;
+  border: none;
+  border-radius: 14px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
-}
-
-.primaryBtn {
-  background: linear-gradient(180deg, #4f67ff, #2937b8);
-  box-shadow: 0 0 16px rgba(79, 103, 255, 0.5);
-}
-
-.secondaryBtn {
-  background: linear-gradient(180deg, #228dff, #1451a8);
-  box-shadow: 0 0 16px rgba(34, 141, 255, 0.45);
 }
 
 .primaryBtnWide {
@@ -234,159 +392,8 @@
   box-shadow: none;
 }
 
-.loadingBox {
-  padding: 22px;
-  text-align: center;
-  font-size: 16px;
-}
-
-.errorBox {
-  padding: 14px 18px;
-  margin-top: 22px;
-  border-color: rgba(255, 90, 90, 0.45);
-  background: rgba(60, 10, 20, 0.42);
-  color: #ffd7d7;
-}
-
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 26px;
-}
-
-.statCard {
-  padding: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 140px;
-}
-
-.cyan {
-  border-color: rgba(0, 255, 208, 0.44);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 18px rgba(0, 255, 208, 0.18),
-    0 0 30px rgba(0, 255, 208, 0.1);
-}
-
-.purple {
-  border-color: rgba(196, 104, 255, 0.44);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 18px rgba(196, 104, 255, 0.18),
-    0 0 30px rgba(196, 104, 255, 0.1);
-}
-
-.orange {
-  border-color: rgba(255, 145, 77, 0.44);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 0 18px rgba(255, 145, 77, 0.18),
-    0 0 30px rgba(255, 145, 77, 0.1);
-}
-
-.statValue {
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1;
-  margin-bottom: 10px;
-  word-break: break-word;
-}
-
-.statLabel {
-  font-size: 22px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.statSide {
-  text-align: right;
-}
-
-.statMini {
-  font-size: 34px;
-  font-weight: 700;
-  margin-bottom: 10px;
-}
-
-.statHint {
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.formsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.panel,
-.resultCard {
-  padding: 22px;
-}
-
-.panelHeader {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 18px;
-}
-
-.panelHeader h3 {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 700;
-}
-
-.panelHeader span {
-  font-size: 14px;
-  color: #7fd0ff;
-}
-
-.panelSubtext {
-  margin: 6px 0 0;
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 14px;
-}
-
-.fieldGroup {
-  margin-bottom: 18px;
-}
-
-.inputLabel {
-  display: block;
-  margin-bottom: 8px;
-  color: #b9c6e3;
-  font-size: 14px;
-}
-
-.inputControl {
-  width: 100%;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
-  padding: 14px 16px;
-  color: white;
-  outline: none;
-  font-size: 14px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
-}
-
-.inputControl::placeholder {
-  color: #99a8c7;
-}
-
-.inputControl:focus {
-  border-color: rgba(56, 189, 248, 0.35);
-  box-shadow:
-    0 0 0 1px rgba(56, 189, 248, 0.16),
-    0 0 18px rgba(56, 189, 248, 0.06);
-}
-
 .helperText {
-  margin: 12px 0 0 0;
+  margin: 12px 0 0;
   font-size: 13px;
   color: #99a8c7;
 }
@@ -396,19 +403,17 @@
   margin-top: 22px;
   border-radius: 20px;
   padding: 18px;
-  background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .previewBox {
   margin-top: 0;
   margin-bottom: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .previewTitle {
-  margin: 0 0 12px 0;
+  margin: 0 0 12px;
   font-size: 18px;
   font-weight: 800;
   color: #ffffff;
@@ -432,6 +437,25 @@
   color: #99a8c7;
 }
 
+.infoHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.infoHeader h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.infoHeader span {
+  font-size: 13px;
+  color: #9fe0ff;
+}
+
 .infoGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -447,14 +471,14 @@
 }
 
 .infoMiniLabel {
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
   color: #99a8c7;
   font-size: 13px;
 }
 
 .infoMiniValue {
   margin: 0;
-  color: white;
+  color: #ffffff;
   font-size: 18px;
   font-weight: 800;
   line-height: 1.4;
@@ -469,15 +493,38 @@
   grid-column: 1 / -1;
 }
 
-@media (max-width: 1100px) {
-  .hero,
+.loadingBox {
+  padding: 22px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.errorBox {
+  padding: 14px 18px;
+  margin-top: 22px;
+  border-color: rgba(255, 90, 90, 0.45);
+  background: rgba(60, 10, 20, 0.42);
+  color: #ffd7d7;
+}
+
+@media (max-width: 1180px) {
+  .operatorCard,
   .formsGrid {
     grid-template-columns: 1fr;
   }
+}
 
-  .balanceCard {
-    justify-self: stretch;
-    max-width: none;
+@media (max-width: 980px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 42px;
+  }
+
+  .operatorValue {
+    font-size: 38px;
   }
 }
 
@@ -486,33 +533,14 @@
     padding: 20px;
   }
 
-  .statsGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .userName {
-    font-size: 38px;
-  }
-
-  .balanceValue {
-    font-size: 30px;
-  }
-
-  .panelHeader {
+  .panelHeader,
+  .infoHeader {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .panelHeader h3 {
     font-size: 22px;
-  }
-
-  .statValue {
-    font-size: 28px;
-  }
-
-  .statLabel {
-    font-size: 18px;
   }
 
   .previewRow {
@@ -532,5 +560,55 @@
 
   .infoMiniValue {
     font-size: 16px;
+  }
+
+  .operatorMiniCard strong,
+  .metricValue {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 18px;
+  }
+
+  .rainbowLine {
+    left: 18px;
+    right: 18px;
+    top: 14px;
+  }
+
+  .hero {
+    margin-top: 26px;
+    margin-bottom: 18px;
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .operatorCard,
+  .metricCard,
+  .panel,
+  .resultCard {
+    border-radius: 20px;
+  }
+
+  .operatorCard {
+    padding: 20px;
+  }
+
+  .operatorTopRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .operatorValue {
+    font-size: 30px;
   }
 }

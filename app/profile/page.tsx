@@ -44,7 +44,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function formatLevel(level: string) {
-  if (!level) return "Basic";
+  if (!level) return "Bronze";
 
   const normalized = String(level).toLowerCase();
 
@@ -125,8 +125,8 @@ export default function ProfilePage() {
     email: "",
     balanceGufo: 0,
     totalSpent: 0,
-    cashbackPercent: 2,
-    level: "Basic",
+    cashbackPercent: 0,
+    level: "Bronze",
     transactions: [],
   });
 
@@ -198,11 +198,11 @@ export default function ProfilePage() {
         );
 
         const cashbackPercent = toNumberSafe(
-          stats?.cashback_percent ?? wallet?.cashback_percent ?? 2
+          stats?.cashback_percent ?? wallet?.cashback_percent ?? 0
         );
 
         const level = formatLevel(
-          String(stats?.level ?? wallet?.current_level ?? "basic")
+          String(stats?.level ?? wallet?.current_level ?? "bronze")
         );
 
         const name =
@@ -254,13 +254,11 @@ export default function ProfilePage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO PROFILE</p>
-            <h1 className={styles.userName}>Profilo</h1>
-            <p className={styles.email}>Caricamento dati account...</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Profile</p>
+          <h1 className={styles.title}>Identità account</h1>
+          <p className={styles.subtitle}>Caricamento dati account...</p>
+        </section>
 
         <div className={styles.loadingBox}>Recupero profilo in corso...</div>
       </div>
@@ -273,13 +271,11 @@ export default function ProfilePage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO PROFILE</p>
-            <h1 className={styles.userName}>Profilo</h1>
-            <p className={styles.email}>Si è verificato un problema.</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Profile</p>
+          <h1 className={styles.title}>Identità account</h1>
+          <p className={styles.subtitle}>Si è verificato un problema.</p>
+        </section>
 
         <div className={styles.errorBox}>{error}</div>
       </div>
@@ -291,76 +287,100 @@ export default function ProfilePage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+      <section className={styles.hero}>
         <div>
-          <p className={styles.welcome}>GUFO PROFILE</p>
-          <h1 className={styles.userName}>Profilo</h1>
-          <p className={styles.email}>
-            Panoramica account, livello, cashback e ultime attività
+          <p className={styles.eyebrow}>GUFO Profile</p>
+          <h1 className={styles.title}>Il tuo account</h1>
+          <p className={styles.subtitle}>
+            Dati profilo, stato membership e ultime attività collegate al tuo account.
           </p>
         </div>
+      </section>
 
-        <div className={styles.balanceCard}>
-          <div className={styles.profileMiniTop}>
-            <div className={styles.avatarLarge}>{profileInitial}</div>
-            <div>
-              <div className={styles.balanceLabel}>Account utente</div>
-              <h2 className={styles.profileCardName}>{profileData.name}</h2>
-              <div className={styles.balanceSubValue}>{profileData.email}</div>
+      <section className={styles.profileHeroCard}>
+        <div className={styles.profileHeroLeft}>
+          <div className={styles.avatarLarge}>{profileInitial}</div>
+
+          <div>
+            <p className={styles.profileLabel}>Profilo utente</p>
+            <h2 className={styles.profileName}>{profileData.name}</h2>
+            <p className={styles.profileEmail}>
+              {profileData.email || "Email non disponibile"}
+            </p>
+
+            <div className={styles.profileTags}>
+              <span className={styles.profileTag}>{profileData.level}</span>
+              <span className={styles.profileTag}>
+                {profileData.transactions.length} movimenti
+              </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>
-              {profileData.balanceGufo.toFixed(2)}
-            </div>
-            <div className={styles.statLabel}>Saldo GUFO</div>
+        <div className={styles.profileHeroRight}>
+          <div className={styles.miniInfoCard}>
+            <span>Saldo GUFO</span>
+            <strong>{profileData.balanceGufo.toFixed(2)}</strong>
           </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>G</div>
-            <div className={styles.statHint}>Wallet</div>
+
+          <div className={styles.miniInfoCard}>
+            <span>Spesa stagione</span>
+            <strong>€ {profileData.totalSpent.toFixed(2)}</strong>
+          </div>
+
+          <div className={styles.miniInfoCard}>
+            <span>Cashback attuale</span>
+            <strong>
+              {profileData.cashbackPercent > 0
+                ? `${profileData.cashbackPercent}%`
+                : "Variabile"}
+            </strong>
           </div>
         </div>
+      </section>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>{profileData.cashbackPercent}%</div>
-            <div className={styles.statLabel}>Cashback attuale</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>%</div>
-            <div className={styles.statHint}>Reward</div>
-          </div>
+      <section className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Livello attuale</p>
+          <h3 className={styles.metricValue}>{profileData.level}</h3>
+          <span className={styles.metricHint}>Status membership corrente</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>
-              € {profileData.totalSpent.toFixed(2)}
-            </div>
-            <div className={styles.statLabel}>Spesa stagione</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>€</div>
-            <div className={styles.statHint}>Season</div>
-          </div>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Saldo GUFO</p>
+          <h3 className={styles.metricValue}>
+            {profileData.balanceGufo.toFixed(2)}
+          </h3>
+          <span className={styles.metricHint}>Disponibilità wallet attuale</span>
         </div>
-      </div>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Spesa stagione</p>
+          <h3 className={styles.metricValue}>
+            € {profileData.totalSpent.toFixed(2)}
+          </h3>
+          <span className={styles.metricHint}>Totale registrato nel periodo</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Cashback</p>
+          <h3 className={styles.metricValue}>
+            {profileData.cashbackPercent > 0
+              ? `${profileData.cashbackPercent}%`
+              : "Var."}
+          </h3>
+          <span className={styles.metricHint}>Valore reward corrente</span>
+        </div>
+      </section>
+
+      <section className={styles.mainGrid}>
+        <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Transazioni recenti</h3>
-              <p className={styles.panelSubtext}>
-                Ultimi movimenti associati al tuo profilo
-              </p>
             </div>
-            <span>{recentTransactions.length} recenti</span>
+            <span className={styles.panelBadge}>{recentTransactions.length} recenti</span>
           </div>
 
           {recentTransactions.length === 0 ? (
@@ -445,62 +465,38 @@ export default function ProfilePage() {
               </div>
             </>
           )}
-        </section>
+        </div>
 
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Top Info</h3>
-            <span>PRO</span>
+        <aside className={styles.sideColumn}>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Nome account</p>
+            <h4>{profileData.name}</h4>
+            <span>Identità principale del profilo</span>
           </div>
 
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>{profileInitial}</div>
-              <div>
-                <strong>{profileData.name}</strong>
-                <p>Profilo attivo</p>
-              </div>
-              <span>{profileData.level}</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Livello</p>
+            <h4>{profileData.level}</h4>
+            <span>Stato membership corrente</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {profileData.totalSpent.toFixed(2)}</strong>
-                <p>Spesa totale stagione</p>
-              </div>
-              <span>tot</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Movimenti registrati</p>
+            <h4>{profileData.transactions.length}</h4>
+            <span>Attività disponibili nello storico</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>G</div>
-              <div>
-                <strong>{profileData.balanceGufo.toFixed(2)}</strong>
-                <p>GUFO disponibili</p>
-              </div>
-              <span>bal</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>#</div>
-              <div>
-                <strong>{profileData.transactions.length}</strong>
-                <p>Movimenti registrati</p>
-              </div>
-              <span>log</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>%</div>
-              <div>
-                <strong>{profileData.cashbackPercent}%</strong>
-                <p>Cashback attuale</p>
-              </div>
-              <span>cb</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Cashback attuale</p>
+            <h4>
+              {profileData.cashbackPercent > 0
+                ? `${profileData.cashbackPercent}%`
+                : "Variabile"}
+            </h4>
+            <span>Valore reward collegato all’account</span>
           </div>
         </aside>
-      </div>
+      </section>
     </div>
   );
 }

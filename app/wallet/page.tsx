@@ -60,7 +60,7 @@ function toNumberSafe(value: unknown) {
 }
 
 function formatLevel(level?: string) {
-  if (!level) return "Basic";
+  if (!level) return "Bronze";
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
 
@@ -139,8 +139,8 @@ export default function WalletPage() {
     balanceGufo: 0,
     balanceEuro: 0,
     seasonSpent: 0,
-    level: "Basic",
-    cashbackPercent: 2,
+    level: "Bronze",
+    cashbackPercent: 0,
     totalTransactions: 0,
     totalGufoEarned: 0,
     transactions: [],
@@ -241,8 +241,8 @@ export default function WalletPage() {
           balanceGufo: toNumberSafe(wallet?.balance_gufo),
           balanceEuro: toNumberSafe(wallet?.balance_eur),
           seasonSpent: toNumberSafe(wallet?.season_spent),
-          level: String(wallet?.current_level ?? "Basic"),
-          cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 2),
+          level: String(wallet?.current_level ?? "Bronze"),
+          cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
           totalTransactions: normalizedTransactions.length,
           totalGufoEarned: Number(totalGufoEarned.toFixed(2)),
           transactions: normalizedTransactions,
@@ -276,10 +276,10 @@ export default function WalletPage() {
         <div className={styles.rainbowLine} />
 
         <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>Welcome back!</p>
-            <h1 className={styles.userName}>Wallet</h1>
-            <p className={styles.email}>Caricamento dati wallet...</p>
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>GUFO Wallet</p>
+            <h1 className={styles.title}>Portafoglio digitale</h1>
+            <p className={styles.subtitle}>Caricamento saldo e movimenti in corso...</p>
           </div>
         </div>
 
@@ -295,10 +295,10 @@ export default function WalletPage() {
         <div className={styles.rainbowLine} />
 
         <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>Welcome back!</p>
-            <h1 className={styles.userName}>Wallet</h1>
-            <p className={styles.email}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>GUFO Wallet</p>
+            <h1 className={styles.title}>Portafoglio digitale</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
           </div>
         </div>
 
@@ -312,78 +312,81 @@ export default function WalletPage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
-        <div>
-          <p className={styles.welcome}>Welcome back!</p>
-          <h1 className={styles.userName}>{userName}</h1>
-          {userEmail ? (
-            <p className={styles.email}>{userEmail}</p>
-          ) : (
-            <p className={styles.email}>Profilo wallet attivo</p>
-          )}
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>GUFO Wallet</p>
+          <h1 className={styles.title}>I tuoi GUFO</h1>
+          <p className={styles.subtitle}>
+            {userEmail ? userEmail : "Portafoglio digitale attivo"}
+          </p>
         </div>
 
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Balance</span>
-          <h2 className={styles.balanceValue}>
-            {walletData.balanceGufo.toFixed(2)} GUFO
-          </h2>
-
-          <div className={styles.balanceSubValue}>
-            ≈ € {walletData.balanceEuro.toFixed(2)} convertibili
+        <div className={styles.walletHeroCard}>
+          <div className={styles.walletGlow} />
+          <div className={styles.walletTopRow}>
+            <span className={styles.walletChip}>Saldo disponibile</span>
+            <span className={styles.walletUser}>{userName}</span>
           </div>
 
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
-              + Deposit
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              + Withdraw
-            </button>
+          <div className={styles.walletAmount}>
+            {walletData.balanceGufo.toFixed(2)} <span>GUFO</span>
+          </div>
+
+          <div className={styles.walletEuro}>
+            Valore convertibile: € {walletData.balanceEuro.toFixed(2)}
+          </div>
+
+          <div className={styles.walletMeta}>
+            <div className={styles.walletMetaItem}>
+              <span>Livello</span>
+              <strong>{formatLevel(walletData.level)}</strong>
+            </div>
+
+            <div className={styles.walletMetaItem}>
+              <span>Movimenti</span>
+              <strong>{walletData.totalTransactions}</strong>
+            </div>
+
+            <div className={styles.walletMetaItem}>
+              <span>Guadagnati</span>
+              <strong>{walletData.totalGufoEarned.toFixed(2)}</strong>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>{walletData.totalTransactions}</div>
-            <div className={styles.statLabel}>Active Transactions</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>↗</div>
-            <div className={styles.statHint}>Live</div>
-          </div>
+      <section className={styles.walletStatsGrid}>
+        <div className={`${styles.infoCard} ${styles.infoCardPrimary}`}>
+          <p className={styles.infoLabel}>GUFO guadagnati</p>
+          <h3 className={styles.infoValue}>{walletData.totalGufoEarned.toFixed(2)}</h3>
+          <span className={styles.infoHint}>Totale accumulato dai tuoi movimenti</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>{formatLevel(walletData.level)}</div>
-            <div className={styles.statLabel}>Membership Level</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>⬢</div>
-            <div className={styles.statHint}>User tier</div>
-          </div>
+        <div className={styles.infoCard}>
+          <p className={styles.infoLabel}>Spesa stagione</p>
+          <h3 className={styles.infoValue}>€ {walletData.seasonSpent.toFixed(2)}</h3>
+          <span className={styles.infoHint}>Volume speso nella stagione attuale</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>{walletData.cashbackPercent}%</div>
-            <div className={styles.statLabel}>Cashback Rate</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>⤴</div>
-            <div className={styles.statHint}>Current</div>
-          </div>
+        <div className={styles.infoCard}>
+          <p className={styles.infoLabel}>Cashback attuale</p>
+          <h3 className={styles.infoValue}>
+            {walletData.cashbackPercent > 0
+              ? `${walletData.cashbackPercent}%`
+              : "Variabile"}
+          </h3>
+          <span className={styles.infoHint}>Deciso dal partner in base all’acquisto</span>
         </div>
-      </div>
+      </section>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
+      <section className={styles.mainGrid}>
+        <div className={styles.panel}>
           <div className={styles.panelHeader}>
-            <h3>Recent Transactions</h3>
-            <span>View All</span>
+            <div>
+              <p className={styles.panelEyebrow}>Wallet activity</p>
+              <h3>Movimenti recenti</h3>
+            </div>
+            <span className={styles.panelBadge}>Ultimi 8</span>
           </div>
 
           <div className={styles.tableWrap}>
@@ -401,7 +404,7 @@ export default function WalletPage() {
                 {recentTransactions.length === 0 ? (
                   <tr>
                     <td colSpan={5} className={styles.emptyRow}>
-                      Nessuna transazione disponibile
+                      Nessun movimento disponibile
                     </td>
                   </tr>
                 ) : (
@@ -422,93 +425,73 @@ export default function WalletPage() {
           </div>
 
           <div className={styles.mobileList}>
-            {recentTransactions.map((tx, index) => (
-              <div
-                className={styles.mobileTxCard}
-                key={tx.id || tx.transaction_id || `mobile-${index}`}
-              >
-                <div className={styles.mobileTxTop}>
-                  <strong>{getTransactionMerchant(tx)}</strong>
-                  <span className={styles.badge}>{getTransactionType(tx)}</span>
-                </div>
+            {recentTransactions.length === 0 ? (
+              <div className={styles.emptyMobile}>Nessun movimento disponibile</div>
+            ) : (
+              recentTransactions.map((tx, index) => (
+                <div
+                  className={styles.mobileTxCard}
+                  key={tx.id || tx.transaction_id || `mobile-${index}`}
+                >
+                  <div className={styles.mobileTxTop}>
+                    <strong>{getTransactionMerchant(tx)}</strong>
+                    <span className={styles.badge}>{getTransactionType(tx)}</span>
+                  </div>
 
-                <div className={styles.mobileTxRow}>
-                  <span>Data</span>
-                  <span>{formatDate(tx.created_at)}</span>
-                </div>
+                  <div className={styles.mobileTxRow}>
+                    <span>Data</span>
+                    <span>{formatDate(tx.created_at)}</span>
+                  </div>
 
-                <div className={styles.mobileTxRow}>
-                  <span>Importo</span>
-                  <span>€ {getTransactionAmount(tx).toFixed(2)}</span>
-                </div>
+                  <div className={styles.mobileTxRow}>
+                    <span>Importo</span>
+                    <span>€ {getTransactionAmount(tx).toFixed(2)}</span>
+                  </div>
 
-                <div className={styles.mobileTxRow}>
-                  <span>GUFO</span>
-                  <span>{getTransactionGufo(tx).toFixed(2)}</span>
+                  <div className={styles.mobileTxRow}>
+                    <span>GUFO</span>
+                    <span>{getTransactionGufo(tx).toFixed(2)}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
-        </section>
+        </div>
 
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Top Info</h3>
-            <span>PRO</span>
-          </div>
-
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
+        <aside className={styles.sideColumn}>
+          <div className={styles.sideCard}>
+            <div className={styles.sideHeader}>
               <div className={styles.avatar}>{userInitial}</div>
               <div>
                 <strong>{userName}</strong>
-                <p>Profilo attivo</p>
+                <p>Profilo wallet attivo</p>
               </div>
-              <span>{formatLevel(walletData.level)}</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {walletData.seasonSpent.toFixed(2)}</strong>
-                <p>Spesa totale stagione</p>
-              </div>
-              <span>tot</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>G</div>
-              <div>
-                <strong>{walletData.totalGufoEarned.toFixed(2)}</strong>
-                <p>GUFO guadagnati</p>
-              </div>
-              <span>earn</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {walletData.balanceEuro.toFixed(2)}</strong>
-                <p>Saldo convertibile</p>
-              </div>
-              <span>eur</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>⟳</div>
-              <div>
-                <strong>
-                  {walletData.lastSeasonReset
-                    ? formatDate(walletData.lastSeasonReset)
-                    : "Nessuno"}
-                </strong>
-                <p>Ultimo reset stagionale</p>
-              </div>
-              <span>reset</span>
             </div>
           </div>
+
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Livello attuale</p>
+            <h4>{formatLevel(walletData.level)}</h4>
+            <span>Stato membership corrente</span>
+          </div>
+
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Saldo convertibile</p>
+            <h4>€ {walletData.balanceEuro.toFixed(2)}</h4>
+            <span>Valore equivalente del saldo GUFO</span>
+          </div>
+
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Ultimo reset</p>
+            <h4>
+              {walletData.lastSeasonReset
+                ? formatDate(walletData.lastSeasonReset)
+                : "Nessuno"}
+            </h4>
+            <span>Ultimo reset stagionale registrato</span>
+          </div>
         </aside>
-      </div>
+      </section>
     </div>
   );
 }

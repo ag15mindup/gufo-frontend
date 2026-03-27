@@ -4,9 +4,113 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./landing.module.css";
 
+const howItWorks = [
+  {
+    step: "01",
+    title: "Il cliente entra in GUFO",
+    text: "L’utente crea il proprio account, accede alla piattaforma e ottiene customer code, wallet e profilo personale.",
+  },
+  {
+    step: "02",
+    title: "Mostra codice o QR",
+    text: "Al momento dell’acquisto il cliente mostra il proprio codice GUFO o il QR direttamente dal telefono.",
+  },
+  {
+    step: "03",
+    title: "Il partner registra la vendita",
+    text: "Il partner identifica il cliente, registra l’importo e applica il cashback previsto dalla propria attività.",
+  },
+  {
+    step: "04",
+    title: "GUFO si aggiorna in tempo reale",
+    text: "Wallet, transazioni, livello e progressi stagionali si aggiornano in un unico ecosistema digitale.",
+  },
+];
+
+const whyGufo = [
+  {
+    title: "Cashback deciso dal partner",
+    text: "Il cashback non è fisso per tutti: ogni partner può definire la propria logica reward e rendere l’offerta più strategica.",
+  },
+  {
+    title: "Wallet visibile e chiaro",
+    text: "Il cliente vede saldo GUFO, storico movimenti, livello e attività in modo semplice, moderno e mobile friendly.",
+  },
+  {
+    title: "Livelli stagionali",
+    text: "La membership segue la spesa stagionale e costruisce una progressione reale dentro l’ecosistema GUFO.",
+  },
+  {
+    title: "Premi e fidelizzazione",
+    text: "GUFO non è solo cashback: è una piattaforma che punta a far tornare il cliente nel tempo.",
+  },
+];
+
+const clientBenefits = [
+  "wallet GUFO sempre aggiornato",
+  "customer code e QR pronti in negozio",
+  "storico transazioni e movimenti",
+  "livelli stagionali e progressione",
+  "premi, vantaggi e missioni future",
+];
+
+const partnerBenefits = [
+  "identificazione rapida del cliente",
+  "registrazione pagamento semplice",
+  "cashback associato alla vendita",
+  "dashboard con volumi e transazioni",
+  "strumento reale per fidelizzare",
+];
+
+const quickLinks = [
+  {
+    href: "/dashboard",
+    title: "Dashboard",
+    text: "Panoramica generale dell’account e delle attività.",
+  },
+  {
+    href: "/wallet",
+    title: "Wallet",
+    text: "Saldo GUFO, valore convertibile e movimenti recenti.",
+  },
+  {
+    href: "/membership",
+    title: "Membership",
+    text: "Livello attuale, progressi e percorso stagionale.",
+  },
+  {
+    href: "/customer-code",
+    title: "Customer Code",
+    text: "Codice cliente e QR da mostrare al partner.",
+  },
+  {
+    href: "/transactions",
+    title: "Transactions",
+    text: "Storico completo con filtro e consultazione rapida.",
+  },
+  {
+    href: "/profile",
+    title: "Profile",
+    text: "Identità account, stato e dati principali.",
+  },
+  {
+    href: "/partner-demo",
+    title: "Partner Demo",
+    text: "Lookup cliente e simulazione pagamento partner.",
+  },
+  {
+    href: "/partner-dashboard",
+    title: "Partner Dashboard",
+    text: "Analytics merchant e transazioni recenti.",
+  },
+];
+
 export default function LandingPage() {
   return (
     <main className={styles.page}>
+      <div className={styles.bgOverlay} />
+      <div className={styles.rainbowLine} />
+
       <div className={styles.container}>
         <header className={styles.topbar}>
           <div className={styles.topbarBrand}>
@@ -32,24 +136,23 @@ export default function LandingPage() {
         <section className={styles.heroSection}>
           <div className={styles.heroContent}>
             <div className={styles.heroBadge}>
-              Cashback • Loyalty • Membership • Partner Network
+              Cashback • Wallet • Membership • Partner Network
             </div>
 
             <h1 className={styles.heroTitle}>
               GUFO
-              <span className={styles.heroTitleGlow}> Rainbow Cashback</span>
+              <span className={styles.heroTitleGlow}> Rainbow</span>
             </h1>
 
             <p className={styles.heroSubtitle}>
-              Il cashback intelligente che collega utenti, partner e loyalty in
-              un’unica esperienza premium.
+              La piattaforma che unisce cashback, wallet digitale e ritorno
+              cliente in un’unica esperienza.
             </p>
 
             <p className={styles.heroDescription}>
-              GUFO permette al cliente di mostrare il proprio codice o QR, al
-              partner di registrare il pagamento e al wallet di aggiornarsi in
-              tempo reale con cashback, livello membership, saldo e storico
-              transazioni.
+              Con GUFO il cliente mostra il proprio codice o QR, il partner
+              registra l’acquisto e il sistema aggiorna wallet, transazioni,
+              progressione stagionale e reward in tempo reale.
             </p>
 
             <div className={styles.heroButtons}>
@@ -71,16 +174,16 @@ export default function LandingPage() {
                 href="/partner-demo"
                 className={`${styles.btn} ${styles.btnDark}`}
               >
-                Prova demo partner
+                Demo partner
               </Link>
             </div>
 
             <div className={styles.heroTags}>
+              <span className={styles.heroTag}>Cashback partner-based</span>
               <span className={styles.heroTag}>Wallet live</span>
-              <span className={styles.heroTag}>Membership</span>
+              <span className={styles.heroTag}>Livelli stagionali</span>
               <span className={styles.heroTag}>QR cliente</span>
-              <span className={styles.heroTag}>Dashboard partner</span>
-              <span className={styles.heroTag}>Cashback in tempo reale</span>
+              <span className={styles.heroTag}>Analytics partner</span>
             </div>
           </div>
 
@@ -90,7 +193,7 @@ export default function LandingPage() {
               <div className={`${styles.visualOrb} ${styles.orbTwo}`} />
               <div className={`${styles.visualOrb} ${styles.orbThree}`} />
 
-              <div className={styles.visualTopline}>GUFO PREMIUM INTERFACE</div>
+              <div className={styles.visualTopline}>GUFO RAINBOW ECOSYSTEM</div>
 
               <div className={styles.logoShell}>
                 <Image
@@ -105,23 +208,23 @@ export default function LandingPage() {
 
               <div className={styles.visualStats}>
                 <div className={styles.visualStat}>
-                  <span className={styles.visualStatLabel}>Wallet</span>
+                  <span className={styles.visualStatLabel}>Cliente</span>
                   <strong className={styles.visualStatValue}>
-                    Saldo + Rewards
+                    Wallet + QR + Livello
                   </strong>
                 </div>
 
                 <div className={styles.visualStat}>
                   <span className={styles.visualStatLabel}>Partner</span>
                   <strong className={styles.visualStatValue}>
-                    Pagamento live
+                    Lookup + Pagamento + Reward
                   </strong>
                 </div>
 
                 <div className={styles.visualStat}>
-                  <span className={styles.visualStatLabel}>Membership</span>
+                  <span className={styles.visualStatLabel}>Core GUFO</span>
                   <strong className={styles.visualStatValue}>
-                    Livelli & progressi
+                    Acquisto → GUFO → Fidelizzazione
                   </strong>
                 </div>
               </div>
@@ -132,67 +235,25 @@ export default function LandingPage() {
         <section className={styles.heroStats}>
           <div className={`${styles.heroStatCard} ${styles.neonBorder}`}>
             <div className={styles.heroStatLabel}>Wallet</div>
-            <div className={styles.heroStatValue}>Saldo + GUFO</div>
+            <div className={styles.heroStatValue}>Saldo, movimenti e GUFO</div>
             <div className={styles.heroStatText}>
-              Controlla saldo, cashback, valore accumulato e movimenti in
-              un’unica dashboard.
+              Il cliente controlla tutto in un’unica area chiara, moderna e mobile.
             </div>
           </div>
 
           <div className={`${styles.heroStatCard} ${styles.neonBorder}`}>
             <div className={styles.heroStatLabel}>Membership</div>
-            <div className={styles.heroStatValue}>Progressione livelli</div>
+            <div className={styles.heroStatValue}>Bronze • Silver • Gold • VIP • Elite</div>
             <div className={styles.heroStatText}>
-              Basic, Bronze, Silver, Gold, Platino, VIP, Elite, Diamond e
-              Millionaire.
+              Il percorso cresce nel tempo con la spesa stagionale e l’attività nell’ecosistema.
             </div>
           </div>
 
           <div className={`${styles.heroStatCard} ${styles.neonBorder}`}>
             <div className={styles.heroStatLabel}>Partner</div>
-            <div className={styles.heroStatValue}>Cashback registrato</div>
+            <div className={styles.heroStatValue}>Vendita, reward e ritorno cliente</div>
             <div className={styles.heroStatText}>
-              Il partner cerca il cliente, registra il pagamento e il wallet si
-              aggiorna.
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Perché GUFO</h2>
-            <p className={styles.sectionText}>
-              Un sistema loyalty moderno, visivo e semplice da usare, pensato
-              per clienti reali, negozi locali e demo startup di alto livello.
-            </p>
-          </div>
-
-          <div className={styles.featuresGrid}>
-            <div className={`${styles.featureCard} ${styles.neonBorder}`}>
-              <div className={styles.featureNumber}>01</div>
-              <h3 className={styles.featureTitle}>Cashback automatico</h3>
-              <p className={styles.featureText}>
-                Ogni pagamento aggiorna il saldo GUFO e il cashback in base al
-                livello del cliente.
-              </p>
-            </div>
-
-            <div className={`${styles.featureCard} ${styles.neonBorder}`}>
-              <div className={styles.featureNumber}>02</div>
-              <h3 className={styles.featureTitle}>Esperienza semplice</h3>
-              <p className={styles.featureText}>
-                Codice cliente, QR code, ricerca rapida e registrazione
-                pagamento in pochi secondi.
-              </p>
-            </div>
-
-            <div className={`${styles.featureCard} ${styles.neonBorder}`}>
-              <div className={styles.featureNumber}>03</div>
-              <h3 className={styles.featureTitle}>Controllo completo</h3>
-              <p className={styles.featureText}>
-                Dashboard, wallet, membership, profilo e transazioni in un’unica
-                esperienza coerente.
-              </p>
+              Il partner usa GUFO per registrare transazioni e costruire fidelizzazione reale.
             </div>
           </div>
         </section>
@@ -201,37 +262,61 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Come funziona</h2>
             <p className={styles.sectionText}>
-              Un flusso semplice, veloce e già pronto per una demo reale.
+              Un flusso semplice che collega cliente, partner e reward in un’unica esperienza.
             </p>
           </div>
 
           <div className={styles.stepsGrid}>
-            <div className={`${styles.stepCard} ${styles.neonBorder}`}>
-              <div className={styles.stepNumber}>1</div>
-              <h3 className={styles.stepTitle}>Registrati o accedi</h3>
-              <p className={styles.stepText}>
-                L’utente entra nella piattaforma e accede alla propria area
-                personale GUFO.
-              </p>
-            </div>
+            {howItWorks.map((item) => (
+              <div key={item.step} className={`${styles.stepCard} ${styles.neonBorder}`}>
+                <div className={styles.stepNumber}>{item.step}</div>
+                <h3 className={styles.stepTitle}>{item.title}</h3>
+                <p className={styles.stepText}>{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-            <div className={`${styles.stepCard} ${styles.neonBorder}`}>
-              <div className={styles.stepNumber}>2</div>
-              <h3 className={styles.stepTitle}>Mostra codice o QR</h3>
-              <p className={styles.stepText}>
-                Il cliente apre il codice GUFO e lo mostra al partner per essere
-                riconosciuto.
-              </p>
-            </div>
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>Perché GUFO Rainbow</h2>
+            <p className={styles.sectionText}>
+              Una piattaforma loyalty moderna pensata per clienti reali, negozi locali e una demo startup forte.
+            </p>
+          </div>
 
-            <div className={`${styles.stepCard} ${styles.neonBorder}`}>
-              <div className={styles.stepNumber}>3</div>
-              <h3 className={styles.stepTitle}>Wallet aggiornato</h3>
-              <p className={styles.stepText}>
-                Cashback, saldo, livello membership e storico si aggiornano in
-                tempo reale.
-              </p>
-            </div>
+          <div className={styles.featuresGrid}>
+            {whyGufo.map((item, index) => (
+              <div key={item.title} className={`${styles.featureCard} ${styles.neonBorder}`}>
+                <div className={styles.featureNumber}>
+                  {(index + 1).toString().padStart(2, "0")}
+                </div>
+                <h3 className={styles.featureTitle}>{item.title}</h3>
+                <p className={styles.featureText}>{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.dualSection}>
+          <div className={`${styles.dualCard} ${styles.neonBorder}`}>
+            <div className={styles.dualEyebrow}>Cliente</div>
+            <h3 className={styles.dualTitle}>Un wallet che continua a crescere</h3>
+            <ul className={styles.cleanList}>
+              {clientBenefits.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={`${styles.dualCard} ${styles.neonBorder}`}>
+            <div className={styles.dualEyebrow}>Partner</div>
+            <h3 className={styles.dualTitle}>Uno strumento concreto per fidelizzare</h3>
+            <ul className={styles.cleanList}>
+              {partnerBenefits.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -239,102 +324,30 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Accesso rapido</h2>
             <p className={styles.sectionText}>
-              Le sezioni principali della web app già disponibili.
+              Le aree principali della web app GUFO già disponibili.
             </p>
           </div>
 
           <div className={styles.quickGrid}>
-            <Link
-              href="/dashboard"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Dashboard</div>
-              <div className={styles.quickText}>
-                Panoramica account, statistiche e attività recenti.
-              </div>
-            </Link>
-
-            <Link
-              href="/wallet"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Wallet</div>
-              <div className={styles.quickText}>
-                Saldo GUFO, saldo euro, cashback e storico movimenti.
-              </div>
-            </Link>
-
-            <Link
-              href="/membership"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Membership</div>
-              <div className={styles.quickText}>
-                Livello attuale, progressi e percorso fino a Diamond e
-                Millionaire.
-              </div>
-            </Link>
-
-            <Link
-              href="/customer-code"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Codice GUFO</div>
-              <div className={styles.quickText}>
-                Codice cliente e QR per identificazione rapida presso i partner.
-              </div>
-            </Link>
-
-            <Link
-              href="/transactions"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Transazioni</div>
-              <div className={styles.quickText}>
-                Storico completo con filtri e riepilogo movimenti.
-              </div>
-            </Link>
-
-            <Link
-              href="/profile"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Profilo</div>
-              <div className={styles.quickText}>
-                Dati utente, livello, cashback e ultime attività.
-              </div>
-            </Link>
-
-            <Link
-              href="/partner-demo"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Partner Demo</div>
-              <div className={styles.quickText}>
-                Ricerca cliente e simulazione di pagamento partner.
-              </div>
-            </Link>
-
-            <Link
-              href="/partner-dashboard"
-              className={`${styles.quickCard} ${styles.neonBorder}`}
-            >
-              <div className={styles.quickTitle}>Partner Dashboard</div>
-              <div className={styles.quickText}>
-                Statistiche aggregate e ultime transazioni partner.
-              </div>
-            </Link>
+            {quickLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.quickCard} ${styles.neonBorder}`}
+              >
+                <div className={styles.quickTitle}>{item.title}</div>
+                <div className={styles.quickText}>{item.text}</div>
+              </Link>
+            ))}
           </div>
         </section>
 
         <section className={`${styles.ctaSection} ${styles.neonBorder}`}>
-          <div className={styles.ctaBadge}>Web app GUFO online</div>
-          <h2 className={styles.ctaTitle}>Accedi o crea il tuo account</h2>
+          <div className={styles.ctaBadge}>GUFO Rainbow online</div>
+          <h2 className={styles.ctaTitle}>Entra nella piattaforma</h2>
           <p className={styles.ctaText}>
-            La piattaforma GUFO integra frontend, backend, wallet, membership,
-            profilo, codice cliente, dashboard partner e demo pagamento in
-            un’unica esperienza moderna, pronta per test reali e demo
-            investitori.
+            Cliente e partner condividono lo stesso ecosistema: più semplice da usare,
+            più forte in demo, più chiaro da raccontare.
           </p>
 
           <div className={styles.ctaButtons}>
@@ -345,7 +358,10 @@ export default function LandingPage() {
               Register
             </Link>
 
-            <Link href="/login" className={`${styles.btn} ${styles.btnSecondary}`}>
+            <Link
+              href="/login"
+              className={`${styles.btn} ${styles.btnSecondary}`}
+            >
               Login
             </Link>
           </div>

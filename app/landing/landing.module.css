@@ -6,8 +6,8 @@
   background:
     radial-gradient(circle at 12% 16%, rgba(236, 72, 153, 0.12), transparent 18%),
     radial-gradient(circle at 82% 12%, rgba(56, 189, 248, 0.12), transparent 18%),
-    radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.1), transparent 18%),
-    radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.1), transparent 18%),
+    radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.10), transparent 18%),
+    radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.10), transparent 18%),
     linear-gradient(180deg, #081120 0%, #0b1424 48%, #081120 100%);
   overflow: hidden;
 }
@@ -21,11 +21,41 @@
   z-index: 0;
 }
 
+.bgOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rainbowLine {
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  right: 30px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #00c6ff 0%,
+    #00f5a0 20%,
+    #ffe66d 40%,
+    #ff7b7b 60%,
+    #b388ff 80%,
+    #6ea8ff 100%
+  );
+  box-shadow:
+    0 0 12px rgba(0, 198, 255, 0.45),
+    0 0 24px rgba(255, 123, 123, 0.22),
+    0 0 36px rgba(179, 136, 255, 0.18);
+  z-index: 1;
+}
+
 .container {
   max-width: 1220px;
   margin: 0 auto;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .topbar {
@@ -108,7 +138,9 @@
   display: block;
 }
 
-.heroBadge {
+.heroBadge,
+.dualEyebrow,
+.ctaBadge {
   display: inline-flex;
   align-items: center;
   min-height: 42px;
@@ -119,6 +151,9 @@
   color: #dbe7ff;
   font-size: 13px;
   font-weight: 700;
+}
+
+.heroBadge {
   margin-bottom: 18px;
 }
 
@@ -369,6 +404,7 @@
 .featureCard,
 .stepCard,
 .quickCard,
+.dualCard,
 .ctaSection {
   background: linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
   border-radius: 24px;
@@ -427,7 +463,7 @@
 
 .featuresGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -441,7 +477,8 @@
 
 .featureTitle,
 .stepTitle,
-.quickTitle {
+.quickTitle,
+.dualTitle {
   margin: 0 0 10px 0;
   font-size: 24px;
   line-height: 1.2;
@@ -460,7 +497,7 @@
 
 .stepsGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -470,6 +507,21 @@
   line-height: 1;
   font-weight: 800;
   color: #60a5fa;
+}
+
+.dualSection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 68px;
+}
+
+.cleanList {
+  margin: 0;
+  padding-left: 18px;
+  color: #cbd5e1;
+  font-size: 15px;
+  line-height: 1.8;
 }
 
 .quickGrid {
@@ -488,15 +540,7 @@
 }
 
 .ctaBadge {
-  display: inline-block;
   margin-bottom: 16px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.14);
-  border: 1px solid rgba(59, 130, 246, 0.22);
-  color: #bfdbfe;
-  font-size: 13px;
-  font-weight: 700;
 }
 
 .ctaTitle {
@@ -515,19 +559,19 @@
   line-height: 1.75;
 }
 
-@media (max-width: 1024px) {
-  .heroSection {
-    grid-template-columns: 1fr;
-  }
-
-  .heroStats,
+@media (max-width: 1200px) {
   .featuresGrid,
-  .stepsGrid {
-    grid-template-columns: 1fr;
-  }
-
+  .stepsGrid,
   .quickGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .heroSection,
+  .heroStats,
+  .dualSection {
+    grid-template-columns: 1fr;
   }
 
   .heroTitle {
@@ -613,11 +657,9 @@
     max-width: 220px;
   }
 
-  .heroStats {
-    margin-bottom: 52px;
-  }
-
-  .section {
+  .heroStats,
+  .section,
+  .dualSection {
     margin-bottom: 52px;
   }
 
@@ -633,6 +675,7 @@
   .featureCard,
   .stepCard,
   .quickCard,
+  .dualCard,
   .ctaSection {
     padding: 18px;
     border-radius: 18px;
@@ -640,18 +683,23 @@
 
   .featureTitle,
   .stepTitle,
-  .quickTitle {
+  .quickTitle,
+  .dualTitle {
     font-size: 21px;
   }
 
   .featureText,
   .stepText,
   .quickText,
-  .heroStatText {
+  .heroStatText,
+  .cleanList {
     font-size: 14px;
   }
 
-  .quickGrid {
+  .featuresGrid,
+  .stepsGrid,
+  .quickGrid,
+  .dualSection {
     grid-template-columns: 1fr;
   }
 

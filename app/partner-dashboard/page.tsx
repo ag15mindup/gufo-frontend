@@ -204,13 +204,11 @@ export default function PartnerDashboardPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO PARTNER ANALYTICS</p>
-            <h1 className={styles.userName}>Partner Dashboard</h1>
-            <p className={styles.email}>Caricamento statistiche...</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+          <h1 className={styles.title}>Partner dashboard</h1>
+          <p className={styles.subtitle}>Caricamento statistiche partner...</p>
+        </section>
 
         <div className={styles.loadingBox}>Recupero analytics partner...</div>
       </div>
@@ -223,15 +221,21 @@ export default function PartnerDashboardPage() {
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
 
-        <div className={styles.hero}>
-          <div>
-            <p className={styles.welcome}>GUFO PARTNER ANALYTICS</p>
-            <h1 className={styles.userName}>Partner Dashboard</h1>
-            <p className={styles.email}>Si è verificato un problema.</p>
-          </div>
-        </div>
+        <section className={styles.hero}>
+          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+          <h1 className={styles.title}>Partner dashboard</h1>
+          <p className={styles.subtitle}>Si è verificato un problema.</p>
+        </section>
 
         <section className={styles.filterPanel}>
+          <div className={styles.filterPanelHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>Partner Selection</p>
+              <h3>Seleziona partner</h3>
+            </div>
+            <span className={styles.panelBadge}>Analytics</span>
+          </div>
+
           <div className={styles.filtersGrid}>
             <div>
               <label className={styles.inputLabel}>Partner</label>
@@ -270,42 +274,55 @@ export default function PartnerDashboardPage() {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
-      <div className={styles.hero}>
+      <section className={styles.hero}>
         <div>
-          <p className={styles.welcome}>GUFO PARTNER ANALYTICS</p>
-          <h1 className={styles.userName}>Partner Dashboard</h1>
-          <p className={styles.email}>
-            Panoramica partner con statistiche e ultime transazioni
+          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+          <h1 className={styles.title}>Performance partner</h1>
+          <p className={styles.subtitle}>
+            Panoramica operativa del partner con statistiche principali e transazioni recenti.
+          </p>
+        </div>
+      </section>
+
+      <section className={styles.operatorCard}>
+        <div className={styles.operatorCardLeft}>
+          <div className={styles.operatorTopRow}>
+            <span className={styles.operatorChip}>Partner attivo</span>
+            <span className={styles.operatorStatus}>Live data</span>
+          </div>
+
+          <p className={styles.operatorLabel}>Merchant selezionato</p>
+          <h2 className={styles.operatorValue}>{activePartnerLabel}</h2>
+          <p className={styles.operatorNote}>
+            Analytics riferite al partner con ID {selectedPartnerId}, comprensive di volumi, reward e attività recente.
           </p>
         </div>
 
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Partner attivo</span>
-          <h2 className={styles.balanceValue}>{activePartnerLabel}</h2>
-          <div className={styles.balanceSubValue}>
-            partner_id: {selectedPartnerId}
+        <div className={styles.operatorCardRight}>
+          <div className={styles.operatorMiniCard}>
+            <span>Partner ID</span>
+            <strong>{selectedPartnerId}</strong>
           </div>
 
-          <div className={styles.balanceButtons}>
-            <button type="button" className={styles.primaryBtn}>
-              € {toNumberSafe(data?.total_amount).toFixed(2)}
-            </button>
-            <button type="button" className={styles.secondaryBtn}>
-              {toNumberSafe(data?.total_gufo_distributed).toFixed(2)} GUFO
-            </button>
+          <div className={styles.operatorMiniCard}>
+            <span>Volume totale</span>
+            <strong>€ {toNumberSafe(data?.total_amount).toFixed(2)}</strong>
+          </div>
+
+          <div className={styles.operatorMiniCard}>
+            <span>GUFO distribuiti</span>
+            <strong>{toNumberSafe(data?.total_gufo_distributed).toFixed(2)}</strong>
           </div>
         </div>
-      </div>
+      </section>
 
       <section className={styles.filterPanel}>
-        <div className={styles.panelHeader}>
+        <div className={styles.filterPanelHeader}>
           <div>
+            <p className={styles.sectionEyebrow}>Partner Selection</p>
             <h3>Selezione partner</h3>
-            <p className={styles.panelSubtext}>
-              Cambia partner e aggiorna le statistiche live
-            </p>
           </div>
-          <span>Analytics Active</span>
+          <span className={styles.panelBadge}>Analytics Active</span>
         </div>
 
         <div className={styles.filtersGrid}>
@@ -336,57 +353,46 @@ export default function PartnerDashboardPage() {
         </div>
       </section>
 
-      <div className={styles.statsGrid}>
-        <div className={`${styles.statCard} ${styles.cyan}`}>
-          <div>
-            <div className={styles.statValue}>
-              {toNumberSafe(data?.total_transactions)}
-            </div>
-            <div className={styles.statLabel}>Totale transazioni</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>#</div>
-            <div className={styles.statHint}>Ops</div>
-          </div>
+      <section className={styles.metricsGrid}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Totale transazioni</p>
+          <h3 className={styles.metricValue}>
+            {toNumberSafe(data?.total_transactions)}
+          </h3>
+          <span className={styles.metricHint}>Operazioni registrate</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.purple}`}>
-          <div>
-            <div className={styles.statValue}>
-              € {toNumberSafe(data?.total_amount).toFixed(2)}
-            </div>
-            <div className={styles.statLabel}>Totale importi</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>€</div>
-            <div className={styles.statHint}>Volume</div>
-          </div>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Volume totale</p>
+          <h3 className={styles.metricValue}>
+            € {toNumberSafe(data?.total_amount).toFixed(2)}
+          </h3>
+          <span className={styles.metricHint}>Importo complessivo delle vendite</span>
         </div>
 
-        <div className={`${styles.statCard} ${styles.orange}`}>
-          <div>
-            <div className={styles.statValue}>
-              {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
-            </div>
-            <div className={styles.statLabel}>GUFO distribuiti</div>
-          </div>
-          <div className={styles.statSide}>
-            <div className={styles.statMini}>G</div>
-            <div className={styles.statHint}>Reward</div>
-          </div>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>GUFO distribuiti</p>
+          <h3 className={styles.metricValue}>
+            {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
+          </h3>
+          <span className={styles.metricHint}>Reward erogate dal partner</span>
         </div>
-      </div>
 
-      <div className={styles.bottomGrid}>
-        <section className={styles.panel}>
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Scontrino medio</p>
+          <h3 className={styles.metricValue}>€ {avgTicket.toFixed(2)}</h3>
+          <span className={styles.metricHint}>Valore medio per transazione</span>
+        </div>
+      </section>
+
+      <section className={styles.mainGrid}>
+        <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <div>
+              <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Ultime transazioni</h3>
-              <p className={styles.panelSubtext}>
-                Storico recente del partner selezionato
-              </p>
             </div>
-            <span>{transactions.length} record</span>
+            <span className={styles.panelBadge}>{transactions.length} record</span>
           </div>
 
           {transactions.length === 0 ? (
@@ -487,55 +493,34 @@ export default function PartnerDashboardPage() {
               </div>
             </>
           )}
-        </section>
+        </div>
 
-        <aside className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <h3>Top Info</h3>
-            <span>PRO</span>
+        <aside className={styles.sideColumn}>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Partner attivo</p>
+            <h4>{activePartnerLabel}</h4>
+            <span>Merchant selezionato nella dashboard</span>
           </div>
 
-          <div className={styles.topList}>
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>P</div>
-              <div>
-                <strong>{activePartnerLabel}</strong>
-                <p>Partner attivo</p>
-              </div>
-              <span>now</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Scontrino medio</p>
+            <h4>€ {avgTicket.toFixed(2)}</h4>
+            <span>Valore medio per operazione</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>€</div>
-              <div>
-                <strong>€ {avgTicket.toFixed(2)}</strong>
-                <p>Scontrino medio</p>
-              </div>
-              <span>avg</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>GUFO distribuiti</p>
+            <h4>{toNumberSafe(data?.total_gufo_distributed).toFixed(2)}</h4>
+            <span>Reward totali erogate</span>
+          </div>
 
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>G</div>
-              <div>
-                <strong>
-                  {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
-                </strong>
-                <p>GUFO distribuiti</p>
-              </div>
-              <span>gfo</span>
-            </div>
-
-            <div className={styles.topItem}>
-              <div className={styles.avatar}>#</div>
-              <div>
-                <strong>{transactions.length}</strong>
-                <p>Movimenti caricati</p>
-              </div>
-              <span>log</span>
-            </div>
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Movimenti caricati</p>
+            <h4>{transactions.length}</h4>
+            <span>Record visibili nello storico</span>
           </div>
         </aside>
-      </div>
+      </section>
     </div>
   );
 }
