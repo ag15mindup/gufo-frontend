@@ -22,13 +22,14 @@ export default function Sidebar() {
 
   const links = [
     { href: "/dashboard", label: "Dashboard", icon: "◈" },
-    { href: "/wallet", label: "Wallet", icon: "◎" },
-    { href: "/transactions", label: "Transactions", icon: "◌" },
-    { href: "/membership", label: "Membership", icon: "✦" },
-    { href: "/profile", label: "Profile", icon: "◉" },
-    { href: "/customer-code", label: "QR Code", icon: "▣" },
-    { href: "/partner-demo", label: "Partner Demo", icon: "△" },
-    { href: "/partner-dashboard", label: "Partner Dashboard", icon: "▤" },
+{ href: "/wallet", label: "Wallet", icon: "◎" },
+{ href: "/transactions", label: "Transactions", icon: "◌" },
+{ href: "/membership", label: "Membership", icon: "✦" },
+{ href: "/rewards", label: "Rewards", icon: "✪" },
+{ href: "/profile", label: "Profile", icon: "◉" },
+{ href: "/customer-code", label: "QR Code", icon: "▣" },
+{ href: "/partner-demo", label: "Partner Demo", icon: "△" },
+{ href: "/partner-dashboard", label: "Partner Dashboard", icon: "▤" },
   ];
 
   return (
