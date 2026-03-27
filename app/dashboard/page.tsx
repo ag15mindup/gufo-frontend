@@ -256,18 +256,28 @@ export default function DashboardPage() {
 
         setDashboardData({
           balanceGufo: toNumberSafe(
-            stats?.balance_gufo ?? wallet?.balance_gufo
-          ),
-          totalTransactions: toNumberSafe(
-            stats?.total_transactions ?? normalizedTransactions.length
-          ),
-          totalSpent: toNumberSafe(
-            stats?.season_spent ?? wallet?.season_spent ?? 0
-          ),
-          totalGufoEarned: toNumberSafe(
-            stats?.gufo_earned ?? wallet?.balance_gufo ?? 0
-          ),
-          level: String(stats?.level ?? wallet?.current_level ?? "Bronze"),
+  wallet?.balance_gufo ?? stats?.balance_gufo ?? 0
+),
+
+totalTransactions: toNumberSafe(
+  stats?.total_transactions ?? normalizedTransactions.length
+),
+
+totalSpent: toNumberSafe(
+  wallet?.season_spent ?? stats?.season_spent ?? 0
+),
+
+totalGufoEarned: toNumberSafe(
+  stats?.gufo_earned ??
+  wallet?.balance_gufo ??
+  0
+),
+
+level: String(
+  wallet?.current_level ??
+  stats?.level ??
+  "bronze"
+),
           transactions: normalizedTransactions,
           monthlyExpenses:
             monthlyExpenses.length === 12
