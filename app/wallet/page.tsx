@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./wallet.module.css";
@@ -135,6 +136,8 @@ function extractTransactions(payload: any): any[] {
 }
 
 export default function WalletPage() {
+  const router = useRouter();
+
   const [walletData, setWalletData] = useState<WalletData>({
     balanceGufo: 0,
     balanceEuro: 0,
@@ -147,14 +150,11 @@ export default function WalletPage() {
     lastSeasonReset: "",
   });
 
-  const [userId, setUserId] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("Utente GUFO");
   const [userInitial, setUserInitial] = useState("U");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [buyingAmount, setBuyingAmount] = useState<number | null>(null);
-  const [buyMessage, setBuyMessage] = useState("");
 
   const loadWalletPage = useCallback(async () => {
     try {
@@ -180,7 +180,6 @@ export default function WalletPage() {
         user.email?.split("@")[0] ||
         "Utente GUFO";
 
-      setUserId(user.id);
       setUserEmail(user.email || "");
       setUserName(fallbackName);
       setUserInitial(fallbackName.trim().charAt(0).toUpperCase() || "U");
@@ -256,43 +255,6 @@ export default function WalletPage() {
     loadWalletPage();
   }, [loadWalletPage]);
 
-  async function handleBuyGufo(amount: number) {
-    try {
-      setBuyingAmount(amount);
-      setBuyMessage("");
-      setError("");
-
-      if (!userId) {
-        throw new Error("Utente non disponibile");
-      }
-
-      const response = await fetch(`${API_URL}/buy-gufo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          amount,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || data?.success === false) {
-        throw new Error(data?.error || "Errore acquisto GUFO");
-      }
-
-      setBuyMessage(`Acquisto completato: € ${amount} caricati correttamente`);
-      await loadWalletPage();
-    } catch (err: any) {
-      setBuyMessage("");
-      setError(err?.message || "Errore durante l'acquisto GUFO");
-    } finally {
-      setBuyingAmount(null);
-    }
-  }
-
   const recentTransactions = useMemo(() => {
     return walletData.transactions.slice(0, 8);
   }, [walletData.transactions]);
@@ -348,41 +310,31 @@ export default function WalletPage() {
             {userEmail ? userEmail : "Portafoglio digitale attivo"}
           </p>
 
-          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "18px" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginTop: "18px",
+            }}
+          >
             <button
-              onClick={() => handleBuyGufo(10)}
-              disabled={buyingAmount !== null}
+              onClick={() => router.push("/buy-gufo")}
               style={{
                 padding: "12px 18px",
                 borderRadius: "12px",
                 border: "none",
-                cursor: buyingAmount !== null ? "not-allowed" : "pointer",
+                cursor: "pointer",
                 fontWeight: 700,
-                opacity: buyingAmount !== null ? 0.7 : 1,
+                background: "rgba(255,255,255,0.14)",
+                color: "#fff",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
               }}
             >
-              {buyingAmount === 10 ? "Caricamento..." : "Compra 10 GUFO"}
-            </button>
-
-            <button
-              onClick={() => handleBuyGufo(50)}
-              disabled={buyingAmount !== null}
-              style={{
-                padding: "12px 18px",
-                borderRadius: "12px",
-                border: "none",
-                cursor: buyingAmount !== null ? "not-allowed" : "pointer",
-                fontWeight: 700,
-                opacity: buyingAmount !== null ? 0.7 : 1,
-              }}
-            >
-              {buyingAmount === 50 ? "Caricamento..." : "Compra 50 GUFO"}
+              Acquista GUFO
             </button>
           </div>
-
-          {buyMessage ? (
-            <div style={{ marginTop: "14px", fontWeight: 600 }}>{buyMessage}</div>
-          ) : null}
 
           {error ? (
             <div style={{ marginTop: "14px", fontWeight: 600 }}>{error}</div>
