@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./wallet.module.css";
@@ -147,123 +147,151 @@ export default function WalletPage() {
     lastSeasonReset: "",
   });
 
+  const [userId, setUserId] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [userName, setUserName] = useState("Utente GUFO");
   const [userInitial, setUserInitial] = useState("U");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [buying, setBuying] = useState(false);
+  const [buyMessage, setBuyMessage] = useState("");
+
+  const loadWalletPage = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw new Error(userError.message || "Errore recupero utente");
+      }
+
+      if (!user) {
+        throw new Error("Utente non autenticato");
+      }
+
+      const fallbackName =
+        user.user_metadata?.username ||
+        user.user_metadata?.full_name ||
+        user.email?.split("@")[0] ||
+        "Utente GUFO";
+
+      setUserId(user.id);
+      setUserEmail(user.email || "");
+      setUserName(fallbackName);
+      setUserInitial(fallbackName.trim().charAt(0).toUpperCase() || "U");
+
+      const [walletRes, transactionsRes] = await Promise.all([
+        safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+        safeJsonFetch(`${API_URL}/transactions/${user.id}`),
+      ]);
+
+      if (!walletRes.response.ok || walletRes.data?.success === false) {
+        throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
+      }
+
+      if (!transactionsRes.response.ok || transactionsRes.data?.success === false) {
+        throw new Error(
+          transactionsRes.data?.error || "Errore nel recupero transazioni"
+        );
+      }
+
+      const walletPayload = walletRes.data ?? {};
+      const transactionsPayload = transactionsRes.data ?? {};
+
+      const wallet: WalletResponse = extractWallet(walletPayload);
+      const rawTransactions = extractTransactions(transactionsPayload);
+
+      const normalizedTransactions: Transaction[] = rawTransactions.map((tx: any) => ({
+        id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
+        transaction_id: tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
+        type: getTransactionType(tx),
+        merchant_name: getTransactionMerchant(tx),
+        amount_euro: getTransactionAmount(tx),
+        gufo_earned: getTransactionGufo(tx),
+        cashback:
+          tx?.cashback ??
+          tx?.cashback_percent ??
+          tx?.raw?.cashback ??
+          tx?.raw?.cashback_percent ??
+          null,
+        cashback_percent:
+          tx?.cashback_percent ??
+          tx?.cashback ??
+          tx?.raw?.cashback_percent ??
+          tx?.raw?.cashback ??
+          null,
+        created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
+        raw: tx?.raw ?? tx,
+      }));
+
+      const totalGufoEarned = normalizedTransactions.reduce(
+        (sum, tx) => sum + getTransactionGufo(tx),
+        0
+      );
+
+      setWalletData({
+        balanceGufo: toNumberSafe(wallet?.balance_gufo),
+        balanceEuro: toNumberSafe(wallet?.balance_eur),
+        seasonSpent: toNumberSafe(wallet?.season_spent),
+        level: String(wallet?.current_level ?? "Bronze"),
+        cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
+        totalTransactions: normalizedTransactions.length,
+        totalGufoEarned: Number(totalGufoEarned.toFixed(2)),
+        transactions: normalizedTransactions,
+        lastSeasonReset: String(wallet?.last_season_reset ?? ""),
+      });
+    } catch (err: any) {
+      setError(err?.message || "Errore sconosciuto");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadWalletPage() {
-      try {
-        setLoading(true);
-        setError("");
-
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-
-        if (userError) {
-          throw new Error(userError.message || "Errore recupero utente");
-        }
-
-        if (!user) {
-          throw new Error("Utente non autenticato");
-        }
-
-        const fallbackName =
-          user.user_metadata?.username ||
-          user.user_metadata?.full_name ||
-          user.email?.split("@")[0] ||
-          "Utente GUFO";
-
-        if (isMounted) {
-          setUserEmail(user.email || "");
-          setUserName(fallbackName);
-          setUserInitial(fallbackName.trim().charAt(0).toUpperCase() || "U");
-        }
-
-        const [walletRes, transactionsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
-          safeJsonFetch(`${API_URL}/transactions/${user.id}`),
-        ]);
-
-        if (!walletRes.response.ok || walletRes.data?.success === false) {
-          throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
-        }
-
-        if (!transactionsRes.response.ok || transactionsRes.data?.success === false) {
-          throw new Error(
-            transactionsRes.data?.error || "Errore nel recupero transazioni"
-          );
-        }
-
-        const walletPayload = walletRes.data ?? {};
-        const transactionsPayload = transactionsRes.data ?? {};
-
-        const wallet: WalletResponse = extractWallet(walletPayload);
-        const rawTransactions = extractTransactions(transactionsPayload);
-
-        const normalizedTransactions: Transaction[] = rawTransactions.map((tx: any) => ({
-          id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-          transaction_id: tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
-          type: getTransactionType(tx),
-          merchant_name: getTransactionMerchant(tx),
-          amount_euro: getTransactionAmount(tx),
-          gufo_earned: getTransactionGufo(tx),
-          cashback:
-            tx?.cashback ??
-            tx?.cashback_percent ??
-            tx?.raw?.cashback ??
-            tx?.raw?.cashback_percent ??
-            null,
-          cashback_percent:
-            tx?.cashback_percent ??
-            tx?.cashback ??
-            tx?.raw?.cashback_percent ??
-            tx?.raw?.cashback ??
-            null,
-          created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
-          raw: tx?.raw ?? tx,
-        }));
-
-        const totalGufoEarned = normalizedTransactions.reduce(
-          (sum, tx) => sum + getTransactionGufo(tx),
-          0
-        );
-
-        if (!isMounted) return;
-
-        setWalletData({
-          balanceGufo: toNumberSafe(wallet?.balance_gufo),
-          balanceEuro: toNumberSafe(wallet?.balance_eur),
-          seasonSpent: toNumberSafe(wallet?.season_spent),
-          level: String(wallet?.current_level ?? "Bronze"),
-          cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
-          totalTransactions: normalizedTransactions.length,
-          totalGufoEarned: Number(totalGufoEarned.toFixed(2)),
-          transactions: normalizedTransactions,
-          lastSeasonReset: String(wallet?.last_season_reset ?? ""),
-        });
-      } catch (err: any) {
-        if (!isMounted) return;
-        setError(err?.message || "Errore sconosciuto");
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
     loadWalletPage();
+  }, [loadWalletPage]);
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  async function handleBuyGufo(amount: number) {
+    try {
+      setBuying(true);
+      setBuyMessage("");
+      setError("");
+
+      if (!userId) {
+        throw new Error("Utente non disponibile");
+      }
+
+      const response = await fetch(`${API_URL}/buy-gufo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          amount,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || "Errore acquisto GUFO");
+      }
+
+      setBuyMessage(`Acquisto completato: € ${amount} caricati correttamente`);
+      await loadWalletPage();
+    } catch (err: any) {
+      setBuyMessage("");
+      setError(err?.message || "Errore durante l'acquisto GUFO");
+    } finally {
+      setBuying(false);
+    }
+  }
 
   const recentTransactions = useMemo(() => {
     return walletData.transactions.slice(0, 8);
@@ -288,7 +316,7 @@ export default function WalletPage() {
     );
   }
 
-  if (error) {
+  if (error && !walletData.transactions.length && walletData.balanceGufo === 0) {
     return (
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
@@ -319,6 +347,44 @@ export default function WalletPage() {
           <p className={styles.subtitle}>
             {userEmail ? userEmail : "Portafoglio digitale attivo"}
           </p>
+
+          <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "18px" }}>
+            <button
+              onClick={() => handleBuyGufo(10)}
+              disabled={buying}
+              style={{
+                padding: "12px 18px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 700,
+              }}
+            >
+              {buying ? "Caricamento..." : "Compra 10 GUFO"}
+            </button>
+
+            <button
+              onClick={() => handleBuyGufo(50)}
+              disabled={buying}
+              style={{
+                padding: "12px 18px",
+                borderRadius: "12px",
+                border: "none",
+                cursor: "pointer",
+                fontWeight: 700,
+              }}
+            >
+              {buying ? "Caricamento..." : "Compra 50 GUFO"}
+            </button>
+          </div>
+
+          {buyMessage ? (
+            <div style={{ marginTop: "14px", fontWeight: 600 }}>{buyMessage}</div>
+          ) : null}
+
+          {error ? (
+            <div style={{ marginTop: "14px", fontWeight: 600 }}>{error}</div>
+          ) : null}
         </div>
 
         <div className={styles.walletHeroCard}>
