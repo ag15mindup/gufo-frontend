@@ -153,7 +153,7 @@ export default function WalletPage() {
   const [userInitial, setUserInitial] = useState("U");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [buying, setBuying] = useState(false);
+  const [buyingAmount, setBuyingAmount] = useState<number | null>(null);
   const [buyMessage, setBuyMessage] = useState("");
 
   const loadWalletPage = useCallback(async () => {
@@ -258,7 +258,7 @@ export default function WalletPage() {
 
   async function handleBuyGufo(amount: number) {
     try {
-      setBuying(true);
+      setBuyingAmount(amount);
       setBuyMessage("");
       setError("");
 
@@ -289,7 +289,7 @@ export default function WalletPage() {
       setBuyMessage("");
       setError(err?.message || "Errore durante l'acquisto GUFO");
     } finally {
-      setBuying(false);
+      setBuyingAmount(null);
     }
   }
 
@@ -351,30 +351,32 @@ export default function WalletPage() {
           <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginTop: "18px" }}>
             <button
               onClick={() => handleBuyGufo(10)}
-              disabled={buying}
+              disabled={buyingAmount !== null}
               style={{
                 padding: "12px 18px",
                 borderRadius: "12px",
                 border: "none",
-                cursor: "pointer",
+                cursor: buyingAmount !== null ? "not-allowed" : "pointer",
                 fontWeight: 700,
+                opacity: buyingAmount !== null ? 0.7 : 1,
               }}
             >
-              {buying ? "Caricamento..." : "Compra 10 GUFO"}
+              {buyingAmount === 10 ? "Caricamento..." : "Compra 10 GUFO"}
             </button>
 
             <button
               onClick={() => handleBuyGufo(50)}
-              disabled={buying}
+              disabled={buyingAmount !== null}
               style={{
                 padding: "12px 18px",
                 borderRadius: "12px",
                 border: "none",
-                cursor: "pointer",
+                cursor: buyingAmount !== null ? "not-allowed" : "pointer",
                 fontWeight: 700,
+                opacity: buyingAmount !== null ? 0.7 : 1,
               }}
             >
-              {buying ? "Caricamento..." : "Compra 50 GUFO"}
+              {buyingAmount === 50 ? "Caricamento..." : "Compra 50 GUFO"}
             </button>
           </div>
 
