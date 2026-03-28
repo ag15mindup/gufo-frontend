@@ -66,6 +66,7 @@ type DashboardData = {
   profileName: string;
   profileEmail: string;
   profileInitial: string;
+  authUserId: string;
 };
 
 const API_URL =
@@ -145,6 +146,8 @@ function formatTransactionType(type?: string) {
       return "Pagamento";
     case "bonus":
       return "Bonus";
+    case "buy":
+      return "Acquisto";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -178,6 +181,7 @@ export default function DashboardPage() {
     profileName: "Utente GUFO",
     profileEmail: "",
     profileInitial: "U",
+    authUserId: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -203,6 +207,9 @@ export default function DashboardPage() {
         if (!user) {
           throw new Error("Utente non autenticato");
         }
+
+        console.log("USER AUTH ID:", user.id);
+        alert(`USER AUTH ID: ${user.id}`);
 
         const [dashboard, profilePayload] = await Promise.all([
           fetchJson<DashboardApiResponse>(`${API_URL}/dashboard/${user.id}`),
@@ -256,28 +263,18 @@ export default function DashboardPage() {
 
         setDashboardData({
           balanceGufo: toNumberSafe(
-  wallet?.balance_gufo ?? stats?.balance_gufo ?? 0
-),
-
-totalTransactions: toNumberSafe(
-  stats?.total_transactions ?? normalizedTransactions.length
-),
-
-totalSpent: toNumberSafe(
-  wallet?.season_spent ?? stats?.season_spent ?? 0
-),
-
-totalGufoEarned: toNumberSafe(
-  stats?.gufo_earned ??
-  wallet?.balance_gufo ??
-  0
-),
-
-level: String(
-  wallet?.current_level ??
-  stats?.level ??
-  "bronze"
-),
+            wallet?.balance_gufo ?? stats?.balance_gufo ?? 0
+          ),
+          totalTransactions: toNumberSafe(
+            stats?.total_transactions ?? normalizedTransactions.length
+          ),
+          totalSpent: toNumberSafe(
+            wallet?.season_spent ?? stats?.season_spent ?? 0
+          ),
+          totalGufoEarned: toNumberSafe(
+            stats?.gufo_earned ?? wallet?.balance_gufo ?? 0
+          ),
+          level: String(wallet?.current_level ?? stats?.level ?? "bronze"),
           transactions: normalizedTransactions,
           monthlyExpenses:
             monthlyExpenses.length === 12
@@ -286,6 +283,7 @@ level: String(
           profileName,
           profileEmail,
           profileInitial,
+          authUserId: user.id,
         });
       } catch (err: any) {
         if (!isMounted) return;
@@ -359,6 +357,9 @@ level: String(
           <h1 className={styles.userName}>{dashboardData.profileName}</h1>
           {dashboardData.profileEmail ? (
             <p className={styles.email}>{dashboardData.profileEmail}</p>
+          ) : null}
+          {dashboardData.authUserId ? (
+            <p className={styles.email}>ID Auth: {dashboardData.authUserId}</p>
           ) : null}
         </div>
 
