@@ -24,6 +24,16 @@ type Transaction = {
   raw?: any;
 };
 
+type Mission = {
+  id: number;
+  title: string;
+  description: string;
+  reward: string;
+  type: "daily" | "weekly" | "monthly";
+  progress: number;
+  total: number;
+};
+
 type DashboardApiResponse = {
   wallet?: {
     balance_gufo?: number | string | null;
@@ -72,6 +82,36 @@ type DashboardData = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
+const demoMissions: Mission[] = [
+  {
+    id: 1,
+    title: "Partner nuovo",
+    description: "Effettua una spesa in un partner nuovo",
+    reward: "+3 GUFO",
+    type: "daily",
+    progress: 0,
+    total: 1,
+  },
+  {
+    id: 2,
+    title: "Aperitivo + Pizza",
+    description: "Completa la combo settimanale",
+    reward: "+5 GUFO",
+    type: "weekly",
+    progress: 1,
+    total: 2,
+  },
+  {
+    id: 3,
+    title: "5 partner diversi",
+    description: "Spendi in 5 partner diversi nel mese",
+    reward: "+10 GUFO",
+    type: "monthly",
+    progress: 2,
+    total: 5,
+  },
+];
+
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -98,6 +138,12 @@ function getMonthLabel(index: number) {
     "Dic",
   ];
   return months[index] || "";
+}
+
+function getMissionTypeLabel(type: Mission["type"]) {
+  if (type === "daily") return "Giornaliera";
+  if (type === "weekly") return "Settimanale";
+  return "Mensile";
 }
 
 function getTransactionAmount(tx: Transaction) {
@@ -419,6 +465,129 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <section className={styles.panel} style={{ marginBottom: "24px" }}>
+        <div className={styles.panelHeader}>
+          <h3>Missioni attive</h3>
+          <span>Reward extra</span>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "16px",
+          }}
+        >
+          {demoMissions.map((mission) => {
+            const progressPercent =
+              mission.total > 0 ? (mission.progress / mission.total) * 100 : 0;
+
+            return (
+              <div
+                key={mission.id}
+                style={{
+                  borderRadius: "20px",
+                  padding: "18px",
+                  background:
+                    "linear-gradient(135deg, rgba(139,92,246,0.18), rgba(56,189,248,0.14))",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginBottom: "10px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      padding: "6px 10px",
+                      borderRadius: "999px",
+                      background: "rgba(255,255,255,0.10)",
+                      border: "1px solid rgba(255,255,255,0.12)",
+                      color: "#fff",
+                    }}
+                  >
+                    {getMissionTypeLabel(mission.type)}
+                  </span>
+
+                  <span
+                    style={{
+                      fontSize: "0.95rem",
+                      fontWeight: 800,
+                      color: "#fff",
+                    }}
+                  >
+                    {mission.reward}
+                  </span>
+                </div>
+
+                <h4
+                  style={{
+                    margin: "0 0 6px 0",
+                    fontSize: "1.1rem",
+                    fontWeight: 800,
+                    color: "#fff",
+                  }}
+                >
+                  {mission.title}
+                </h4>
+
+                <p
+                  style={{
+                    margin: "0 0 14px 0",
+                    fontSize: "0.92rem",
+                    color: "rgba(255,255,255,0.78)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {mission.description}
+                </p>
+
+                <div
+                  style={{
+                    width: "100%",
+                    height: "10px",
+                    borderRadius: "999px",
+                    background: "rgba(255,255,255,0.10)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${progressPercent}%`,
+                      height: "100%",
+                      borderRadius: "999px",
+                      background: "linear-gradient(90deg, #8b5cf6, #38bdf8)",
+                    }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "8px",
+                    fontSize: "0.85rem",
+                    fontWeight: 600,
+                    color: "#fff",
+                  }}
+                >
+                  Progresso: {mission.progress}/{mission.total}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       <div className={styles.bottomGrid}>
         <section className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -507,31 +676,50 @@ export default function DashboardPage() {
         </aside>
       </div>
 
-      <section className={styles.chartPanel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h3>Andamento spese</h3>
-            <span>Ultimi 12 mesi</span>
+<section className={`${styles.panel} ${styles.missionsSection}`}>
+  <div className={styles.panelHeader}>
+    <h3>Missioni attive</h3>
+    <span>Reward extra</span>
+  </div>
+
+  <div className={styles.missionsGrid}>
+    {demoMissions.map((mission) => {
+      const progressPercent =
+        mission.total > 0 ? (mission.progress / mission.total) * 100 : 0;
+
+      return (
+        <div key={mission.id} className={styles.missionCard}>
+          <div className={styles.missionTop}>
+            <span className={styles.missionBadge}>
+              {getMissionTypeLabel(mission.type)}
+            </span>
+
+            <span className={styles.missionReward}>
+              {mission.reward}
+            </span>
+          </div>
+
+          <h4 className={styles.missionTitle}>{mission.title}</h4>
+
+          <p className={styles.missionDescription}>
+            {mission.description}
+          </p>
+
+          <div className={styles.missionProgressBar}>
+            <div
+              className={styles.missionProgressFill}
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+
+          <div className={styles.missionProgressText}>
+            Progresso: {mission.progress}/{mission.total}
           </div>
         </div>
-
-        <div className={styles.chartWrap}>
-          {dashboardData.monthlyExpenses.map((value, index) => {
-            const height =
-              value > 0 ? `${(value / maxMonthlyValue) * 100}%` : "8px";
-
-            return (
-              <div className={styles.chartItem} key={index}>
-                <span className={styles.chartValue}>€{value.toFixed(0)}</span>
-                <div className={styles.chartBarShell}>
-                  <div className={styles.chartBar} style={{ height }} />
-                </div>
-                <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      );
+    })}
+  </div>
+</section>
     </div>
   );
 }
