@@ -45,8 +45,8 @@ function getMissionTypeColors(type: Mission["type"]) {
 
   return {
     badgeBg: "rgba(16, 185, 129, 0.18)",
-    badgeBorder: "rgba(52, 211, 153, 0.35)",
-    badgeColor: "#d1fae5",
+      badgeBorder: "rgba(52, 211, 153, 0.35)",
+      badgeColor: "#d1fae5",
   };
 }
 
@@ -70,62 +70,71 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
   const merchantCount: Record<string, number> = {};
+  const merchantSet = new Set<string>();
 
   safeTransactions.forEach((tx) => {
-    const name = getTransactionMerchant(tx);
+    const name = String(getTransactionMerchant(tx)).trim();
     if (!name) return;
+    merchantSet.add(name);
     merchantCount[name] = (merchantCount[name] || 0) + 1;
   });
 
-  const merchants = Object.keys(merchantCount);
+  const merchants = Array.from(merchantSet);
 
-  const mostUsed = merchants.sort(
-    (a, b) => merchantCount[b] - merchantCount[a]
+  const mostUsed = [...merchants].sort(
+    (a, b) => (merchantCount[b] || 0) - (merchantCount[a] || 0)
   )[0];
 
-  const uniquePartners = merchants.length;
   const totalTransactions = safeTransactions.length;
+  const uniquePartners = merchants.length;
 
-  const suggestedPartners = [
-    "Bar Centrale",
-    "Pizzeria Napoli",
-    "Market Express",
-  ];
+  const paymentLikeTransactions = safeTransactions.filter((tx) => {
+    const type = String(getTransactionType(tx)).toLowerCase();
+    return (
+      type === "payment" ||
+      type === "buy" ||
+      type === "acquisto" ||
+      type === "cashback"
+    );
+  });
 
-  const newPartner = suggestedPartners.find((partner) => !merchants.includes(partner));
+  const hasAnyTransaction = paymentLikeTransactions.length > 0;
+  const returnedToPartner = mostUsed ? (merchantCount[mostUsed] || 0) >= 2 : false;
+  const hasFoodCombo = uniquePartners >= 2;
+  const hasExplorerProgress = uniquePartners > 0;
 
   return [
     {
       id: 1,
       title: "Usa GUFO oggi",
-      description: "Completa almeno una transazione oggi",
+      description: "Completa almeno una transazione con il tuo account GUFO",
       reward: "+3 GUFO",
       type: "daily",
-      progress: totalTransactions > 0 ? 1 : 0,
+      progress: hasAnyTransaction ? 1 : 0,
       total: 1,
     },
     {
       id: 2,
-      title: mostUsed ? `Torna da ${mostUsed}` : "Torna in un partner",
-      description: "Effettua un nuovo acquisto nel tuo partner preferito",
+      title: mostUsed ? `Torna da ${mostUsed}` : "Torna da un partner",
+      description: "Effettua un nuovo acquisto nel partner che frequenti di più",
       reward: "+5 GUFO",
       type: "weekly",
-      progress: mostUsed && merchantCount[mostUsed] > 1 ? 1 : 0,
+      progress: returnedToPartner ? 1 : 0,
       total: 1,
     },
     {
       id: 3,
-      title: newPartner ? `Scopri ${newPartner}` : "Scopri un nuovo partner",
-      description: "Effettua una spesa in un partner che non hai mai visitato",
+      title: "Esplora nuovi partner",
+      description: "Visita partner diversi per ampliare il tuo percorso GUFO",
       reward: "+6 GUFO",
       type: "weekly",
-      progress: newPartner ? 0 : 1,
-      total: 1,
+      progress: hasExplorerProgress ? Math.min(uniquePartners, 3) : 0,
+      total: 3,
     },
     {
       id: 4,
       title: "Combo Food Experience",
-      description: "Bar + Ristorante nella stessa settimana",
+      description: "Completa acquisti in almeno 2 partner diversi nella settimana",
       reward: "+10 GUFO",
       type: "weekly",
       progress: Math.min(uniquePartners, 2),
@@ -133,8 +142,8 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
     },
     {
       id: 5,
-      title: "Top spender",
-      description: "Completa 5 transazioni nel mese",
+      title: "Top spender mensile",
+      description: "Completa 5 transazioni nel mese per ottenere un reward extra",
       reward: "+12 GUFO",
       type: "monthly",
       progress: Math.min(totalTransactions, 5),

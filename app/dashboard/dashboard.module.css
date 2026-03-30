@@ -52,7 +52,8 @@
 .bottomGrid,
 .chartPanel,
 .loadingBox,
-.errorBox {
+.errorBox,
+.panel {
   position: relative;
   z-index: 2;
 }
@@ -291,6 +292,7 @@
 
 .panel {
   padding: 20px;
+  margin-top: 24px;
 }
 
 .panelHeader {

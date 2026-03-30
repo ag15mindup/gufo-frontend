@@ -83,6 +83,24 @@ function formatLevel(level?: string) {
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
 }
 
+function getMonthLabel(index: number) {
+  const months = [
+    "Gen",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mag",
+    "Giu",
+    "Lug",
+    "Ago",
+    "Set",
+    "Ott",
+    "Nov",
+    "Dic",
+  ];
+  return months[index] || "";
+}
+
 function getTransactionAmount(tx: Transaction) {
   return toNumberSafe(
     tx?.amount_euro ??
@@ -286,6 +304,8 @@ export default function DashboardPage() {
     return dashboardData.transactions.slice(0, 8);
   }, [dashboardData.transactions]);
 
+  const maxMonthlyValue = Math.max(...dashboardData.monthlyExpenses, 1);
+
   if (loading) {
     return (
       <div className={styles.page}>
@@ -398,6 +418,73 @@ export default function DashboardPage() {
       </div>
 
       <MissionCard transactions={dashboardData.transactions} />
+
+      <section className={styles.panel} style={{ marginTop: "24px" }}>
+        <div className={styles.panelHeader}>
+          <h3>Spese mensili</h3>
+          <span>Ultimi 12 mesi</span>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
+            alignItems: "end",
+            gap: "10px",
+            minHeight: "220px",
+            marginTop: "8px",
+          }}
+        >
+          {dashboardData.monthlyExpenses.map((value, index) => {
+            const safeHeight = Math.max((value / maxMonthlyValue) * 160, 8);
+
+            return (
+              <div
+                key={`${getMonthLabel(index)}-${index}`}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                  gap: "10px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "rgba(255,255,255,0.72)",
+                    minHeight: "16px",
+                  }}
+                >
+                  € {value.toFixed(0)}
+                </span>
+
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: "28px",
+                    height: `${safeHeight}px`,
+                    borderRadius: "999px",
+                    background:
+                      "linear-gradient(180deg, rgba(56,189,248,0.95), rgba(139,92,246,0.95))",
+                    boxShadow: "0 0 20px rgba(56,189,248,0.28)",
+                  }}
+                />
+
+                <span
+                  style={{
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    color: "#fff",
+                  }}
+                >
+                  {getMonthLabel(index)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <div className={styles.bottomGrid}>
         <section className={styles.panel}>
