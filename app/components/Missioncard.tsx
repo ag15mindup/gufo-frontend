@@ -74,7 +74,6 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
   safeTransactions.forEach((tx) => {
     const name = getTransactionMerchant(tx);
     if (!name) return;
-
     merchantCount[name] = (merchantCount[name] || 0) + 1;
   });
 
@@ -87,15 +86,15 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
   const uniquePartners = merchants.length;
   const totalTransactions = safeTransactions.length;
 
-  // Simulazione partner disponibili (in futuro arriveranno dal backend)
-  const suggestedPartners = ["Bar Centrale", "Pizzeria Napoli", "Market Express"];
+  const suggestedPartners = [
+    "Bar Centrale",
+    "Pizzeria Napoli",
+    "Market Express",
+  ];
 
-  const newPartner = suggestedPartners.find(
-    (p) => !merchants.includes(p)
-  );
+  const newPartner = suggestedPartners.find((partner) => !merchants.includes(partner));
 
   return [
-    // 🎯 USO BASE
     {
       id: 1,
       title: "Usa GUFO oggi",
@@ -105,34 +104,24 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
       progress: totalTransactions > 0 ? 1 : 0,
       total: 1,
     },
-
-    // 🔁 RETENTION (ritorno cliente)
     {
       id: 2,
-      title: mostUsed
-        ? `Torna da ${mostUsed}`
-        : "Torna in un partner",
+      title: mostUsed ? `Torna da ${mostUsed}` : "Torna in un partner",
       description: "Effettua un nuovo acquisto nel tuo partner preferito",
       reward: "+5 GUFO",
       type: "weekly",
-      progress: merchantCount[mostUsed] > 1 ? 1 : 0,
+      progress: mostUsed && merchantCount[mostUsed] > 1 ? 1 : 0,
       total: 1,
     },
-
-    // 🆕 ACQUISIZIONE NUOVI PARTNER
     {
       id: 3,
-      title: newPartner
-        ? `Scopri ${newPartner}`
-        : "Scopri un nuovo partner",
+      title: newPartner ? `Scopri ${newPartner}` : "Scopri un nuovo partner",
       description: "Effettua una spesa in un partner che non hai mai visitato",
       reward: "+6 GUFO",
       type: "weekly",
       progress: newPartner ? 0 : 1,
       total: 1,
     },
-
-    // 🧩 COMBO (SUPER IMPORTANTE)
     {
       id: 4,
       title: "Combo Food Experience",
@@ -142,8 +131,6 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
       progress: Math.min(uniquePartners, 2),
       total: 2,
     },
-
-    // 🏆 VOLUME
     {
       id: 5,
       title: "Top spender",
@@ -156,11 +143,13 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
   ];
 }
 
-export default function MissioniCard({
+type MissionCardProps = {
+  transactions?: Transaction[];
+};
+
+export default function MissionCard({
   transactions = [],
-}: {
-  transactions: Transaction[];
-}) {
+}: MissionCardProps) {
   const missions = buildDynamicMissions(transactions);
 
   return (
@@ -171,7 +160,11 @@ export default function MissioniCard({
         padding: "20px",
         background: "rgba(10, 15, 35, 0.42)",
         backdropFilter: "blur(14px)",
+        WebkitBackdropFilter: "blur(14px)",
         boxShadow: "0 12px 30px rgba(0,0,0,0.22)",
+        position: "relative",
+        zIndex: 2,
+        marginBottom: "24px",
       }}
     >
       <div style={{ marginBottom: 18 }}>
@@ -189,6 +182,7 @@ export default function MissioniCard({
         <p
           style={{
             marginTop: 6,
+            marginBottom: 0,
             color: "rgba(255,255,255,0.75)",
             fontSize: "0.95rem",
           }}
@@ -229,6 +223,8 @@ export default function MissioniCard({
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 10,
                   marginBottom: 10,
                   flexWrap: "wrap",
                 }}
@@ -273,6 +269,7 @@ export default function MissioniCard({
                   margin: "0 0 12px 0",
                   color: "rgba(255,255,255,0.78)",
                   fontSize: "0.9rem",
+                  lineHeight: 1.4,
                 }}
               >
                 {mission.description}
@@ -295,6 +292,7 @@ export default function MissioniCard({
                     background: completed
                       ? "linear-gradient(90deg, #22c55e, #38bdf8)"
                       : "linear-gradient(90deg, #8b5cf6, #38bdf8)",
+                    transition: "width 0.3s ease",
                   }}
                 />
               </div>

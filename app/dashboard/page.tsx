@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./dashboard.module.css";
 import { createClient } from "@/lib/supabase/client";
+import MissionCard from "@/app/components/Missioncard";
 
 const supabase = createClient();
 
@@ -22,16 +23,6 @@ type Transaction = {
   gufo?: number | string | null;
   created_at?: string | null;
   raw?: any;
-};
-
-type Mission = {
-  id: number;
-  title: string;
-  description: string;
-  reward: string;
-  type: "daily" | "weekly" | "monthly";
-  progress: number;
-  total: number;
 };
 
 type DashboardApiResponse = {
@@ -82,36 +73,6 @@ type DashboardData = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
-const demoMissions: Mission[] = [
-  {
-    id: 1,
-    title: "Scopri un nuovo partner",
-    description: "Effettua una spesa in un partner che non hai ancora visitato",
-    reward: "+3 GUFO",
-    type: "daily",
-    progress: 0,
-    total: 1,
-  },
-  {
-    id: 2,
-    title: "Combo Aperitivo + Pizza",
-    description: "Completa 2 acquisti partner compatibili nella settimana",
-    reward: "+5 GUFO",
-    type: "weekly",
-    progress: 1,
-    total: 2,
-  },
-  {
-    id: 3,
-    title: "Esploratore mensile",
-    description: "Spendi in 5 partner diversi entro la fine del mese",
-    reward: "+10 GUFO",
-    type: "monthly",
-    progress: 2,
-    total: 5,
-  },
-];
-
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -120,54 +81,6 @@ function toNumberSafe(value: unknown) {
 function formatLevel(level?: string) {
   if (!level) return "Bronze";
   return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
-}
-
-function getMonthLabel(index: number) {
-  const months = [
-    "Gen",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mag",
-    "Giu",
-    "Lug",
-    "Ago",
-    "Set",
-    "Ott",
-    "Nov",
-    "Dic",
-  ];
-  return months[index] || "";
-}
-
-function getMissionTypeLabel(type: Mission["type"]) {
-  if (type === "daily") return "Giornaliera";
-  if (type === "weekly") return "Settimanale";
-  return "Mensile";
-}
-
-function getMissionTypeColors(type: Mission["type"]) {
-  if (type === "daily") {
-    return {
-      badgeBg: "rgba(59, 130, 246, 0.18)",
-      badgeBorder: "rgba(96, 165, 250, 0.35)",
-      badgeColor: "#dbeafe",
-    };
-  }
-
-  if (type === "weekly") {
-    return {
-      badgeBg: "rgba(168, 85, 247, 0.18)",
-      badgeBorder: "rgba(192, 132, 252, 0.35)",
-      badgeColor: "#f3e8ff",
-    };
-  }
-
-  return {
-    badgeBg: "rgba(16, 185, 129, 0.18)",
-    badgeBorder: "rgba(52, 211, 153, 0.35)",
-    badgeColor: "#d1fae5",
-  };
 }
 
 function getTransactionAmount(tx: Transaction) {
@@ -373,8 +286,6 @@ export default function DashboardPage() {
     return dashboardData.transactions.slice(0, 8);
   }, [dashboardData.transactions]);
 
-  const maxMonthlyValue = Math.max(...dashboardData.monthlyExpenses, 1);
-
   if (loading) {
     return (
       <div className={styles.page}>
@@ -486,174 +397,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <section className={styles.panel} style={{ marginBottom: "24px" }}>
-        <div className={styles.panelHeader}>
-          <h3>Missioni attive</h3>
-          <span>Reward extra</span>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: "16px",
-          }}
-        >
-          {demoMissions.map((mission) => {
-            const progressPercent =
-              mission.total > 0 ? (mission.progress / mission.total) * 100 : 0;
-            const completed = mission.progress >= mission.total;
-            const typeColors = getMissionTypeColors(mission.type);
-
-            return (
-              <div
-                key={mission.id}
-                style={{
-                  borderRadius: "20px",
-                  padding: "18px",
-                  background: completed
-                    ? "linear-gradient(135deg, rgba(34,197,94,0.16), rgba(59,130,246,0.14))"
-                    : "linear-gradient(135deg, rgba(139,92,246,0.18), rgba(56,189,248,0.14))",
-                  border: completed
-                    ? "1px solid rgba(74, 222, 128, 0.35)"
-                    : "1px solid rgba(255,255,255,0.14)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
-                  boxShadow: completed
-                    ? "0 10px 30px rgba(34,197,94,0.10)"
-                    : "0 10px 30px rgba(0,0,0,0.18)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "10px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.78rem",
-                      fontWeight: 700,
-                      padding: "6px 10px",
-                      borderRadius: "999px",
-                      background: typeColors.badgeBg,
-                      border: `1px solid ${typeColors.badgeBorder}`,
-                      color: typeColors.badgeColor,
-                    }}
-                  >
-                    {getMissionTypeLabel(mission.type)}
-                  </span>
-
-                  <span
-                    style={{
-                      fontSize: "0.98rem",
-                      fontWeight: 900,
-                      color: "#fff",
-                    }}
-                  >
-                    {mission.reward}
-                  </span>
-                </div>
-
-                <h4
-                  style={{
-                    margin: "0 0 6px 0",
-                    fontSize: "1.08rem",
-                    fontWeight: 800,
-                    color: "#fff",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {mission.title}
-                </h4>
-
-                <p
-                  style={{
-                    margin: "0 0 14px 0",
-                    fontSize: "0.92rem",
-                    color: "rgba(255,255,255,0.78)",
-                    lineHeight: 1.4,
-                    minHeight: "42px",
-                  }}
-                >
-                  {mission.description}
-                </p>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "10px",
-                    marginBottom: "8px",
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: completed ? "#bbf7d0" : "rgba(255,255,255,0.85)",
-                      fontSize: "0.86rem",
-                      fontWeight: 700,
-                    }}
-                  >
-                    {completed ? "Completata" : "In corso"}
-                  </span>
-
-                  <span
-                    style={{
-                      color: "rgba(255,255,255,0.72)",
-                      fontSize: "0.84rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {mission.progress}/{mission.total}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "10px",
-                    borderRadius: "999px",
-                    background: "rgba(255,255,255,0.10)",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${progressPercent}%`,
-                      height: "100%",
-                      borderRadius: "999px",
-                      background: completed
-                        ? "linear-gradient(90deg, #22c55e, #38bdf8)"
-                        : "linear-gradient(90deg, #8b5cf6, #38bdf8)",
-                      boxShadow: "0 0 16px rgba(56,189,248,0.35)",
-                      transition: "width 0.3s ease",
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    marginTop: "10px",
-                    fontSize: "0.84rem",
-                    fontWeight: 600,
-                    color: "rgba(255,255,255,0.80)",
-                  }}
-                >
-                  {completed
-                    ? "Reward pronto da riscattare"
-                    : `Progresso missione: ${mission.progress}/${mission.total}`}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+      <MissionCard transactions={dashboardData.transactions} />
 
       <div className={styles.bottomGrid}>
         <section className={styles.panel}>
