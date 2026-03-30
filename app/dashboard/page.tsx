@@ -85,8 +85,8 @@ const API_URL =
 const demoMissions: Mission[] = [
   {
     id: 1,
-    title: "Partner nuovo",
-    description: "Effettua una spesa in un partner nuovo",
+    title: "Scopri un nuovo partner",
+    description: "Effettua una spesa in un partner che non hai ancora visitato",
     reward: "+3 GUFO",
     type: "daily",
     progress: 0,
@@ -94,8 +94,8 @@ const demoMissions: Mission[] = [
   },
   {
     id: 2,
-    title: "Aperitivo + Pizza",
-    description: "Completa la combo settimanale",
+    title: "Combo Aperitivo + Pizza",
+    description: "Completa 2 acquisti partner compatibili nella settimana",
     reward: "+5 GUFO",
     type: "weekly",
     progress: 1,
@@ -103,8 +103,8 @@ const demoMissions: Mission[] = [
   },
   {
     id: 3,
-    title: "5 partner diversi",
-    description: "Spendi in 5 partner diversi nel mese",
+    title: "Esploratore mensile",
+    description: "Spendi in 5 partner diversi entro la fine del mese",
     reward: "+10 GUFO",
     type: "monthly",
     progress: 2,
@@ -144,6 +144,30 @@ function getMissionTypeLabel(type: Mission["type"]) {
   if (type === "daily") return "Giornaliera";
   if (type === "weekly") return "Settimanale";
   return "Mensile";
+}
+
+function getMissionTypeColors(type: Mission["type"]) {
+  if (type === "daily") {
+    return {
+      badgeBg: "rgba(59, 130, 246, 0.18)",
+      badgeBorder: "rgba(96, 165, 250, 0.35)",
+      badgeColor: "#dbeafe",
+    };
+  }
+
+  if (type === "weekly") {
+    return {
+      badgeBg: "rgba(168, 85, 247, 0.18)",
+      badgeBorder: "rgba(192, 132, 252, 0.35)",
+      badgeColor: "#f3e8ff",
+    };
+  }
+
+  return {
+    badgeBg: "rgba(16, 185, 129, 0.18)",
+    badgeBorder: "rgba(52, 211, 153, 0.35)",
+    badgeColor: "#d1fae5",
+  };
 }
 
 function getTransactionAmount(tx: Transaction) {
@@ -253,9 +277,6 @@ export default function DashboardPage() {
         if (!user) {
           throw new Error("Utente non autenticato");
         }
-
-        console.log("USER AUTH ID:", user.id);
-        alert(`USER AUTH ID: ${user.id}`);
 
         const [dashboard, profilePayload] = await Promise.all([
           fetchJson<DashboardApiResponse>(`${API_URL}/dashboard/${user.id}`),
@@ -474,13 +495,15 @@ export default function DashboardPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
             gap: "16px",
           }}
         >
           {demoMissions.map((mission) => {
             const progressPercent =
               mission.total > 0 ? (mission.progress / mission.total) * 100 : 0;
+            const completed = mission.progress >= mission.total;
+            const typeColors = getMissionTypeColors(mission.type);
 
             return (
               <div
@@ -488,12 +511,17 @@ export default function DashboardPage() {
                 style={{
                   borderRadius: "20px",
                   padding: "18px",
-                  background:
-                    "linear-gradient(135deg, rgba(139,92,246,0.18), rgba(56,189,248,0.14))",
-                  border: "1px solid rgba(255,255,255,0.14)",
+                  background: completed
+                    ? "linear-gradient(135deg, rgba(34,197,94,0.16), rgba(59,130,246,0.14))"
+                    : "linear-gradient(135deg, rgba(139,92,246,0.18), rgba(56,189,248,0.14))",
+                  border: completed
+                    ? "1px solid rgba(74, 222, 128, 0.35)"
+                    : "1px solid rgba(255,255,255,0.14)",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+                  boxShadow: completed
+                    ? "0 10px 30px rgba(34,197,94,0.10)"
+                    : "0 10px 30px rgba(0,0,0,0.18)",
                 }}
               >
                 <div
@@ -512,9 +540,9 @@ export default function DashboardPage() {
                       fontWeight: 700,
                       padding: "6px 10px",
                       borderRadius: "999px",
-                      background: "rgba(255,255,255,0.10)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                      color: "#fff",
+                      background: typeColors.badgeBg,
+                      border: `1px solid ${typeColors.badgeBorder}`,
+                      color: typeColors.badgeColor,
                     }}
                   >
                     {getMissionTypeLabel(mission.type)}
@@ -522,8 +550,8 @@ export default function DashboardPage() {
 
                   <span
                     style={{
-                      fontSize: "0.95rem",
-                      fontWeight: 800,
+                      fontSize: "0.98rem",
+                      fontWeight: 900,
                       color: "#fff",
                     }}
                   >
@@ -534,9 +562,10 @@ export default function DashboardPage() {
                 <h4
                   style={{
                     margin: "0 0 6px 0",
-                    fontSize: "1.1rem",
+                    fontSize: "1.08rem",
                     fontWeight: 800,
                     color: "#fff",
+                    lineHeight: 1.2,
                   }}
                 >
                   {mission.title}
@@ -548,10 +577,42 @@ export default function DashboardPage() {
                     fontSize: "0.92rem",
                     color: "rgba(255,255,255,0.78)",
                     lineHeight: 1.4,
+                    minHeight: "42px",
                   }}
                 >
                   {mission.description}
                 </p>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginBottom: "8px",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <span
+                    style={{
+                      color: completed ? "#bbf7d0" : "rgba(255,255,255,0.85)",
+                      fontSize: "0.86rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {completed ? "Completata" : "In corso"}
+                  </span>
+
+                  <span
+                    style={{
+                      color: "rgba(255,255,255,0.72)",
+                      fontSize: "0.84rem",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {mission.progress}/{mission.total}
+                  </span>
+                </div>
 
                 <div
                   style={{
@@ -567,20 +628,26 @@ export default function DashboardPage() {
                       width: `${progressPercent}%`,
                       height: "100%",
                       borderRadius: "999px",
-                      background: "linear-gradient(90deg, #8b5cf6, #38bdf8)",
+                      background: completed
+                        ? "linear-gradient(90deg, #22c55e, #38bdf8)"
+                        : "linear-gradient(90deg, #8b5cf6, #38bdf8)",
+                      boxShadow: "0 0 16px rgba(56,189,248,0.35)",
+                      transition: "width 0.3s ease",
                     }}
                   />
                 </div>
 
                 <div
                   style={{
-                    marginTop: "8px",
-                    fontSize: "0.85rem",
+                    marginTop: "10px",
+                    fontSize: "0.84rem",
                     fontWeight: 600,
-                    color: "#fff",
+                    color: "rgba(255,255,255,0.80)",
                   }}
                 >
-                  Progresso: {mission.progress}/{mission.total}
+                  {completed
+                    ? "Reward pronto da riscattare"
+                    : `Progresso missione: ${mission.progress}/${mission.total}`}
                 </div>
               </div>
             );
@@ -675,51 +742,6 @@ export default function DashboardPage() {
           </div>
         </aside>
       </div>
-
-<section className={`${styles.panel} ${styles.missionsSection}`}>
-  <div className={styles.panelHeader}>
-    <h3>Missioni attive</h3>
-    <span>Reward extra</span>
-  </div>
-
-  <div className={styles.missionsGrid}>
-    {demoMissions.map((mission) => {
-      const progressPercent =
-        mission.total > 0 ? (mission.progress / mission.total) * 100 : 0;
-
-      return (
-        <div key={mission.id} className={styles.missionCard}>
-          <div className={styles.missionTop}>
-            <span className={styles.missionBadge}>
-              {getMissionTypeLabel(mission.type)}
-            </span>
-
-            <span className={styles.missionReward}>
-              {mission.reward}
-            </span>
-          </div>
-
-          <h4 className={styles.missionTitle}>{mission.title}</h4>
-
-          <p className={styles.missionDescription}>
-            {mission.description}
-          </p>
-
-          <div className={styles.missionProgressBar}>
-            <div
-              className={styles.missionProgressFill}
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-
-          <div className={styles.missionProgressText}>
-            Progresso: {mission.progress}/{mission.total}
-          </div>
-        </div>
-      );
-    })}
-  </div>
-</section>
     </div>
   );
 }
