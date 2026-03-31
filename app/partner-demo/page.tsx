@@ -56,6 +56,27 @@ function formatLevel(level: string) {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+function formatTransactionType(type?: string) {
+  const value = String(type || "-").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    case "buy":
+      return "Acquisto";
+    case "acquisto":
+      return "Acquisto";
+    case "withdraw":
+      return "Prelievo";
+    default:
+      return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+
 function getTransactionId(result: ApiResponse) {
   return (
     result.transaction?.id ||
@@ -211,11 +232,17 @@ export default function PartnerDemoPage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PARTNER CONSOLE</div>
           <p className={styles.eyebrow}>GUFO Partner Console</p>
           <h1 className={styles.title}>Demo operativa partner</h1>
           <p className={styles.subtitle}>
-            Cerca il cliente tramite customer code, verifica il profilo e registra una transazione demo.
+            Cerca il cliente tramite customer code, verifica il profilo e registra
+            una transazione demo.
+          </p>
+          <p className={styles.heroDescription}>
+            Un flusso pensato per mostrare come il partner identifica il cliente,
+            registra il pagamento e accredita i GUFO in tempo reale.
           </p>
         </div>
       </section>
@@ -233,7 +260,8 @@ export default function PartnerDemoPage() {
           </h2>
 
           <p className={styles.operatorNote}>
-            Il flusso partner consente di identificare il cliente e simulare il pagamento con accredito GUFO.
+            Il flusso partner consente di identificare il cliente e simulare il
+            pagamento con accredito GUFO.
           </p>
         </div>
 
@@ -262,7 +290,7 @@ export default function PartnerDemoPage() {
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Cliente attivo</p>
           <h3 className={styles.metricValue}>
             {customer ? customer.customer_code : "--"}
@@ -496,7 +524,9 @@ export default function PartnerDemoPage() {
 
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Tipo</p>
-              <p className={styles.infoMiniValue}>{result.transaction?.tipo || "-"}</p>
+              <p className={styles.infoMiniValue}>
+                {formatTransactionType(result.transaction?.tipo || "-")}
+              </p>
             </div>
 
             <div className={`${styles.infoMiniCard} ${styles.fullSpan}`}>

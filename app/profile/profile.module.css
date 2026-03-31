@@ -5,11 +5,23 @@
   color: #ffffff;
   overflow: hidden;
   background-image:
-    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.6)),
+    linear-gradient(rgba(4, 10, 28, 0.42), rgba(4, 10, 28, 0.68)),
     url("/dashboard-space.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(84, 170, 255, 0.12), transparent 22%),
+    radial-gradient(circle at 82% 20%, rgba(162, 92, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(0, 220, 255, 0.08), transparent 34%);
+  z-index: 0;
 }
 
 .bgOverlay {
@@ -58,8 +70,28 @@
 }
 
 .hero {
-  margin-top: 34px;
+  margin-top: 38px;
   margin-bottom: 24px;
+}
+
+.heroCopy {
+  max-width: 820px;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: rgba(111, 176, 255, 0.14);
+  border: 1px solid rgba(111, 176, 255, 0.26);
+  color: #bfe0ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 18px rgba(72, 149, 255, 0.16);
 }
 
 .eyebrow {
@@ -73,10 +105,13 @@
 
 .title {
   margin: 0;
-  font-size: 54px;
+  font-size: 56px;
   line-height: 0.98;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: -0.03em;
+  text-shadow:
+    0 0 18px rgba(120, 170, 255, 0.22),
+    0 0 36px rgba(90, 130, 255, 0.12);
 }
 
 .subtitle {
@@ -87,6 +122,14 @@
   line-height: 1.5;
 }
 
+.heroDescription {
+  margin-top: 16px;
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
 .profileHeroCard,
 .metricCard,
 .panel,
@@ -95,18 +138,18 @@
 .errorBox,
 .mobileTxCard {
   position: relative;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   background: linear-gradient(
     180deg,
-    rgba(8, 18, 52, 0.72),
-    rgba(7, 16, 42, 0.52)
+    rgba(8, 18, 52, 0.74),
+    rgba(7, 16, 42, 0.54)
   );
   border: 1px solid rgba(110, 170, 255, 0.34);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.035) inset,
     0 0 18px rgba(42, 117, 255, 0.14),
-    0 0 34px rgba(0, 0, 0, 0.22);
+    0 18px 44px rgba(0, 0, 0, 0.22);
   border-radius: 24px;
 }
 
@@ -230,7 +273,7 @@
 
 .miniInfoCard strong {
   font-size: 24px;
-  font-weight: 750;
+  font-weight: 800;
   color: #ffffff;
   word-break: break-word;
 }
@@ -248,6 +291,20 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.metricCard:hover,
+.sideCard:hover,
+.panel:hover {
+  transform: translateY(-2px);
+}
+
+.metricCardPrimary {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 24px rgba(0, 213, 255, 0.16),
+    0 0 36px rgba(88, 94, 255, 0.14);
 }
 
 .metricLabel {
@@ -260,7 +317,7 @@
   margin: 10px 0;
   font-size: 36px;
   line-height: 1.04;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: -0.03em;
   word-break: break-word;
 }
@@ -293,7 +350,7 @@
 .panelHeader h3 {
   margin: 0;
   font-size: 30px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .sectionEyebrow {
@@ -331,8 +388,10 @@
   text-align: left;
   padding: 14px 12px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.68);
+  color: rgba(255, 255, 255, 0.64);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -343,22 +402,28 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 .partnerCell {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 88px;
-  padding: 7px 10px;
+  min-width: 92px;
+  padding: 8px 10px;
   border-radius: 999px;
-  background: rgba(94, 126, 255, 0.22);
-  border: 1px solid rgba(120, 155, 255, 0.28);
+  background: rgba(94, 126, 255, 0.18);
+  border: 1px solid rgba(120, 155, 255, 0.24);
   color: #eaf2ff;
   font-size: 12px;
+  font-weight: 700;
   text-transform: capitalize;
+  box-shadow: 0 0 10px rgba(94, 126, 255, 0.14);
 }
 
 .greenBadge {
@@ -383,6 +448,12 @@
   background: rgba(251, 146, 60, 0.16);
   border-color: rgba(253, 186, 116, 0.24);
   color: #ffedd5;
+}
+
+.cyanBadge {
+  background: rgba(34, 211, 238, 0.16);
+  border-color: rgba(103, 232, 249, 0.24);
+  color: #cffafe;
 }
 
 .emptyState {
@@ -423,7 +494,7 @@
   margin: 0 0 8px;
   font-size: 28px;
   line-height: 1.08;
-  font-weight: 720;
+  font-weight: 800;
   word-break: break-word;
 }
 
@@ -495,6 +566,11 @@
 
   .title {
     font-size: 42px;
+  }
+
+  .heroDescription {
+    font-size: 15px;
+    line-height: 1.55;
   }
 
   .profileName {

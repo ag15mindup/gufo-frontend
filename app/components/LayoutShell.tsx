@@ -7,19 +7,23 @@ const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
 export default function LayoutShell({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const pathname = usePathname();
-  const hideSidebar = PUBLIC_ROUTES.includes(pathname);
+  const isPublicPage = PUBLIC_ROUTES.includes(pathname);
 
   return (
     <div className="layout-root">
-      {!hideSidebar && <Sidebar />}
+      {!isPublicPage && <Sidebar />}
 
-      <div className={`app-shell ${hideSidebar ? "no-sidebar" : "with-sidebar"}`}>
-        <main className={`app-main ${hideSidebar ? "public-page" : "private-page"}`}>
-          {hideSidebar ? children : <div className="gufo-page-frame">{children}</div>}
+      <div className={`app-shell ${isPublicPage ? "no-sidebar" : "with-sidebar"}`}>
+        <main className={`app-main ${isPublicPage ? "public-page" : "private-page"}`}>
+          {isPublicPage ? (
+            children
+          ) : (
+            <div className="gufo-page-frame">{children}</div>
+          )}
         </main>
       </div>
     </div>

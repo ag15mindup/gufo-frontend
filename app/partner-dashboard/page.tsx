@@ -70,6 +70,27 @@ function getTransactionType(tx: any) {
   return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
 }
 
+function formatTransactionType(type?: string) {
+  const value = String(type || "-").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    case "buy":
+      return "Acquisto";
+    case "acquisto":
+      return "Acquisto";
+    case "withdraw":
+      return "Prelievo";
+    default:
+      return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+
 function getTransactionMerchant(tx: any) {
   return (
     tx?.merchant_name ??
@@ -120,6 +141,8 @@ function getTypeTone(type: string) {
   if (normalized.includes("bonus")) return styles.purpleBadge;
   if (normalized.includes("payment")) return styles.blueBadge;
   if (normalized.includes("withdraw")) return styles.orangeBadge;
+  if (normalized.includes("buy") || normalized.includes("acquisto"))
+    return styles.cyanBadge;
 
   return "";
 }
@@ -205,9 +228,12 @@ export default function PartnerDashboardPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
-          <h1 className={styles.title}>Partner dashboard</h1>
-          <p className={styles.subtitle}>Caricamento statistiche partner...</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
+            <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+            <h1 className={styles.title}>Partner dashboard</h1>
+            <p className={styles.subtitle}>Caricamento statistiche partner...</p>
+          </div>
         </section>
 
         <div className={styles.loadingBox}>Recupero analytics partner...</div>
@@ -222,9 +248,12 @@ export default function PartnerDashboardPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
-          <h1 className={styles.title}>Partner dashboard</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
+            <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+            <h1 className={styles.title}>Partner dashboard</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
+          </div>
         </section>
 
         <section className={styles.filterPanel}>
@@ -275,11 +304,17 @@ export default function PartnerDashboardPage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
           <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
           <h1 className={styles.title}>Performance partner</h1>
           <p className={styles.subtitle}>
-            Panoramica operativa del partner con statistiche principali e transazioni recenti.
+            Panoramica operativa del partner con statistiche principali e
+            transazioni recenti.
+          </p>
+          <p className={styles.heroDescription}>
+            Una dashboard merchant pensata per leggere rapidamente volume,
+            reward distribuite e attività recente del punto vendita.
           </p>
         </div>
       </section>
@@ -294,7 +329,8 @@ export default function PartnerDashboardPage() {
           <p className={styles.operatorLabel}>Merchant selezionato</p>
           <h2 className={styles.operatorValue}>{activePartnerLabel}</h2>
           <p className={styles.operatorNote}>
-            Analytics riferite al partner con ID {selectedPartnerId}, comprensive di volumi, reward e attività recente.
+            Analytics riferite al partner con ID {selectedPartnerId},
+            comprensive di volumi, reward e attività recente.
           </p>
         </div>
 
@@ -354,7 +390,7 @@ export default function PartnerDashboardPage() {
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Totale transazioni</p>
           <h3 className={styles.metricValue}>
             {toNumberSafe(data?.total_transactions)}
@@ -434,7 +470,7 @@ export default function PartnerDashboardPage() {
                               getTransactionType(tx)
                             )}`}
                           >
-                            {getTransactionType(tx)}
+                            {formatTransactionType(getTransactionType(tx))}
                           </span>
                         </td>
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
@@ -460,7 +496,7 @@ export default function PartnerDashboardPage() {
                           getTransactionType(tx)
                         )}`}
                       >
-                        {getTransactionType(tx)}
+                        {formatTransactionType(getTransactionType(tx))}
                       </span>
                     </div>
 

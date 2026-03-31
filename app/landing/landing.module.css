@@ -82,6 +82,9 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .topbarActions {
@@ -99,7 +102,7 @@
   border-radius: 12px;
   text-decoration: none;
   font-weight: 700;
-  transition: transform 0.18s ease, opacity 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
 }
 
 .topbarBtn:hover,
@@ -118,6 +121,7 @@
     #4ade80 70%,
     #facc15 100%
   );
+  box-shadow: 0 12px 28px rgba(96, 165, 250, 0.18);
 }
 
 .topbarBtnSecondary {
@@ -151,6 +155,9 @@
   color: #dbe7ff;
   font-size: 13px;
   font-weight: 700;
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .heroBadge {
@@ -192,11 +199,20 @@
 }
 
 .heroDescription {
-  margin: 0 0 26px 0;
+  margin: 0 0 18px 0;
   max-width: 720px;
   color: #c8d4e8;
   font-size: 17px;
   line-height: 1.75;
+}
+
+.heroPitch {
+  margin: 0 0 26px 0;
+  max-width: 720px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e7ff;
+  line-height: 1.6;
 }
 
 .heroButtons,
@@ -215,7 +231,7 @@
   border-radius: 14px;
   text-decoration: none;
   font-weight: 700;
-  transition: transform 0.18s ease, opacity 0.18s ease;
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
 }
 
 .btnPrimary {
@@ -257,6 +273,29 @@
   color: #cbd5e1;
   font-size: 13px;
   font-weight: 600;
+}
+
+.heroLiveBox {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(134, 239, 172, 0.2);
+  font-size: 13px;
+  color: #bbf7d0;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.14);
+}
+
+.liveDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #4ade80;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
 }
 
 .heroVisual {
@@ -405,7 +444,8 @@
 .stepCard,
 .quickCard,
 .dualCard,
-.ctaSection {
+.ctaSection,
+.visionSection {
   background: linear-gradient(180deg, rgba(10, 16, 32, 0.92), rgba(15, 23, 42, 0.88));
   border-radius: 24px;
   padding: 24px;
@@ -534,6 +574,33 @@
   text-decoration: none;
 }
 
+.visionSection {
+  text-align: center;
+  padding: 40px 24px;
+  margin-bottom: 60px;
+}
+
+.visionTitle {
+  font-size: 38px;
+  font-weight: 800;
+  margin: 0 0 14px 0;
+}
+
+.visionText {
+  max-width: 720px;
+  margin: 0 auto 16px auto;
+  color: #cbd5e1;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.visionHighlight {
+  font-size: 20px;
+  font-weight: 700;
+  color: #60a5fa;
+  margin: 0;
+}
+
 .ctaSection {
   text-align: center;
   padding: 40px 24px;
@@ -586,6 +653,7 @@
     font-size: 34px;
   }
 
+  .visionTitle,
   .ctaTitle {
     font-size: 34px;
   }
@@ -623,8 +691,13 @@
     font-size: 22px;
   }
 
-  .heroDescription {
+  .heroDescription,
+  .heroPitch {
     font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .heroPitch {
     margin-bottom: 22px;
   }
 
@@ -644,6 +717,12 @@
 
   .heroTag {
     font-size: 12px;
+  }
+
+  .heroLiveBox {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .visualCard {
@@ -676,7 +755,8 @@
   .stepCard,
   .quickCard,
   .dualCard,
-  .ctaSection {
+  .ctaSection,
+  .visionSection {
     padding: 18px;
     border-radius: 18px;
   }
@@ -692,7 +772,8 @@
   .stepText,
   .quickText,
   .heroStatText,
-  .cleanList {
+  .cleanList,
+  .visionText {
     font-size: 14px;
   }
 
@@ -703,8 +784,13 @@
     grid-template-columns: 1fr;
   }
 
+  .visionTitle,
   .ctaTitle {
     font-size: 28px;
+  }
+
+  .visionHighlight {
+    font-size: 18px;
   }
 
   .ctaText {
@@ -725,6 +811,7 @@
     font-size: 24px;
   }
 
+  .visionTitle,
   .ctaTitle {
     font-size: 24px;
   }

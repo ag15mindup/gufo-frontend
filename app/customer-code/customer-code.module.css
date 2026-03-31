@@ -5,11 +5,23 @@
   color: #ffffff;
   overflow: hidden;
   background-image:
-    linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.6)),
+    linear-gradient(rgba(4, 10, 28, 0.42), rgba(4, 10, 28, 0.68)),
     url("/dashboard-space.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(84, 170, 255, 0.12), transparent 22%),
+    radial-gradient(circle at 82% 20%, rgba(162, 92, 255, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(0, 220, 255, 0.08), transparent 34%);
+  z-index: 0;
 }
 
 .bgOverlay {
@@ -58,8 +70,28 @@
 }
 
 .hero {
-  margin-top: 34px;
+  margin-top: 38px;
   margin-bottom: 24px;
+}
+
+.heroCopy {
+  max-width: 820px;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  border-radius: 999px;
+  background: rgba(111, 176, 255, 0.14);
+  border: 1px solid rgba(111, 176, 255, 0.26);
+  color: #bfe0ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  box-shadow: 0 0 18px rgba(72, 149, 255, 0.16);
 }
 
 .eyebrow {
@@ -73,10 +105,13 @@
 
 .title {
   margin: 0;
-  font-size: 54px;
+  font-size: 56px;
   line-height: 0.98;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: -0.03em;
+  text-shadow:
+    0 0 18px rgba(120, 170, 255, 0.22),
+    0 0 36px rgba(90, 130, 255, 0.12);
 }
 
 .subtitle {
@@ -87,6 +122,14 @@
   line-height: 1.5;
 }
 
+.heroDescription {
+  margin-top: 16px;
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
 .passCard,
 .metricCard,
 .panel,
@@ -94,19 +137,19 @@
 .loadingBox,
 .errorBox {
   position: relative;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   background: linear-gradient(
     180deg,
-    rgba(8, 18, 52, 0.72),
-    rgba(7, 16, 42, 0.52)
+    rgba(8, 18, 52, 0.74),
+    rgba(7, 16, 42, 0.54)
   );
   border: 1px solid rgba(110, 170, 255, 0.34);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.035) inset,
     0 0 18px rgba(42, 117, 255, 0.14),
-    0 0 34px rgba(0, 0, 0, 0.22);
-  border-radius: 24px;
+    0 18px 44px rgba(0, 0, 0, 0.22);
+  border-radius: 28px;
 }
 
 .passCard::before,
@@ -138,38 +181,71 @@
 
 .passCard {
   padding: 26px;
-  display: grid;
-  grid-template-columns: 1.06fr 0.94fr;
-  gap: 22px;
-  align-items: stretch;
   margin-bottom: 24px;
   overflow: hidden;
 }
 
-.passCard::after {
-  content: "";
+.passGlowA,
+.passGlowB {
   position: absolute;
-  right: -70px;
-  top: -70px;
+  border-radius: 999px;
+  filter: blur(30px);
+  pointer-events: none;
+  opacity: 0.28;
+}
+
+.passGlowA {
   width: 220px;
   height: 220px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08), transparent 70%);
-  pointer-events: none;
+  background: rgba(56, 189, 248, 0.32);
+  top: -60px;
+  right: -40px;
 }
 
-.passLeft {
+.passGlowB {
+  width: 180px;
+  height: 180px;
+  background: rgba(236, 72, 153, 0.22);
+  bottom: -50px;
+  left: -30px;
+}
+
+.passTopBar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.passBrandBlock {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 6px;
 }
 
-.passHeader {
+.passBrandKicker {
+  color: rgba(184, 196, 222, 0.72);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.passBrandTitle {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.passStatusWrap {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 22px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .passChip,
@@ -195,6 +271,25 @@
   color: #dcfce7;
 }
 
+.passBody {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.04fr 0.96fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.passLeft {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.codeBlock {
+  margin-bottom: 22px;
+}
+
 .passLabel {
   margin: 0 0 8px;
   font-size: 14px;
@@ -206,7 +301,7 @@
   font-size: 52px;
   line-height: 1.02;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   color: #fde047;
   word-break: break-word;
   text-shadow:
@@ -215,7 +310,7 @@
 }
 
 .passNote {
-  margin: 16px 0 22px;
+  margin: 16px 0 0;
   color: #dbe7fb;
   font-size: 15px;
   line-height: 1.7;
@@ -244,7 +339,7 @@
 
 .passMetaItem strong {
   font-size: 20px;
-  font-weight: 760;
+  font-weight: 800;
   color: #ffffff;
   word-break: break-word;
 }
@@ -255,30 +350,71 @@
   justify-content: center;
 }
 
-.qrShell {
+.qrTicket {
   width: 100%;
-  min-height: 100%;
+  max-width: 380px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  color: #0f172a;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 24px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.qrTicketTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px dashed rgba(15, 23, 42, 0.18);
+}
+
+.qrTicketLabel {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #334155;
+}
+
+.qrTicketMini {
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
+}
+
+.qrShell {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
-  border-radius: 24px;
+  padding: 22px;
   background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 70%),
-    rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    radial-gradient(circle at center, rgba(15, 23, 42, 0.03), transparent 70%);
 }
 
 .qrInner {
   background: #ffffff;
   border-radius: 24px;
-  padding: 22px;
+  padding: 14px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 16px 34px rgba(0, 0, 0, 0.22),
-    0 0 24px rgba(255, 255, 255, 0.08);
+    inset 0 0 0 1px rgba(15, 23, 42, 0.06),
+    0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.qrFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-top: 1px dashed rgba(15, 23, 42, 0.18);
+  font-size: 12px;
+  font-weight: 700;
+  color: #475569;
 }
 
 .metricsGrid {
@@ -294,6 +430,20 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.metricCard:hover,
+.sideCard:hover,
+.panel:hover {
+  transform: translateY(-2px);
+}
+
+.metricCardPrimary {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 24px rgba(0, 213, 255, 0.16),
+    0 0 36px rgba(88, 94, 255, 0.14);
 }
 
 .metricLabel {
@@ -306,7 +456,7 @@
   margin: 10px 0;
   font-size: 36px;
   line-height: 1.04;
-  font-weight: 760;
+  font-weight: 800;
   letter-spacing: -0.03em;
   word-break: break-word;
 }
@@ -339,7 +489,7 @@
 .panelHeader h3 {
   margin: 0;
   font-size: 30px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .sectionEyebrow {
@@ -428,7 +578,7 @@
   margin: 0 0 8px;
   font-size: 28px;
   line-height: 1.08;
-  font-weight: 720;
+  font-weight: 800;
   word-break: break-word;
 }
 
@@ -453,7 +603,7 @@
 }
 
 @media (max-width: 1200px) {
-  .passCard,
+  .passBody,
   .mainGrid {
     grid-template-columns: 1fr;
   }
@@ -480,6 +630,11 @@
 
   .title {
     font-size: 42px;
+  }
+
+  .heroDescription {
+    font-size: 15px;
+    line-height: 1.55;
   }
 
   .passCode {
@@ -536,23 +691,36 @@
     padding: 20px;
   }
 
-  .passHeader,
+  .passTopBar,
   .panelHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .passStatusWrap {
+    justify-content: flex-start;
   }
 
   .passCode {
     font-size: 30px;
   }
 
+  .qrTicket {
+    max-width: 100%;
+  }
+
   .qrShell {
-    padding: 14px;
+    padding: 16px;
   }
 
   .qrInner {
-    padding: 14px;
+    padding: 12px;
     border-radius: 18px;
+  }
+
+  .qrFooter {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .metricsGrid {

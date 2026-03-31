@@ -149,9 +149,12 @@ export default function CustomerCodePage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Customer Pass</p>
-          <h1 className={styles.title}>Il tuo codice cliente</h1>
-          <p className={styles.subtitle}>Caricamento pass digitale...</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO DIGITAL PASS</div>
+            <p className={styles.eyebrow}>GUFO Customer Pass</p>
+            <h1 className={styles.title}>Il tuo codice cliente</h1>
+            <p className={styles.subtitle}>Caricamento pass digitale...</p>
+          </div>
         </section>
 
         <div className={styles.loadingBox}>Recupero customer code...</div>
@@ -166,9 +169,12 @@ export default function CustomerCodePage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Customer Pass</p>
-          <h1 className={styles.title}>Il tuo codice cliente</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO DIGITAL PASS</div>
+            <p className={styles.eyebrow}>GUFO Customer Pass</p>
+            <h1 className={styles.title}>Il tuo codice cliente</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
+          </div>
         </section>
 
         <div className={styles.errorBox}>{error}</div>
@@ -182,66 +188,104 @@ export default function CustomerCodePage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO DIGITAL PASS</div>
           <p className={styles.eyebrow}>GUFO Customer Pass</p>
           <h1 className={styles.title}>Scan & earn</h1>
           <p className={styles.subtitle}>
-            Mostra questo pass al partner per identificarti e registrare correttamente la transazione.
+            Mostra questo pass al partner per identificarti e registrare
+            correttamente la transazione.
+          </p>
+          <p className={styles.heroDescription}>
+            Un pass digitale pronto all’uso, pensato per essere mostrato in
+            negozio in modo immediato, chiaro e professionale.
           </p>
         </div>
       </section>
 
       <section className={styles.passCard}>
-        <div className={styles.passLeft}>
-          <div className={styles.passHeader}>
+        <div className={styles.passGlowA} />
+        <div className={styles.passGlowB} />
+
+        <div className={styles.passTopBar}>
+          <div className={styles.passBrandBlock}>
+            <span className={styles.passBrandKicker}>GUFO RAINBOW</span>
+            <span className={styles.passBrandTitle}>Customer Access Pass</span>
+          </div>
+
+          <div className={styles.passStatusWrap}>
             <span className={styles.passChip}>Customer ID</span>
             <span className={styles.passStatus}>Scan Ready</span>
           </div>
-
-          <p className={styles.passLabel}>Codice cliente</p>
-          <h2 className={styles.passCode}>{customerCode}</h2>
-
-          <p className={styles.passNote}>
-            Usa questo codice o il QR per permettere al partner di associarti alla transazione.
-          </p>
-
-          <div className={styles.passMetaGrid}>
-            <div className={styles.passMetaItem}>
-              <span>Livello</span>
-              <strong>
-                {formatLevel(
-                  String(customer?.current_level ?? customer?.level ?? "Bronze")
-                )}
-              </strong>
-            </div>
-
-            <div className={styles.passMetaItem}>
-              <span>Saldo GUFO</span>
-              <strong>{toNumberSafe(customer?.balance_gufo).toFixed(2)}</strong>
-            </div>
-
-            <div className={styles.passMetaItem}>
-              <span>Cashback</span>
-              <strong>
-                {toNumberSafe(customer?.cashback_percent) > 0
-                  ? `${toNumberSafe(customer?.cashback_percent).toFixed(2)}%`
-                  : "Variabile"}
-              </strong>
-            </div>
-          </div>
         </div>
 
-        <div className={styles.passRight}>
-          <div className={styles.qrShell}>
-            <div className={styles.qrInner}>
-              <QRCodeCanvas value={customerCode} size={220} />
+        <div className={styles.passBody}>
+          <div className={styles.passLeft}>
+            <div className={styles.codeBlock}>
+              <p className={styles.passLabel}>Codice cliente</p>
+              <h2 className={styles.passCode}>{customerCode}</h2>
+              <p className={styles.passNote}>
+                Usa questo codice o il QR per permettere al partner di
+                associarti alla transazione.
+              </p>
+            </div>
+
+            <div className={styles.passMetaGrid}>
+              <div className={styles.passMetaItem}>
+                <span>Livello</span>
+                <strong>
+                  {formatLevel(
+                    String(customer?.current_level ?? customer?.level ?? "Bronze")
+                  )}
+                </strong>
+              </div>
+
+              <div className={styles.passMetaItem}>
+                <span>Saldo GUFO</span>
+                <strong>{toNumberSafe(customer?.balance_gufo).toFixed(2)}</strong>
+              </div>
+
+              <div className={styles.passMetaItem}>
+                <span>Cashback</span>
+                <strong>
+                  {toNumberSafe(customer?.cashback_percent) > 0
+                    ? `${toNumberSafe(customer?.cashback_percent).toFixed(2)}%`
+                    : "Variabile"}
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.passRight}>
+            <div className={styles.qrTicket}>
+              <div className={styles.qrTicketTop}>
+                <span className={styles.qrTicketLabel}>QR AUTH</span>
+                <span className={styles.qrTicketMini}>{customerCode}</span>
+              </div>
+
+              <div className={styles.qrShell}>
+                <div className={styles.qrInner}>
+                  <QRCodeCanvas
+                    value={customerCode}
+                    size={220}
+                    bgColor="#ffffff"
+                    fgColor="#0f172a"
+                    includeMargin={true}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.qrFooter}>
+                <span>Mostra al partner</span>
+                <span>Validazione cliente live</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Saldo GUFO</p>
           <h3 className={styles.metricValue}>
             {toNumberSafe(customer?.balance_gufo).toFixed(2)}

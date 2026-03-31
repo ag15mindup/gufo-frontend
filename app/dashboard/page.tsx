@@ -350,33 +350,48 @@ export default function DashboardPage() {
       <div className={styles.rainbowLine} />
 
       <div className={styles.hero}>
-        <div>
-          <p className={styles.welcome}>Bentornato 👋</p>
-          <h1 className={styles.userName}>{dashboardData.profileName}</h1>
-          {dashboardData.profileEmail ? (
-            <p className={styles.email}>{dashboardData.profileEmail}</p>
-          ) : null}
-          {dashboardData.authUserId ? (
-            <p className={styles.email}>ID Auth: {dashboardData.authUserId}</p>
-          ) : null}
-        </div>
+  <div className={styles.heroContent}>
+    <div className={styles.heroBadge}>GUFO PREMIUM DASHBOARD</div>
+    <p className={styles.welcome}>Bentornato 👋</p>
+    <h1 className={styles.userName}>{dashboardData.profileName}</h1>
 
-        <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Saldo disponibile</span>
-          <h2 className={styles.balanceValue}>
-            {dashboardData.balanceGufo.toFixed(2)} GUFO
-          </h2>
+    {dashboardData.profileEmail ? (
+      <p className={styles.email}>{dashboardData.profileEmail}</p>
+    ) : null}
 
-          <div className={styles.balanceButtons}>
-            <Link href="/customer-code" className={styles.primaryBtn}>
-              Il mio codice
-            </Link>
-            <Link href="/wallet" className={styles.secondaryBtn}>
-              Wallet
-            </Link>
-          </div>
-        </div>
+    <p className={styles.heroDescription}>
+      Monitora saldo, transazioni, missioni e andamento delle tue spese in un’unica esperienza premium.
+    </p>
+  </div>
+
+  <div className={styles.balanceCard}>
+    <div className={styles.balanceGlow} />
+    <span className={styles.balanceLabel}>Saldo disponibile</span>
+    <h2 className={styles.balanceValue}>
+      {dashboardData.balanceGufo.toFixed(2)} GUFO
+    </h2>
+
+    <div className={styles.balanceMetaRow}>
+      <div className={styles.balanceMetaBox}>
+        <span>Livello</span>
+        <strong>{formatLevel(dashboardData.level)}</strong>
       </div>
+      <div className={styles.balanceMetaBox}>
+        <span>Stagione</span>
+        <strong>Attiva</strong>
+      </div>
+    </div>
+
+    <div className={styles.balanceButtons}>
+      <Link href="/customer-code" className={styles.primaryBtn}>
+        Il mio codice
+      </Link>
+      <Link href="/wallet" className={styles.secondaryBtn}>
+        Wallet
+      </Link>
+    </div>
+  </div>
+</div>
 
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.cyan}`}>
@@ -425,65 +440,29 @@ export default function DashboardPage() {
           <span>Ultimi 12 mesi</span>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(12, minmax(0, 1fr))",
-            alignItems: "end",
-            gap: "10px",
-            minHeight: "220px",
-            marginTop: "8px",
-          }}
-        >
-          {dashboardData.monthlyExpenses.map((value, index) => {
-            const safeHeight = Math.max((value / maxMonthlyValue) * 160, 8);
+        <div className={styles.chartWrap}>
+  {dashboardData.monthlyExpenses.map((value, index) => {
+    const safeHeight = Math.max((value / maxMonthlyValue) * 160, 10);
 
-            return (
-              <div
-                key={`${getMonthLabel(index)}-${index}`}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "flex-end",
-                  gap: "10px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "rgba(255,255,255,0.72)",
-                    minHeight: "16px",
-                  }}
-                >
-                  € {value.toFixed(0)}
-                </span>
+    return (
+      <div
+        key={`${getMonthLabel(index)}-${index}`}
+        className={styles.chartItem}
+      >
+        <span className={styles.chartValue}>€ {value.toFixed(0)}</span>
 
-                <div
-                  style={{
-                    width: "100%",
-                    maxWidth: "28px",
-                    height: `${safeHeight}px`,
-                    borderRadius: "999px",
-                    background:
-                      "linear-gradient(180deg, rgba(56,189,248,0.95), rgba(139,92,246,0.95))",
-                    boxShadow: "0 0 20px rgba(56,189,248,0.28)",
-                  }}
-                />
-
-                <span
-                  style={{
-                    fontSize: "0.8rem",
-                    fontWeight: 700,
-                    color: "#fff",
-                  }}
-                >
-                  {getMonthLabel(index)}
-                </span>
-              </div>
-            );
-          })}
+        <div className={styles.chartBarShell}>
+          <div
+            className={styles.chartBar}
+            style={{ height: `${safeHeight}px` }}
+          />
         </div>
+
+        <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
+      </div>
+    );
+  })}
+</div>
       </section>
 
       <div className={styles.bottomGrid}>

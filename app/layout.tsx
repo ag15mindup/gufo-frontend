@@ -9,14 +9,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="it">
+    <html lang="it" suppressHydrationWarning>
       <body className="gufo-body">
         <div className="layout-root">
-          <LayoutShell>{children}</LayoutShell>
+          <div className="layout-shell-frame">
+            <LayoutShell>{children}</LayoutShell>
+          </div>
         </div>
       </body>
     </html>

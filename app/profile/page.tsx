@@ -55,6 +55,27 @@ function formatLevel(level: string) {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
+function formatTransactionType(type?: string) {
+  const value = String(type || "cashback").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    case "buy":
+      return "Acquisto";
+    case "acquisto":
+      return "Acquisto";
+    case "withdraw":
+      return "Prelievo";
+    default:
+      return value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+
 function getTransactionAmount(tx: any) {
   return toNumberSafe(
     tx?.amount_euro ??
@@ -115,6 +136,8 @@ function getTypeTone(type: string) {
   if (normalized.includes("bonus")) return styles.purpleBadge;
   if (normalized.includes("payment")) return styles.blueBadge;
   if (normalized.includes("withdraw")) return styles.orangeBadge;
+  if (normalized.includes("buy") || normalized.includes("acquisto"))
+    return styles.cyanBadge;
 
   return "";
 }
@@ -255,9 +278,12 @@ export default function ProfilePage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Profile</p>
-          <h1 className={styles.title}>Identità account</h1>
-          <p className={styles.subtitle}>Caricamento dati account...</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM PROFILE</div>
+            <p className={styles.eyebrow}>GUFO Profile</p>
+            <h1 className={styles.title}>Identità account</h1>
+            <p className={styles.subtitle}>Caricamento dati account...</p>
+          </div>
         </section>
 
         <div className={styles.loadingBox}>Recupero profilo in corso...</div>
@@ -272,9 +298,12 @@ export default function ProfilePage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Profile</p>
-          <h1 className={styles.title}>Identità account</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM PROFILE</div>
+            <p className={styles.eyebrow}>GUFO Profile</p>
+            <h1 className={styles.title}>Identità account</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
+          </div>
         </section>
 
         <div className={styles.errorBox}>{error}</div>
@@ -288,11 +317,17 @@ export default function ProfilePage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PREMIUM PROFILE</div>
           <p className={styles.eyebrow}>GUFO Profile</p>
           <h1 className={styles.title}>Il tuo account</h1>
           <p className={styles.subtitle}>
-            Dati profilo, stato membership e ultime attività collegate al tuo account.
+            Dati profilo, stato membership e ultime attività collegate al tuo
+            account.
+          </p>
+          <p className={styles.heroDescription}>
+            Un’unica vista per controllare identità, wallet, livello e attività
+            recenti nell’ecosistema GUFO.
           </p>
         </div>
       </section>
@@ -340,7 +375,7 @@ export default function ProfilePage() {
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Livello attuale</p>
           <h3 className={styles.metricValue}>{profileData.level}</h3>
           <span className={styles.metricHint}>Status membership corrente</span>
@@ -380,14 +415,17 @@ export default function ProfilePage() {
               <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Transazioni recenti</h3>
             </div>
-            <span className={styles.panelBadge}>{recentTransactions.length} recenti</span>
+            <span className={styles.panelBadge}>
+              {recentTransactions.length} recenti
+            </span>
           </div>
 
           {recentTransactions.length === 0 ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyTitle}>Nessuna transazione trovata</div>
               <div className={styles.emptyText}>
-                Le tue attività recenti compariranno qui appena inizierai a usare GUFO.
+                Le tue attività recenti compariranno qui appena inizierai a usare
+                GUFO.
               </div>
             </div>
           ) : (
@@ -414,7 +452,7 @@ export default function ProfilePage() {
                               getTransactionType(transaction)
                             )}`}
                           >
-                            {getTransactionType(transaction)}
+                            {formatTransactionType(getTransactionType(transaction))}
                           </span>
                         </td>
                         <td className={styles.partnerCell}>
@@ -442,7 +480,7 @@ export default function ProfilePage() {
                           getTransactionType(transaction)
                         )}`}
                       >
-                        {getTransactionType(transaction)}
+                        {formatTransactionType(getTransactionType(transaction))}
                       </span>
                     </div>
 

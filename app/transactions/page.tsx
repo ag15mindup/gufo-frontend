@@ -38,6 +38,27 @@ function getTransactionType(tx: any) {
   return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "-";
 }
 
+function formatTransactionType(type?: string) {
+  const value = String(type || "-").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    case "buy":
+      return "Acquisto";
+    case "acquisto":
+      return "Acquisto";
+    case "withdraw":
+      return "Prelievo";
+    default:
+      return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
+  }
+}
+
 function getTransactionMerchant(tx: any) {
   return (
     tx?.merchant_name ??
@@ -108,6 +129,8 @@ function getTypeTone(type: string) {
   if (normalized.includes("bonus")) return styles.purpleBadge;
   if (normalized.includes("payment")) return styles.blueBadge;
   if (normalized.includes("withdraw")) return styles.orangeBadge;
+  if (normalized.includes("buy") || normalized.includes("acquisto"))
+    return styles.cyanBadge;
 
   return "";
 }
@@ -246,9 +269,12 @@ export default function TransactionsPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Ledger</p>
-          <h1 className={styles.title}>Transazioni</h1>
-          <p className={styles.subtitle}>Caricamento storico movimenti...</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM LEDGER</div>
+            <p className={styles.eyebrow}>GUFO Ledger</p>
+            <h1 className={styles.title}>Transazioni</h1>
+            <p className={styles.subtitle}>Caricamento storico movimenti...</p>
+          </div>
         </section>
 
         <div className={styles.loadingBox}>Recupero transazioni in corso...</div>
@@ -263,9 +289,12 @@ export default function TransactionsPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Ledger</p>
-          <h1 className={styles.title}>Transazioni</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM LEDGER</div>
+            <p className={styles.eyebrow}>GUFO Ledger</p>
+            <h1 className={styles.title}>Transazioni</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
+          </div>
         </section>
 
         <div className={styles.errorBox}>{error}</div>
@@ -279,11 +308,16 @@ export default function TransactionsPage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PREMIUM LEDGER</div>
           <p className={styles.eyebrow}>GUFO Ledger</p>
           <h1 className={styles.title}>Storico transazioni</h1>
           <p className={styles.subtitle}>
             Archivio completo dei movimenti con ricerca e filtri in tempo reale.
+          </p>
+          <p className={styles.heroDescription}>
+            Monitora in un colpo solo partner, importi, cashback e rewards GUFO
+            generate da ogni operazione.
           </p>
         </div>
       </section>
@@ -310,7 +344,7 @@ export default function TransactionsPage() {
               <option value="all">Tutti</option>
               {transactionTypes.map((type) => (
                 <option key={type} value={type}>
-                  {type}
+                  {formatTransactionType(type)}
                 </option>
               ))}
             </select>
@@ -330,7 +364,7 @@ export default function TransactionsPage() {
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Movimenti visibili</p>
           <h3 className={styles.metricValue}>{filteredTransactions.length}</h3>
           <span className={styles.metricHint}>Totale righe filtrate</span>
@@ -369,7 +403,8 @@ export default function TransactionsPage() {
             <div className={styles.emptyState}>
               <div className={styles.emptyTitle}>Nessuna transazione trovata</div>
               <div className={styles.emptyText}>
-                Quando userai GUFO, qui vedrai tutti i movimenti filtrabili per tipo e merchant.
+                Quando userai GUFO, qui vedrai tutti i movimenti filtrabili per
+                tipo e merchant.
               </div>
             </div>
           ) : (
@@ -397,7 +432,7 @@ export default function TransactionsPage() {
                               getTransactionType(tx)
                             )}`}
                           >
-                            {getTransactionType(tx)}
+                            {formatTransactionType(getTransactionType(tx))}
                           </span>
                         </td>
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
@@ -422,7 +457,7 @@ export default function TransactionsPage() {
                           getTransactionType(tx)
                         )}`}
                       >
-                        {getTransactionType(tx)}
+                        {formatTransactionType(getTransactionType(tx))}
                       </span>
                     </div>
 

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
+import MissionCard from "@/app/components/Missioncard";
 import styles from "./wallet.module.css";
 
 const supabase = createClient();
@@ -112,6 +113,25 @@ function getTransactionMerchant(tx: any) {
 
 function getTransactionType(tx: any) {
   return tx?.type ?? tx?.tipo ?? tx?.raw?.type ?? tx?.raw?.tipo ?? "cashback";
+}
+
+function formatTransactionType(type?: string) {
+  const value = String(type || "cashback").toLowerCase();
+
+  switch (value) {
+    case "cashback":
+      return "Cashback";
+    case "payment":
+      return "Pagamento";
+    case "bonus":
+      return "Bonus";
+    case "buy":
+      return "Acquisto";
+    case "acquisto":
+      return "Acquisto";
+    default:
+      return value.charAt(0).toUpperCase() + value.slice(1);
+  }
 }
 
 function formatDate(value?: string | null) {
@@ -267,6 +287,7 @@ export default function WalletPage() {
 
         <div className={styles.hero}>
           <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM WALLET</div>
             <p className={styles.eyebrow}>GUFO Wallet</p>
             <h1 className={styles.title}>Portafoglio digitale</h1>
             <p className={styles.subtitle}>Caricamento saldo e movimenti in corso...</p>
@@ -286,6 +307,7 @@ export default function WalletPage() {
 
         <div className={styles.hero}>
           <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM WALLET</div>
             <p className={styles.eyebrow}>GUFO Wallet</p>
             <h1 className={styles.title}>Portafoglio digitale</h1>
             <p className={styles.subtitle}>Si è verificato un problema.</p>
@@ -304,41 +326,39 @@ export default function WalletPage() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PREMIUM WALLET</div>
           <p className={styles.eyebrow}>GUFO Wallet</p>
           <h1 className={styles.title}>I tuoi GUFO</h1>
           <p className={styles.subtitle}>
             {userEmail ? userEmail : "Portafoglio digitale attivo"}
           </p>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              flexWrap: "wrap",
-              marginTop: "18px",
-            }}
-          >
+          <p className={styles.heroDescription}>
+            Tieni sotto controllo saldo, guadagni, missioni e movimenti recenti
+            in un’unica esperienza premium.
+          </p>
+
+          <div className={styles.heroButtons}>
             <button
               onClick={() => router.push("/buy-gufo")}
-              style={{
-                padding: "12px 18px",
-                borderRadius: "12px",
-                border: "none",
-                cursor: "pointer",
-                fontWeight: 700,
-                background: "rgba(255,255,255,0.14)",
-                color: "#fff",
-                backdropFilter: "blur(10px)",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
-              }}
+              className={styles.buyButton}
+              type="button"
             >
-              Acquista GUFO
+              <span className={styles.buyButtonGlow} />
+              <span className={styles.buyButtonLabel}>Acquista GUFO</span>
+              <span className={styles.buyButtonArrow}>↗</span>
+            </button>
+
+            <button
+              onClick={() => router.push("/customer-code")}
+              className={styles.ghostButton}
+              type="button"
+            >
+              Il mio codice
             </button>
           </div>
 
-          {error ? (
-            <div style={{ marginTop: "14px", fontWeight: 600 }}>{error}</div>
-          ) : null}
+          {error ? <div className={styles.inlineError}>{error}</div> : null}
         </div>
 
         <div className={styles.walletHeroCard}>
@@ -399,6 +419,8 @@ export default function WalletPage() {
         </div>
       </section>
 
+      <MissionCard transactions={walletData.transactions} />
+
       <section className={styles.mainGrid}>
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -433,7 +455,9 @@ export default function WalletPage() {
                       <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
                       <td>{formatDate(tx.created_at)}</td>
                       <td>
-                        <span className={styles.badge}>{getTransactionType(tx)}</span>
+                        <span className={styles.badge}>
+                          {formatTransactionType(getTransactionType(tx))}
+                        </span>
                       </td>
                       <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
                       <td>{getTransactionGufo(tx).toFixed(2)}</td>
@@ -455,7 +479,9 @@ export default function WalletPage() {
                 >
                   <div className={styles.mobileTxTop}>
                     <strong>{getTransactionMerchant(tx)}</strong>
-                    <span className={styles.badge}>{getTransactionType(tx)}</span>
+                    <span className={styles.badge}>
+                      {formatTransactionType(getTransactionType(tx))}
+                    </span>
                   </div>
 
                   <div className={styles.mobileTxRow}>

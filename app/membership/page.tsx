@@ -219,9 +219,12 @@ export default function MembershipPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Membership</p>
-          <h1 className={styles.title}>Status e progressione</h1>
-          <p className={styles.subtitle}>Caricamento progressi membership...</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM MEMBERSHIP</div>
+            <p className={styles.eyebrow}>GUFO Membership</p>
+            <h1 className={styles.title}>Status e progressione</h1>
+            <p className={styles.subtitle}>Caricamento progressi membership...</p>
+          </div>
         </section>
 
         <div className={styles.loadingBox}>Recupero percorso membership...</div>
@@ -236,9 +239,12 @@ export default function MembershipPage() {
         <div className={styles.rainbowLine} />
 
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Membership</p>
-          <h1 className={styles.title}>Status e progressione</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PREMIUM MEMBERSHIP</div>
+            <p className={styles.eyebrow}>GUFO Membership</p>
+            <h1 className={styles.title}>Status e progressione</h1>
+            <p className={styles.subtitle}>Si è verificato un problema.</p>
+          </div>
         </section>
 
         <div className={styles.errorBox}>{error}</div>
@@ -252,11 +258,17 @@ export default function MembershipPage() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PREMIUM MEMBERSHIP</div>
           <p className={styles.eyebrow}>GUFO Membership</p>
           <h1 className={styles.title}>Il tuo percorso status</h1>
           <p className={styles.subtitle}>
-            Controlla il livello attuale, i progressi stagionali e quanto manca al prossimo traguardo.
+            Controlla il livello attuale, i progressi stagionali e quanto manca
+            al prossimo traguardo.
+          </p>
+          <p className={styles.heroDescription}>
+            La membership GUFO evolve in base alla tua attività nell’ecosistema:
+            più spesa stagionale, più crescita, più valore nel tempo.
           </p>
         </div>
       </section>
@@ -269,7 +281,8 @@ export default function MembershipPage() {
             <p className={styles.heroLabel}>Livello attuale</p>
             <h2 className={styles.mainLevelTitle}>{currentLevel}</h2>
             <p className={styles.mainLevelText}>
-              Il tuo status si aggiorna in base alla spesa stagionale registrata dentro l’ecosistema GUFO.
+              Il tuo status si aggiorna in base alla spesa stagionale registrata
+              dentro l’ecosistema GUFO.
             </p>
           </div>
 
@@ -320,7 +333,7 @@ export default function MembershipPage() {
       </section>
 
       <section className={styles.metricsGrid}>
-        <div className={styles.metricCard}>
+        <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Livello attuale</p>
           <h3 className={styles.metricValue}>{currentLevel}</h3>
           <span className={styles.metricHint}>Status membership corrente</span>

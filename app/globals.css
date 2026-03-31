@@ -6,17 +6,27 @@
 
   --gufo-bg-1: #081120;
   --gufo-bg-2: #0b1424;
+  --gufo-bg-3: #0f1a30;
+
   --gufo-panel: rgba(10, 18, 36, 0.72);
   --gufo-panel-strong: rgba(8, 15, 30, 0.88);
   --gufo-border: rgba(255, 255, 255, 0.1);
+
   --gufo-text: #f5f7ff;
   --gufo-text-soft: #a9b4d0;
+  --gufo-text-muted: #8390b2;
+
   --gufo-cyan: #38bdf8;
   --gufo-blue: #60a5fa;
   --gufo-violet: #8b5cf6;
   --gufo-pink: #ec4899;
   --gufo-green: #22c55e;
   --gufo-yellow: #facc15;
+
+  --gufo-shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.28);
+  --gufo-shadow-strong: 0 18px 44px rgba(0, 0, 0, 0.34);
+  --gufo-radius-lg: 22px;
+  --gufo-radius-md: 18px;
 }
 
 @theme inline {
@@ -26,7 +36,9 @@
   --font-mono: monospace;
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -50,24 +62,25 @@ body {
   color: var(--gufo-text);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* sfondo principale GUFO */
 body.gufo-body {
   position: relative;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 16%, rgba(236, 72, 153, 0.16), transparent 0 18%),
-    radial-gradient(circle at 82% 12%, rgba(56, 189, 248, 0.16), transparent 0 18%),
-    radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.12), transparent 0 18%),
-    radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.12), transparent 0 18%),
-    radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.08), transparent 0 42%),
+    radial-gradient(circle at 12% 16%, rgba(236, 72, 153, 0.15), transparent 0 18%),
+    radial-gradient(circle at 82% 12%, rgba(56, 189, 248, 0.15), transparent 0 18%),
+    radial-gradient(circle at 18% 84%, rgba(34, 197, 94, 0.11), transparent 0 18%),
+    radial-gradient(circle at 82% 84%, rgba(250, 204, 21, 0.11), transparent 0 18%),
+    radial-gradient(circle at 50% 50%, rgba(96, 165, 250, 0.07), transparent 0 42%),
     linear-gradient(180deg, #081120 0%, #0b1424 48%, #081120 100%);
   color: var(--gufo-text);
   overflow-x: hidden;
 }
 
-/* stelle globali */
 body.gufo-body::before {
   content: "";
   position: fixed;
@@ -75,20 +88,19 @@ body.gufo-body::before {
   pointer-events: none;
   z-index: 0;
   background-image:
-    radial-gradient(circle at 20px 30px, rgba(255, 255, 255, 0.75) 0 1px, transparent 1.6px),
-    radial-gradient(circle at 120px 80px, rgba(255, 255, 255, 0.72) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 240px 140px, rgba(255, 255, 255, 0.6) 0 1.1px, transparent 1.8px),
-    radial-gradient(circle at 320px 220px, rgba(255, 255, 255, 0.68) 0 0.9px, transparent 1.5px),
-    radial-gradient(circle at 440px 120px, rgba(56, 189, 248, 0.42) 0 1.2px, transparent 2px),
-    radial-gradient(circle at 540px 260px, rgba(236, 72, 153, 0.28) 0 1.1px, transparent 1.8px),
-    radial-gradient(circle at 660px 180px, rgba(255, 255, 255, 0.55) 0 1px, transparent 1.6px),
-    radial-gradient(circle at 760px 90px, rgba(250, 204, 21, 0.2) 0 1.1px, transparent 1.8px);
+    radial-gradient(circle at 20px 30px, rgba(255, 255, 255, 0.72) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 120px 80px, rgba(255, 255, 255, 0.68) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 240px 140px, rgba(255, 255, 255, 0.56) 0 1.1px, transparent 1.8px),
+    radial-gradient(circle at 320px 220px, rgba(255, 255, 255, 0.62) 0 0.9px, transparent 1.5px),
+    radial-gradient(circle at 440px 120px, rgba(56, 189, 248, 0.36) 0 1.2px, transparent 2px),
+    radial-gradient(circle at 540px 260px, rgba(236, 72, 153, 0.24) 0 1.1px, transparent 1.8px),
+    radial-gradient(circle at 660px 180px, rgba(255, 255, 255, 0.48) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 760px 90px, rgba(250, 204, 21, 0.18) 0 1.1px, transparent 1.8px);
   background-size: 800px 320px;
   background-repeat: repeat;
-  opacity: 0.32;
+  opacity: 0.28;
 }
 
-/* glow globale */
 body.gufo-body::after {
   content: "";
   position: fixed;
@@ -96,22 +108,22 @@ body.gufo-body::after {
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.1), transparent 0 22%),
-    radial-gradient(circle at 20% 100%, rgba(236, 72, 153, 0.08), transparent 0 20%),
-    radial-gradient(circle at 80% 100%, rgba(139, 92, 246, 0.08), transparent 0 22%),
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.09), transparent 0 22%),
+    radial-gradient(circle at 20% 100%, rgba(236, 72, 153, 0.07), transparent 0 20%),
+    radial-gradient(circle at 80% 100%, rgba(139, 92, 246, 0.07), transparent 0 22%),
     linear-gradient(
       90deg,
-      rgba(56, 189, 248, 0.025) 0%,
-      rgba(139, 92, 246, 0.025) 25%,
-      rgba(236, 72, 153, 0.025) 50%,
-      rgba(250, 204, 21, 0.02) 75%,
-      rgba(34, 197, 94, 0.02) 100%
+      rgba(56, 189, 248, 0.02) 0%,
+      rgba(139, 92, 246, 0.02) 25%,
+      rgba(236, 72, 153, 0.02) 50%,
+      rgba(250, 204, 21, 0.016) 75%,
+      rgba(34, 197, 94, 0.016) 100%
     );
-  opacity: 0.45;
+  opacity: 0.4;
 }
 
-/* tutto il contenuto sopra allo sfondo */
 .layout-root,
+.layout-shell-frame,
 .app-shell,
 .app-main,
 main,
@@ -124,8 +136,13 @@ footer {
   z-index: 1;
 }
 
-/* contenitore app */
 .layout-root {
+  position: relative;
+  min-height: 100vh;
+  background: transparent;
+}
+
+.layout-shell-frame {
   position: relative;
   min-height: 100vh;
   background: transparent;
@@ -135,7 +152,6 @@ footer {
   position: relative;
   min-height: 100vh;
   transition: padding-left 0.25s ease;
-  z-index: 1;
   background: transparent;
 }
 
@@ -151,7 +167,6 @@ footer {
   position: relative;
   min-height: 100vh;
   padding: 24px;
-  z-index: 1;
   background: transparent;
   overflow: hidden;
 }
@@ -163,12 +178,12 @@ footer {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(5, 10, 20, 0.78), rgba(5, 10, 20, 0.9)),
+    linear-gradient(rgba(5, 10, 20, 0.72), rgba(5, 10, 20, 0.86)),
     url("/dashboard-space.jpg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  opacity: 0.42;
+  opacity: 0.34;
 }
 
 .app-main > * {
@@ -203,8 +218,8 @@ footer {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 0 22%),
-    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.08), transparent 0 20%);
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.07), transparent 0 22%),
+    radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.07), transparent 0 20%);
   z-index: 0;
 }
 
@@ -213,7 +228,6 @@ footer {
   z-index: 1;
 }
 
-/* testi */
 h1,
 h2,
 h3,
@@ -222,6 +236,7 @@ h5,
 h6 {
   margin-top: 0;
   color: #ffffff;
+  letter-spacing: -0.02em;
 }
 
 p {
@@ -233,13 +248,30 @@ a {
   text-decoration: none;
 }
 
-/* selezione testo */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input,
+select,
+textarea,
+button {
+  outline: none;
+}
+
 ::selection {
   background: rgba(56, 189, 248, 0.3);
   color: #ffffff;
 }
 
-/* scrollbar */
+:focus-visible {
+  outline: 2px solid rgba(56, 189, 248, 0.75);
+  outline-offset: 2px;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -263,7 +295,6 @@ a {
   filter: brightness(1.08);
 }
 
-/* classi utili */
 .gufo-glass {
   background: rgba(10, 18, 36, 0.62);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -281,7 +312,7 @@ a {
     rgba(8, 15, 30, 0.92) 100%
   );
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
+  border-radius: var(--gufo-radius-lg);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.02),
     0 14px 35px rgba(0, 0, 0, 0.35);
@@ -338,14 +369,6 @@ a {
   margin-bottom: 24px;
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-/* mobile */
 @media (max-width: 1024px) {
   .app-shell.with-sidebar,
   .app-shell.no-sidebar {
@@ -363,12 +386,12 @@ textarea {
 
 @media (max-width: 768px) {
   body.gufo-body::before {
-    opacity: 0.24;
+    opacity: 0.22;
     background-size: 620px 280px;
   }
 
   body.gufo-body::after {
-    opacity: 0.38;
+    opacity: 0.34;
   }
 
   .gufo-card {
@@ -377,7 +400,7 @@ textarea {
 
   .app-main::before {
     background-position: center;
-    opacity: 0.34;
+    opacity: 0.28;
   }
 }
 

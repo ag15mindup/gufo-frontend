@@ -155,6 +155,11 @@ export default function LandingPage() {
               progressione stagionale e reward in tempo reale.
             </p>
 
+            <p className={styles.heroPitch}>
+              GUFO non è un semplice cashback: è un sistema che trasforma ogni
+              acquisto in un’opportunità di ritorno cliente per il partner.
+            </p>
+
             <div className={styles.heroButtons}>
               <Link
                 href="/register"
@@ -184,6 +189,11 @@ export default function LandingPage() {
               <span className={styles.heroTag}>Livelli stagionali</span>
               <span className={styles.heroTag}>QR cliente</span>
               <span className={styles.heroTag}>Analytics partner</span>
+            </div>
+
+            <div className={styles.heroLiveBox}>
+              <div className={styles.liveDot} />
+              <span>Sistema attivo • Wallet e transazioni in tempo reale</span>
             </div>
           </div>
 
@@ -215,16 +225,16 @@ export default function LandingPage() {
                 </div>
 
                 <div className={styles.visualStat}>
-                  <span className={styles.visualStatLabel}>Partner</span>
+                  <span className={styles.visualStatLabel}>Flusso</span>
                   <strong className={styles.visualStatValue}>
-                    Lookup + Pagamento + Reward
+                    QR → Pagamento → Cashback
                   </strong>
                 </div>
 
                 <div className={styles.visualStat}>
-                  <span className={styles.visualStatLabel}>Core GUFO</span>
+                  <span className={styles.visualStatLabel}>Risultato</span>
                   <strong className={styles.visualStatValue}>
-                    Acquisto → GUFO → Fidelizzazione
+                    + ritorno cliente
                   </strong>
                 </div>
               </div>
@@ -243,17 +253,23 @@ export default function LandingPage() {
 
           <div className={`${styles.heroStatCard} ${styles.neonBorder}`}>
             <div className={styles.heroStatLabel}>Membership</div>
-            <div className={styles.heroStatValue}>Bronze • Silver • Gold • VIP • Elite</div>
+            <div className={styles.heroStatValue}>
+              Bronze • Silver • Gold • VIP • Elite
+            </div>
             <div className={styles.heroStatText}>
-              Il percorso cresce nel tempo con la spesa stagionale e l’attività nell’ecosistema.
+              Il percorso cresce nel tempo con la spesa stagionale e l’attività
+              nell’ecosistema.
             </div>
           </div>
 
           <div className={`${styles.heroStatCard} ${styles.neonBorder}`}>
             <div className={styles.heroStatLabel}>Partner</div>
-            <div className={styles.heroStatValue}>Vendita, reward e ritorno cliente</div>
+            <div className={styles.heroStatValue}>
+              Vendita, reward e ritorno cliente
+            </div>
             <div className={styles.heroStatText}>
-              Il partner usa GUFO per registrare transazioni e costruire fidelizzazione reale.
+              Il partner usa GUFO per registrare transazioni e costruire
+              fidelizzazione reale.
             </div>
           </div>
         </section>
@@ -262,13 +278,17 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Come funziona</h2>
             <p className={styles.sectionText}>
-              Un flusso semplice che collega cliente, partner e reward in un’unica esperienza.
+              Un flusso semplice che collega cliente, partner e reward in
+              un’unica esperienza.
             </p>
           </div>
 
           <div className={styles.stepsGrid}>
             {howItWorks.map((item) => (
-              <div key={item.step} className={`${styles.stepCard} ${styles.neonBorder}`}>
+              <div
+                key={item.step}
+                className={`${styles.stepCard} ${styles.neonBorder}`}
+              >
                 <div className={styles.stepNumber}>{item.step}</div>
                 <h3 className={styles.stepTitle}>{item.title}</h3>
                 <p className={styles.stepText}>{item.text}</p>
@@ -281,13 +301,17 @@ export default function LandingPage() {
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Perché GUFO Rainbow</h2>
             <p className={styles.sectionText}>
-              Una piattaforma loyalty moderna pensata per clienti reali, negozi locali e una demo startup forte.
+              Una piattaforma loyalty moderna pensata per clienti reali, negozi
+              locali e una demo startup forte.
             </p>
           </div>
 
           <div className={styles.featuresGrid}>
             {whyGufo.map((item, index) => (
-              <div key={item.title} className={`${styles.featureCard} ${styles.neonBorder}`}>
+              <div
+                key={item.title}
+                className={`${styles.featureCard} ${styles.neonBorder}`}
+              >
                 <div className={styles.featureNumber}>
                   {(index + 1).toString().padStart(2, "0")}
                 </div>
@@ -301,7 +325,9 @@ export default function LandingPage() {
         <section className={styles.dualSection}>
           <div className={`${styles.dualCard} ${styles.neonBorder}`}>
             <div className={styles.dualEyebrow}>Cliente</div>
-            <h3 className={styles.dualTitle}>Un wallet che continua a crescere</h3>
+            <h3 className={styles.dualTitle}>
+              Un wallet che continua a crescere
+            </h3>
             <ul className={styles.cleanList}>
               {clientBenefits.map((item) => (
                 <li key={item}>{item}</li>
@@ -311,7 +337,9 @@ export default function LandingPage() {
 
           <div className={`${styles.dualCard} ${styles.neonBorder}`}>
             <div className={styles.dualEyebrow}>Partner</div>
-            <h3 className={styles.dualTitle}>Uno strumento concreto per fidelizzare</h3>
+            <h3 className={styles.dualTitle}>
+              Uno strumento concreto per fidelizzare
+            </h3>
             <ul className={styles.cleanList}>
               {partnerBenefits.map((item) => (
                 <li key={item}>{item}</li>
@@ -342,12 +370,27 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className={`${styles.visionSection} ${styles.neonBorder}`}>
+          <h2 className={styles.visionTitle}>
+            Il futuro del commercio locale è data-driven
+          </h2>
+
+          <p className={styles.visionText}>
+            GUFO permette ai partner di capire quando, quanto e perché un cliente
+            torna. Non è solo uno sconto: è una strategia.
+          </p>
+
+          <p className={styles.visionHighlight}>
+            Cashback → comportamento → fidelizzazione reale
+          </p>
+        </section>
+
         <section className={`${styles.ctaSection} ${styles.neonBorder}`}>
           <div className={styles.ctaBadge}>GUFO Rainbow online</div>
           <h2 className={styles.ctaTitle}>Entra nella piattaforma</h2>
           <p className={styles.ctaText}>
-            Cliente e partner condividono lo stesso ecosistema: più semplice da usare,
-            più forte in demo, più chiaro da raccontare.
+            Cliente e partner condividono lo stesso ecosistema: più semplice da
+            usare, più forte in demo, più chiaro da raccontare.
           </p>
 
           <div className={styles.ctaButtons}>
