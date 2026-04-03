@@ -28,25 +28,59 @@ type RewardData = {
   lastSeasonReset: string;
 };
 
-type GiftCardItem = {
-  id: string;
+type BackendGiftCardItem = {
+  id: number;
   brand: string;
-  valueEuro: number;
-  costGufo: number;
-  tag: string;
+  value_eur: number;
+  fee_percent: number;
+  fee_amount_gufo: number;
+  price_gufo: number;
+};
+
+type GiftCardsResponse = {
+  success?: boolean;
+  fee_percent?: number;
+  cards?: BackendGiftCardItem[];
+  error?: string;
+};
+
+type ConvertResponse = {
+  success?: boolean;
+  message?: string;
+  error?: string;
+  wallet?: {
+    balance_gufo?: number;
+    balance_eur?: number;
+    total_spent?: number;
+    season_spent?: number;
+    current_level?: string;
+  };
+  conversion?: {
+    gufo_amount?: number;
+    gross_amount?: number;
+    fee_percent?: number;
+    fee_amount?: number;
+    net_amount?: number;
+    currency?: string;
+    exchange_rate?: number;
+  };
+};
+
+type RedeemGiftCardResponse = {
+  success?: boolean;
+  message?: string;
+  error?: string;
+  wallet?: {
+    balance_gufo?: number;
+    balance_eur?: number;
+    total_spent?: number;
+    season_spent?: number;
+    current_level?: string;
+  };
 };
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
-
-const GIFT_CARDS: GiftCardItem[] = [
-  { id: "amazon-10", brand: "Amazon", valueEuro: 10, costGufo: 120, tag: "Popular" },
-  { id: "zalando-25", brand: "Zalando", valueEuro: 25, costGufo: 290, tag: "Fashion" },
-  { id: "mediaworld-50", brand: "MediaWorld", valueEuro: 50, costGufo: 560, tag: "Tech" },
-  { id: "spotify-10", brand: "Spotify", valueEuro: 10, costGufo: 115, tag: "Digital" },
-  { id: "netflix-25", brand: "Netflix", valueEuro: 25, costGufo: 300, tag: "Entertainment" },
-  { id: "decathlon-30", brand: "Decathlon", valueEuro: 30, costGufo: 345, tag: "Sport" },
-];
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -68,6 +102,23 @@ function extractWallet(payload: any): WalletResponse {
   return payload;
 }
 
+function formatMoney(value: number) {
+  return value.toFixed(2);
+}
+
+function getGiftCardTag(brand: string) {
+  const normalized = String(brand || "").toLowerCase();
+
+  if (normalized.includes("amazon")) return "Popular";
+  if (normalized.includes("zalando")) return "Fashion";
+  if (normalized.includes("mediaworld")) return "Tech";
+  if (normalized.includes("spotify")) return "Digital";
+  if (normalized.includes("ikea")) return "Home";
+  if (normalized.includes("esselunga")) return "Food";
+
+  return "Catalog";
+}
+
 export default function RewardsPage() {
   const [rewardData, setRewardData] = useState<RewardData>({
     balanceGufo: 0,
@@ -78,11 +129,18 @@ export default function RewardsPage() {
     lastSeasonReset: "",
   });
 
+  const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("Utente GUFO");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [convertAmount, setConvertAmount] = useState("100");
-  const [selectedGiftCard, setSelectedGiftCard] = useState<string | null>(null);
+  const [giftCards, setGiftCards] = useState<BackendGiftCardItem[]>([]);
+  const [selectedGiftCard, setSelectedGiftCard] = useState<number | null>(null);
+
+  const [convertLoading, setConvertLoading] = useState(false);
+  const [giftCardLoading, setGiftCardLoading] = useState(false);
+  const [actionMessage, setActionMessage] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -91,6 +149,7 @@ export default function RewardsPage() {
       try {
         setLoading(true);
         setError("");
+        setActionMessage("");
 
         const {
           data: { user },
@@ -111,19 +170,26 @@ export default function RewardsPage() {
           user.email?.split("@")[0] ||
           "Utente GUFO";
 
-        if (isMounted) {
-          setUserName(fallbackName);
-        }
-
-        const walletRes = await safeJsonFetch(`${API_URL}/wallet/${user.id}`);
+        const [walletRes, giftCardsRes] = await Promise.all([
+          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+          safeJsonFetch(`${API_URL}/gift-cards`),
+        ]);
 
         if (!walletRes.response.ok || walletRes.data?.success === false) {
           throw new Error(walletRes.data?.error || "Errore nel recupero rewards");
         }
 
+        if (!giftCardsRes.response.ok || giftCardsRes.data?.success === false) {
+          throw new Error(giftCardsRes.data?.error || "Errore nel recupero gift card");
+        }
+
         const wallet = extractWallet(walletRes.data ?? {});
+        const giftPayload = (giftCardsRes.data ?? {}) as GiftCardsResponse;
 
         if (!isMounted) return;
+
+        setUserId(user.id);
+        setUserName(fallbackName);
 
         setRewardData({
           balanceGufo: toNumberSafe(wallet?.balance_gufo),
@@ -133,6 +199,12 @@ export default function RewardsPage() {
           cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
           lastSeasonReset: String(wallet?.last_season_reset ?? ""),
         });
+
+        setGiftCards(Array.isArray(giftPayload.cards) ? giftPayload.cards : []);
+
+        if (giftPayload.cards && giftPayload.cards.length > 0) {
+          setSelectedGiftCard(giftPayload.cards[0].id);
+        }
       } catch (err: any) {
         if (!isMounted) return;
         setError(err?.message || "Errore sconosciuto");
@@ -150,9 +222,9 @@ export default function RewardsPage() {
     };
   }, []);
 
-  const convertGufoAmount = toNumberSafe(convertAmount);
-  const conversionFeePercent = 5;
-  const grossEuro = convertGufoAmount * 0.01;
+  const convertGufoAmount = Math.max(toNumberSafe(convertAmount), 0);
+  const conversionFeePercent = 15;
+  const grossEuro = convertGufoAmount;
   const feeEuro = grossEuro * (conversionFeePercent / 100);
   const netEuro = Math.max(grossEuro - feeEuro, 0);
 
@@ -162,9 +234,116 @@ export default function RewardsPage() {
     : "Premio stagionale bloccato";
 
   const selectedGiftCardData = useMemo(
-    () => GIFT_CARDS.find((item) => item.id === selectedGiftCard) ?? null,
-    [selectedGiftCard]
+    () => giftCards.find((item) => item.id === selectedGiftCard) ?? null,
+    [giftCards, selectedGiftCard]
   );
+
+  async function refreshWallet(currentUserId: string) {
+    const walletRes = await safeJsonFetch(`${API_URL}/wallet/${currentUserId}`);
+
+    if (!walletRes.response.ok || walletRes.data?.success === false) {
+      throw new Error(walletRes.data?.error || "Errore aggiornamento wallet");
+    }
+
+    const wallet = extractWallet(walletRes.data ?? {});
+
+    setRewardData({
+      balanceGufo: toNumberSafe(wallet?.balance_gufo),
+      balanceEuro: toNumberSafe(wallet?.balance_eur),
+      seasonSpent: toNumberSafe(wallet?.season_spent),
+      currentLevel: String(wallet?.current_level ?? "Bronze"),
+      cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
+      lastSeasonReset: String(wallet?.last_season_reset ?? ""),
+    });
+  }
+
+  async function handleConvertGufo() {
+    try {
+      setConvertLoading(true);
+      setActionMessage("");
+      setError("");
+
+      if (!userId) {
+        throw new Error("Utente non disponibile");
+      }
+
+      if (convertGufoAmount <= 0) {
+        throw new Error("Inserisci una quantità GUFO valida");
+      }
+
+      const response = await fetch(`${API_URL}/convert-gufo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          amount_gufo: convertGufoAmount,
+        }),
+      });
+
+      const data = (await response.json()) as ConvertResponse;
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || "Errore durante la conversione");
+      }
+
+      await refreshWallet(userId);
+      setActionMessage(
+        `Conversione completata: ${formatMoney(convertGufoAmount)} GUFO → € ${formatMoney(
+          toNumberSafe(data.conversion?.net_amount)
+        )}`
+      );
+    } catch (err: any) {
+      setError(err?.message || "Errore conversione");
+    } finally {
+      setConvertLoading(false);
+    }
+  }
+
+  async function handleRedeemGiftCard() {
+    try {
+      setGiftCardLoading(true);
+      setActionMessage("");
+      setError("");
+
+      if (!userId) {
+        throw new Error("Utente non disponibile");
+      }
+
+      if (!selectedGiftCardData) {
+        throw new Error("Seleziona una gift card");
+      }
+
+      const response = await fetch(`${API_URL}/redeem-gift-card`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          gift_card_id: selectedGiftCardData.id,
+        }),
+      });
+
+      const data = (await response.json()) as RedeemGiftCardResponse;
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || "Errore durante il riscatto gift card");
+      }
+
+      await refreshWallet(userId);
+      setActionMessage(
+        `Gift card riscattata: ${selectedGiftCardData.brand} € ${formatMoney(
+          selectedGiftCardData.value_eur
+        )}`
+      );
+    } catch (err: any) {
+      setError(err?.message || "Errore riscatto gift card");
+    } finally {
+      setGiftCardLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -179,23 +358,6 @@ export default function RewardsPage() {
         </section>
 
         <div className={styles.loadingBox}>Recupero rewards...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.bgOverlay} />
-        <div className={styles.rainbowLine} />
-
-        <section className={styles.hero}>
-          <p className={styles.eyebrow}>GUFO Rewards Center</p>
-          <h1 className={styles.title}>Rewards</h1>
-          <p className={styles.subtitle}>Si è verificato un problema.</p>
-        </section>
-
-        <div className={styles.errorBox}>{error}</div>
       </div>
     );
   }
@@ -216,6 +378,9 @@ export default function RewardsPage() {
         </div>
       </section>
 
+      {error ? <div className={styles.errorBox}>{error}</div> : null}
+      {actionMessage ? <div className={styles.successBox}>{actionMessage}</div> : null}
+
       <section className={styles.heroCard}>
         <div className={styles.heroCardLeft}>
           <div className={styles.heroTopRow}>
@@ -224,9 +389,9 @@ export default function RewardsPage() {
           </div>
 
           <p className={styles.heroLabel}>Saldo disponibile</p>
-          <h2 className={styles.heroValue}>{rewardData.balanceGufo.toFixed(2)} GUFO</h2>
+          <h2 className={styles.heroValue}>{formatMoney(rewardData.balanceGufo)} GUFO</h2>
           <p className={styles.heroNote}>
-            Valore convertibile stimato: € {rewardData.balanceEuro.toFixed(2)}
+            Wallet EUR disponibile: € {formatMoney(rewardData.balanceEuro)}
           </p>
         </div>
 
@@ -238,7 +403,7 @@ export default function RewardsPage() {
 
           <div className={styles.heroMiniCard}>
             <span>Spesa stagione</span>
-            <strong>€ {rewardData.seasonSpent.toFixed(2)}</strong>
+            <strong>€ {formatMoney(rewardData.seasonSpent)}</strong>
           </div>
 
           <div className={styles.heroMiniCard}>
@@ -255,14 +420,14 @@ export default function RewardsPage() {
       <section className={styles.metricsGrid}>
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Saldo GUFO</p>
-          <h3 className={styles.metricValue}>{rewardData.balanceGufo.toFixed(2)}</h3>
+          <h3 className={styles.metricValue}>{formatMoney(rewardData.balanceGufo)}</h3>
           <span className={styles.metricHint}>Disponibilità attuale wallet</span>
         </div>
 
         <div className={styles.metricCard}>
-          <p className={styles.metricLabel}>Valore convertibile</p>
-          <h3 className={styles.metricValue}>€ {rewardData.balanceEuro.toFixed(2)}</h3>
-          <span className={styles.metricHint}>Stima lato reward</span>
+          <p className={styles.metricLabel}>Wallet EUR</p>
+          <h3 className={styles.metricValue}>€ {formatMoney(rewardData.balanceEuro)}</h3>
+          <span className={styles.metricHint}>Disponibilità conversioni completate</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -282,7 +447,7 @@ export default function RewardsPage() {
                 <p className={styles.sectionEyebrow}>Convert</p>
                 <h3>Converti GUFO in euro</h3>
               </div>
-              <span className={styles.panelBadge}>Demo flow</span>
+              <span className={styles.panelBadge}>15% fee</span>
             </div>
 
             <div className={styles.fieldGroup}>
@@ -301,26 +466,31 @@ export default function RewardsPage() {
             <div className={styles.previewBox}>
               <div className={styles.previewRow}>
                 <span>Conversione lorda</span>
-                <strong>€ {grossEuro.toFixed(2)}</strong>
+                <strong>€ {formatMoney(grossEuro)}</strong>
               </div>
 
               <div className={styles.previewRow}>
                 <span>Commissione ({conversionFeePercent}%)</span>
-                <strong>€ {feeEuro.toFixed(2)}</strong>
+                <strong>€ {formatMoney(feeEuro)}</strong>
               </div>
 
               <div className={styles.previewRow}>
                 <span>Valore netto</span>
-                <strong>€ {netEuro.toFixed(2)}</strong>
+                <strong>€ {formatMoney(netEuro)}</strong>
               </div>
             </div>
 
-            <button type="button" className={styles.primaryBtnWide}>
-              Converti in euro
+            <button
+              type="button"
+              className={styles.primaryBtnWide}
+              onClick={handleConvertGufo}
+              disabled={convertLoading || convertGufoAmount <= 0}
+            >
+              {convertLoading ? "Conversione in corso..." : "Converti in euro"}
             </button>
 
             <p className={styles.helperText}>
-              Flusso demo: la conversione reale potrà essere collegata più avanti al backend.
+              Conversione reale collegata al backend: 1 GUFO = 1€ con commissione del 15%.
             </p>
           </div>
 
@@ -330,11 +500,11 @@ export default function RewardsPage() {
                 <p className={styles.sectionEyebrow}>Gift Cards</p>
                 <h3>Riscatta gift card</h3>
               </div>
-              <span className={styles.panelBadge}>Catalog</span>
+              <span className={styles.panelBadge}>10% fee</span>
             </div>
 
             <div className={styles.giftGrid}>
-              {GIFT_CARDS.map((item) => (
+              {giftCards.map((item) => (
                 <button
                   type="button"
                   key={item.id}
@@ -345,11 +515,11 @@ export default function RewardsPage() {
                 >
                   <div className={styles.giftTop}>
                     <span className={styles.giftBrand}>{item.brand}</span>
-                    <span className={styles.giftTag}>{item.tag}</span>
+                    <span className={styles.giftTag}>{getGiftCardTag(item.brand)}</span>
                   </div>
 
-                  <div className={styles.giftValue}>€ {item.valueEuro}</div>
-                  <div className={styles.giftCost}>{item.costGufo} GUFO</div>
+                  <div className={styles.giftValue}>€ {formatMoney(item.value_eur)}</div>
+                  <div className={styles.giftCost}>{formatMoney(item.price_gufo)} GUFO</div>
                 </button>
               ))}
             </div>
@@ -363,18 +533,28 @@ export default function RewardsPage() {
 
                 <div className={styles.selectionRow}>
                   <span>Valore</span>
-                  <strong>€ {selectedGiftCardData.valueEuro}</strong>
+                  <strong>€ {formatMoney(selectedGiftCardData.value_eur)}</strong>
                 </div>
 
                 <div className={styles.selectionRow}>
-                  <span>Costo</span>
-                  <strong>{selectedGiftCardData.costGufo} GUFO</strong>
+                  <span>Commissione</span>
+                  <strong>{formatMoney(selectedGiftCardData.fee_amount_gufo)} GUFO</strong>
+                </div>
+
+                <div className={styles.selectionRow}>
+                  <span>Costo totale</span>
+                  <strong>{formatMoney(selectedGiftCardData.price_gufo)} GUFO</strong>
                 </div>
               </div>
             )}
 
-            <button type="button" className={styles.secondaryBtnWide}>
-              Riscatta gift card
+            <button
+              type="button"
+              className={styles.secondaryBtnWide}
+              onClick={handleRedeemGiftCard}
+              disabled={giftCardLoading || !selectedGiftCardData}
+            >
+              {giftCardLoading ? "Riscatto in corso..." : "Riscatta gift card"}
             </button>
           </div>
         </div>
@@ -435,17 +615,22 @@ export default function RewardsPage() {
 
               <div className={styles.summaryItem}>
                 <span>Saldo GUFO</span>
-                <strong>{rewardData.balanceGufo.toFixed(2)}</strong>
+                <strong>{formatMoney(rewardData.balanceGufo)}</strong>
               </div>
 
               <div className={styles.summaryItem}>
-                <span>Valore convertibile</span>
-                <strong>€ {rewardData.balanceEuro.toFixed(2)}</strong>
+                <span>Wallet EUR</span>
+                <strong>€ {formatMoney(rewardData.balanceEuro)}</strong>
               </div>
 
               <div className={styles.summaryItem}>
                 <span>Premio stagione</span>
                 <strong>{seasonalRewardUnlocked ? "Disponibile" : "Non disponibile"}</strong>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <span>Ultimo reset stagione</span>
+                <strong>{rewardData.lastSeasonReset || "-"}</strong>
               </div>
             </div>
           </div>

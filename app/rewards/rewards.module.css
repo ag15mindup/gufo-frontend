@@ -52,7 +52,8 @@
 .metricsGrid,
 .mainGrid,
 .loadingBox,
-.errorBox {
+.errorBox,
+.successBox {
   position: relative;
   z-index: 2;
 }
@@ -91,7 +92,8 @@
 .metricCard,
 .panel,
 .loadingBox,
-.errorBox {
+.errorBox,
+.successBox {
   position: relative;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -421,6 +423,7 @@
   margin: 12px 0 0;
   font-size: 13px;
   color: #99a8c7;
+  line-height: 1.5;
 }
 
 .giftGrid {
@@ -532,10 +535,19 @@
 }
 
 .errorBox {
+  margin-bottom: 18px;
   padding: 14px 18px;
   border-color: rgba(255, 90, 90, 0.45);
   background: rgba(60, 10, 20, 0.42);
   color: #ffd7d7;
+}
+
+.successBox {
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border-color: rgba(34, 197, 94, 0.35);
+  background: rgba(12, 48, 28, 0.45);
+  color: #dcfce7;
 }
 
 @media (max-width: 1180px) {
@@ -616,7 +628,9 @@
 
   .heroCard,
   .metricCard,
-  .panel {
+  .panel,
+  .errorBox,
+  .successBox {
     border-radius: 20px;
   }
 

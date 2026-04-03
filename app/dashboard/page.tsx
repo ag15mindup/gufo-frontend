@@ -149,6 +149,10 @@ function formatTransactionType(type?: string) {
       return "Bonus";
     case "buy":
       return "Acquisto";
+    case "convert":
+      return "Conversione";
+    case "giftcard":
+      return "Gift Card";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -350,48 +354,49 @@ export default function DashboardPage() {
       <div className={styles.rainbowLine} />
 
       <div className={styles.hero}>
-  <div className={styles.heroContent}>
-    <div className={styles.heroBadge}>GUFO PREMIUM DASHBOARD</div>
-    <p className={styles.welcome}>Bentornato 👋</p>
-    <h1 className={styles.userName}>{dashboardData.profileName}</h1>
+        <div className={styles.heroContent}>
+          <div className={styles.heroBadge}>GUFO PREMIUM DASHBOARD</div>
+          <p className={styles.welcome}>Bentornato 👋</p>
+          <h1 className={styles.userName}>{dashboardData.profileName}</h1>
 
-    {dashboardData.profileEmail ? (
-      <p className={styles.email}>{dashboardData.profileEmail}</p>
-    ) : null}
+          {dashboardData.profileEmail ? (
+            <p className={styles.email}>{dashboardData.profileEmail}</p>
+          ) : null}
 
-    <p className={styles.heroDescription}>
-      Monitora saldo, transazioni, missioni e andamento delle tue spese in un’unica esperienza premium.
-    </p>
-  </div>
+          <p className={styles.heroDescription}>
+            Monitora saldo, transazioni, missioni e andamento delle tue spese in
+            un’unica esperienza premium.
+          </p>
+        </div>
 
-  <div className={styles.balanceCard}>
-    <div className={styles.balanceGlow} />
-    <span className={styles.balanceLabel}>Saldo disponibile</span>
-    <h2 className={styles.balanceValue}>
-      {dashboardData.balanceGufo.toFixed(2)} GUFO
-    </h2>
+        <div className={styles.balanceCard}>
+          <div className={styles.balanceGlow} />
+          <span className={styles.balanceLabel}>Saldo disponibile</span>
+          <h2 className={styles.balanceValue}>
+            {dashboardData.balanceGufo.toFixed(2)} GUFO
+          </h2>
 
-    <div className={styles.balanceMetaRow}>
-      <div className={styles.balanceMetaBox}>
-        <span>Livello</span>
-        <strong>{formatLevel(dashboardData.level)}</strong>
+          <div className={styles.balanceMetaRow}>
+            <div className={styles.balanceMetaBox}>
+              <span>Livello</span>
+              <strong>{formatLevel(dashboardData.level)}</strong>
+            </div>
+            <div className={styles.balanceMetaBox}>
+              <span>Stagione</span>
+              <strong>Attiva</strong>
+            </div>
+          </div>
+
+          <div className={styles.balanceButtons}>
+            <Link href="/customer-code" className={styles.primaryBtn}>
+              Il mio codice
+            </Link>
+            <Link href="/wallet" className={styles.secondaryBtn}>
+              Wallet
+            </Link>
+          </div>
+        </div>
       </div>
-      <div className={styles.balanceMetaBox}>
-        <span>Stagione</span>
-        <strong>Attiva</strong>
-      </div>
-    </div>
-
-    <div className={styles.balanceButtons}>
-      <Link href="/customer-code" className={styles.primaryBtn}>
-        Il mio codice
-      </Link>
-      <Link href="/wallet" className={styles.secondaryBtn}>
-        Wallet
-      </Link>
-    </div>
-  </div>
-</div>
 
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.cyan}`}>
@@ -434,35 +439,37 @@ export default function DashboardPage() {
 
       <MissionCard transactions={dashboardData.transactions} />
 
-      <section className={styles.panel} style={{ marginTop: "24px" }}>
+      <section className={styles.panel}>
         <div className={styles.panelHeader}>
           <h3>Spese mensili</h3>
           <span>Ultimi 12 mesi</span>
         </div>
 
-        <div className={styles.chartWrap}>
-  {dashboardData.monthlyExpenses.map((value, index) => {
-    const safeHeight = Math.max((value / maxMonthlyValue) * 160, 10);
+        <div className={styles.chartScroll}>
+          <div className={styles.chartWrap}>
+            {dashboardData.monthlyExpenses.map((value, index) => {
+              const safeHeight = Math.max((value / maxMonthlyValue) * 160, 10);
 
-    return (
-      <div
-        key={`${getMonthLabel(index)}-${index}`}
-        className={styles.chartItem}
-      >
-        <span className={styles.chartValue}>€ {value.toFixed(0)}</span>
+              return (
+                <div
+                  key={`${getMonthLabel(index)}-${index}`}
+                  className={styles.chartItem}
+                >
+                  <span className={styles.chartValue}>€ {value.toFixed(0)}</span>
 
-        <div className={styles.chartBarShell}>
-          <div
-            className={styles.chartBar}
-            style={{ height: `${safeHeight}px` }}
-          />
+                  <div className={styles.chartBarShell}>
+                    <div
+                      className={styles.chartBar}
+                      style={{ height: `${safeHeight}px` }}
+                    />
+                  </div>
+
+                  <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-
-        <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
-      </div>
-    );
-  })}
-</div>
       </section>
 
       <div className={styles.bottomGrid}>
@@ -513,6 +520,49 @@ export default function DashboardPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          <div className={styles.mobileTransactions}>
+            {recentTransactions.length === 0 ? (
+              <div className={styles.mobileEmpty}>Nessuna transazione</div>
+            ) : (
+              recentTransactions.map((tx, index) => (
+                <div
+                  key={tx.id || `${getTransactionMerchant(tx)}-mobile-${index}`}
+                  className={styles.mobileTransactionCard}
+                >
+                  <div className={styles.mobileTransactionTop}>
+                    <strong className={styles.mobileMerchant}>
+                      {getTransactionMerchant(tx)}
+                    </strong>
+                    <span className={styles.badge}>
+                      {formatTransactionType(getTransactionType(tx))}
+                    </span>
+                  </div>
+
+                  <div className={styles.mobileTransactionMeta}>
+                    <div className={styles.mobileMetaItem}>
+                      <span>Data</span>
+                      <strong>
+                        {tx.created_at
+                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
+                          : "-"}
+                      </strong>
+                    </div>
+
+                    <div className={styles.mobileMetaItem}>
+                      <span>Importo</span>
+                      <strong>€ {getTransactionAmount(tx).toFixed(2)}</strong>
+                    </div>
+
+                    <div className={styles.mobileMetaItem}>
+                      <span>GUFO</span>
+                      <strong>{getTransactionGufo(tx).toFixed(2)}</strong>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
