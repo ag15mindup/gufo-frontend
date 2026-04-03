@@ -22,7 +22,13 @@ export default function LayoutShell({
           {isPublicPage ? (
             children
           ) : (
-            <div className="gufo-page-frame">{children}</div>
+            <div className="gufo-page-frame">
+              <div className="gufo-page-glow gufo-page-glow-cyan" />
+              <div className="gufo-page-glow gufo-page-glow-pink" />
+              <div className="gufo-page-glow gufo-page-glow-violet" />
+              <div className="gufo-page-grid" />
+              {children}
+            </div>
           )}
         </main>
       </div>

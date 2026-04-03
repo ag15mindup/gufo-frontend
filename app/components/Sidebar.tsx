@@ -21,15 +21,15 @@ export default function Sidebar() {
   }
 
   const links = [
-    { href: "/dashboard", label: "Dashboard", icon: "◈" },
-    { href: "/wallet", label: "Wallet", icon: "◎" },
-    { href: "/transactions", label: "Transactions", icon: "◌" },
-    { href: "/membership", label: "Membership", icon: "✦" },
-    { href: "/rewards", label: "Rewards", icon: "✪" },
-    { href: "/profile", label: "Profile", icon: "◉" },
-    { href: "/customer-code", label: "QR Code", icon: "▣" },
-    { href: "/partner-demo", label: "Partner Demo", icon: "△" },
-    { href: "/partner-dashboard", label: "Partner Dashboard", icon: "▤" },
+    { href: "/dashboard", label: "Dashboard", sub: "Control center", icon: "◈" },
+    { href: "/wallet", label: "Wallet", sub: "Assets & balance", icon: "◎" },
+    { href: "/transactions", label: "Transactions", sub: "Activity log", icon: "◌" },
+    { href: "/membership", label: "Membership", sub: "Season level", icon: "✦" },
+    { href: "/rewards", label: "Rewards", sub: "Bonuses & gifts", icon: "✪" },
+    { href: "/profile", label: "Profile", sub: "Identity layer", icon: "◉" },
+    { href: "/customer-code", label: "QR Code", sub: "Customer access", icon: "▣" },
+    { href: "/partner-demo", label: "Partner Demo", sub: "Merchant preview", icon: "△" },
+    { href: "/partner-dashboard", label: "Partner Dashboard", sub: "Business panel", icon: "▤" },
   ];
 
   return (
@@ -58,17 +58,21 @@ export default function Sidebar() {
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <div className="sidebar-noise" />
         <div className="sidebar-grid" />
-        <div className="sidebar-aurora sidebar-aurora-cyan" />
-        <div className="sidebar-aurora sidebar-aurora-pink" />
-        <div className="sidebar-aurora sidebar-aurora-violet" />
+        <div className="sidebar-beam sidebar-beam-top" />
+        <div className="sidebar-beam sidebar-beam-bottom" />
+        <div className="sidebar-orb sidebar-orb-cyan" />
+        <div className="sidebar-orb sidebar-orb-pink" />
+        <div className="sidebar-orb sidebar-orb-violet" />
 
         <div className="sidebar-inner">
           <div className="sidebar-header">
             <div className="brand-wrap">
               <div className="brand-logo-shell">
-                <div className="brand-logo-ring" />
-                <div className="brand-logo-core" />
-                <div className="brand-logo">🦉</div>
+                <div className="brand-logo-halo" />
+                <div className="brand-logo-disc" />
+                <div className="brand-logo-core">
+                  <span className="brand-logo-owl">🦉</span>
+                </div>
               </div>
 
               <div className="brand-text">
@@ -89,10 +93,11 @@ export default function Sidebar() {
           </div>
 
           <div className="sidebar-status-card">
+            <div className="status-scan" />
             <div className="status-top">
               <div>
                 <div className="status-label">System Status</div>
-                <div className="status-title">Live Platform</div>
+                <div className="status-title">GUFO Network Live</div>
               </div>
 
               <div className="status-pill">
@@ -135,7 +140,7 @@ export default function Sidebar() {
 
                   <span className="sidebar-link-label-wrap">
                     <span className="sidebar-link-label">{link.label}</span>
-                    <span className="sidebar-link-sub">GUFO workspace</span>
+                    <span className="sidebar-link-sub">{link.sub}</span>
                   </span>
 
                   <span className="sidebar-link-arrow">›</span>
@@ -147,12 +152,12 @@ export default function Sidebar() {
 
           <div className="sidebar-footer">
             <div className="sidebar-footer-card">
-              <div className="footer-card-kicker">GUFO Network</div>
+              <div className="footer-card-kicker">GUFO Core</div>
               <div className="sidebar-footer-title">
-                Loyalty, cashback e partner ecosystem
+                Futuristic loyalty dashboard
               </div>
               <div className="sidebar-footer-text">
-                Una piattaforma unica per utenti, merchant e demo partner.
+                Cashback, membership, rewards e partner tools in un solo ecosistema.
               </div>
             </div>
 
@@ -176,26 +181,26 @@ const sidebarStyles = `
     position: fixed;
     top: 16px;
     left: 16px;
-    z-index: 1300;
+    z-index: 1400;
     width: 58px;
     height: 58px;
     border: none;
     border-radius: 18px;
-    background:
-      linear-gradient(180deg, rgba(8, 14, 28, 0.92), rgba(12, 20, 38, 0.86));
-    box-shadow:
-      0 18px 36px rgba(0, 0, 0, 0.34),
-      0 0 18px rgba(56, 189, 248, 0.12),
-      0 0 28px rgba(139, 92, 246, 0.08),
-      inset 0 1px 0 rgba(255,255,255,0.05);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     display: none;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     gap: 5px;
     cursor: pointer;
+    background:
+      linear-gradient(180deg, rgba(8, 14, 28, 0.95), rgba(11, 18, 36, 0.88));
+    box-shadow:
+      0 18px 36px rgba(0, 0, 0, 0.34),
+      0 0 18px rgba(56, 189, 248, 0.14),
+      0 0 28px rgba(139, 92, 246, 0.12),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     overflow: hidden;
   }
 
@@ -226,7 +231,6 @@ const sidebarStyles = `
     height: 2px;
     border-radius: 999px;
     background: #f8fafc;
-    display: block;
     position: relative;
     z-index: 1;
     box-shadow: 0 0 8px rgba(255,255,255,0.18);
@@ -235,33 +239,33 @@ const sidebarStyles = `
   .sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(2, 6, 23, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    z-index: 1190;
+    background: rgba(2, 6, 23, 0.68);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 1290;
   }
 
   .sidebar {
     position: fixed;
     top: 0;
     left: 0;
-    width: 302px;
+    width: 320px;
     height: 100vh;
-    z-index: 1200;
+    z-index: 1300;
     overflow: hidden;
     background:
       linear-gradient(
         180deg,
-        rgba(5, 10, 22, 0.78),
-        rgba(8, 15, 30, 0.72) 38%,
-        rgba(12, 20, 38, 0.82) 100%
+        rgba(4, 8, 18, 0.9) 0%,
+        rgba(7, 13, 28, 0.86) 34%,
+        rgba(10, 18, 38, 0.92) 100%
       );
-    backdrop-filter: blur(26px);
-    -webkit-backdrop-filter: blur(26px);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     box-shadow:
-      18px 0 48px rgba(0, 0, 0, 0.34),
+      18px 0 48px rgba(0, 0, 0, 0.4),
       0 0 24px rgba(56, 189, 248, 0.08),
-      0 0 34px rgba(139, 92, 246, 0.06),
+      0 0 34px rgba(139, 92, 246, 0.08),
       inset -1px 0 0 rgba(255,255,255,0.05);
   }
 
@@ -307,38 +311,62 @@ const sidebarStyles = `
       linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
     background-size: 26px 26px;
-    mask-image: linear-gradient(180deg, rgba(0,0,0,0.8), transparent 95%);
+    mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), transparent 96%);
   }
 
-  .sidebar-aurora {
+  .sidebar-beam {
+    position: absolute;
+    left: -20%;
+    width: 140%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(56, 189, 248, 0.22),
+      rgba(236, 72, 153, 0.18),
+      transparent
+    );
+    opacity: 0.45;
+    pointer-events: none;
+  }
+
+  .sidebar-beam-top {
+    top: 92px;
+  }
+
+  .sidebar-beam-bottom {
+    bottom: 108px;
+  }
+
+  .sidebar-orb {
     position: absolute;
     border-radius: 999px;
-    filter: blur(28px);
+    filter: blur(30px);
     pointer-events: none;
-    opacity: 0.38;
+    opacity: 0.42;
   }
 
-  .sidebar-aurora-cyan {
+  .sidebar-orb-cyan {
     top: -40px;
     left: -40px;
-    width: 210px;
-    height: 210px;
+    width: 220px;
+    height: 220px;
     background: radial-gradient(circle, rgba(56, 189, 248, 0.34), transparent 70%);
   }
 
-  .sidebar-aurora-pink {
-    top: 160px;
+  .sidebar-orb-pink {
+    top: 180px;
     right: -80px;
     width: 180px;
     height: 180px;
     background: radial-gradient(circle, rgba(236, 72, 153, 0.24), transparent 72%);
   }
 
-  .sidebar-aurora-violet {
+  .sidebar-orb-violet {
     bottom: -50px;
     left: 20px;
-    width: 200px;
-    height: 200px;
+    width: 210px;
+    height: 210px;
     background: radial-gradient(circle, rgba(139, 92, 246, 0.24), transparent 70%);
   }
 
@@ -368,64 +396,81 @@ const sidebarStyles = `
 
   .brand-logo-shell {
     position: relative;
-    width: 60px;
-    height: 60px;
+    width: 66px;
+    height: 66px;
     flex-shrink: 0;
   }
 
-  .brand-logo-ring {
+  .brand-logo-halo {
     position: absolute;
-    inset: -5px;
-    border-radius: 22px;
-    background: linear-gradient(
-      135deg,
-      rgba(56, 189, 248, 0.3),
-      rgba(139, 92, 246, 0.28),
-      rgba(236, 72, 153, 0.26),
-      rgba(250, 204, 21, 0.24)
+    inset: -8px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(96, 165, 250, 0.26),
+      rgba(139, 92, 246, 0.18),
+      transparent 72%
     );
     filter: blur(12px);
+  }
+
+  .brand-logo-disc {
+    position: absolute;
+    left: 7px;
+    right: 7px;
+    bottom: 3px;
+    height: 18px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      rgba(56, 189, 248, 0.9),
+      rgba(139, 92, 246, 0.92),
+      rgba(236, 72, 153, 0.9),
+      rgba(250, 204, 21, 0.86)
+    );
+    box-shadow:
+      0 0 18px rgba(96, 165, 250, 0.24),
+      0 0 24px rgba(236, 72, 153, 0.18);
+    opacity: 0.95;
   }
 
   .brand-logo-core {
     position: absolute;
     inset: 0;
-    border-radius: 20px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background:
-      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 35%),
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), transparent 34%),
       linear-gradient(
         135deg,
         rgba(244, 114, 182, 0.95) 0%,
-        rgba(96, 165, 250, 0.96) 30%,
+        rgba(96, 165, 250, 0.96) 28%,
         rgba(139, 92, 246, 0.96) 56%,
         rgba(74, 222, 128, 0.92) 78%,
         rgba(250, 204, 21, 0.92) 100%
       );
     box-shadow:
-      0 0 18px rgba(96, 165, 250, 0.2),
+      0 0 18px rgba(96, 165, 250, 0.22),
       0 0 28px rgba(236, 72, 153, 0.14),
       inset 0 1px 0 rgba(255,255,255,0.28);
   }
 
-  .brand-logo {
+  .brand-logo-owl {
     position: relative;
     z-index: 1;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 26px;
-    color: #111827;
+    font-size: 28px;
+    color: #081120;
   }
 
   .brand-text {
     min-width: 0;
-    padding-top: 2px;
+    padding-top: 3px;
   }
 
   .brand-kicker {
-    color: rgba(184, 196, 222, 0.78);
+    color: rgba(184, 196, 222, 0.8);
     font-size: 10px;
     font-weight: 800;
     letter-spacing: 0.14em;
@@ -435,13 +480,13 @@ const sidebarStyles = `
 
   .brand-name {
     color: #ffffff;
-    font-size: 25px;
+    font-size: 26px;
     font-weight: 900;
     line-height: 1;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.05em;
     text-shadow:
-      0 0 16px rgba(56, 189, 248, 0.22),
-      0 0 22px rgba(139, 92, 246, 0.14);
+      0 0 18px rgba(56, 189, 248, 0.24),
+      0 0 24px rgba(139, 92, 246, 0.16);
   }
 
   .brand-subtitle {
@@ -488,18 +533,17 @@ const sidebarStyles = `
       0 12px 26px rgba(0, 0, 0, 0.18);
   }
 
-  .sidebar-status-card::before {
-    content: "";
+  .status-scan {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(
-        90deg,
-        rgba(56, 189, 248, 0.08),
-        rgba(139, 92, 246, 0.07),
-        rgba(236, 72, 153, 0.06)
-      );
     pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(56, 189, 248, 0.06) 50%,
+      transparent 100%
+    );
+    opacity: 0.9;
   }
 
   .status-top {
@@ -632,7 +676,7 @@ const sidebarStyles = `
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: 58px;
+    min-height: 62px;
     padding: 0 14px;
     border-radius: 18px;
     text-decoration: none;
@@ -651,8 +695,8 @@ const sidebarStyles = `
   .sidebar-link-glow {
     position: absolute;
     inset: auto auto -28px -10px;
-    width: 110px;
-    height: 70px;
+    width: 120px;
+    height: 72px;
     background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
     filter: blur(16px);
     opacity: 0;
@@ -712,9 +756,9 @@ const sidebarStyles = `
   }
 
   .sidebar-link-icon-wrap {
-    width: 35px;
-    height: 35px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 13px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -779,7 +823,6 @@ const sidebarStyles = `
       0 0 10px rgba(56, 189, 248, 0.8),
       0 0 16px rgba(236, 72, 153, 0.45);
     z-index: 1;
-    flex-shrink: 0;
   }
 
   .sidebar-footer {
@@ -894,7 +937,7 @@ const sidebarStyles = `
     .sidebar {
       transform: translateX(-100%);
       transition: transform 0.28s ease;
-      width: 292px;
+      width: 300px;
     }
 
     .sidebar.sidebar-open {
@@ -921,7 +964,7 @@ const sidebarStyles = `
     }
 
     .brand-name {
-      font-size: 21px;
+      font-size: 22px;
     }
 
     .brand-subtitle {
@@ -929,14 +972,14 @@ const sidebarStyles = `
     }
 
     .sidebar-link {
-      min-height: 54px;
+      min-height: 56px;
       padding: 0 12px;
       border-radius: 16px;
     }
 
     .sidebar-link-icon-wrap {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 11px;
     }
 

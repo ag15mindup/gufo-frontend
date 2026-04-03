@@ -15,11 +15,7 @@ export default function RootLayout({
   return (
     <html lang="it" suppressHydrationWarning>
       <body className="gufo-body">
-        <div className="layout-root">
-          <div className="layout-shell-frame">
-            <LayoutShell>{children}</LayoutShell>
-          </div>
-        </div>
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
