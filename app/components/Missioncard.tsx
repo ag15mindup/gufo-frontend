@@ -1,5 +1,7 @@
 "use client";
 
+import styles from "./missioncard.module.css";
+
 type Transaction = {
   id?: string;
   type?: string;
@@ -28,9 +30,9 @@ function getMissionTypeLabel(type: Mission["type"]) {
 }
 
 function getMissionTypeClass(type: Mission["type"]) {
-  if (type === "daily") return "daily";
-  if (type === "weekly") return "weekly";
-  return "monthly";
+  if (type === "daily") return styles.daily;
+  if (type === "weekly") return styles.weekly;
+  return styles.monthly;
 }
 
 function getTransactionMerchant(tx: Transaction) {
@@ -164,54 +166,54 @@ export default function MissionCard({
   ).size;
 
   return (
-    <section className="missionSection">
-      <div className="missionGlow missionGlowA" />
-      <div className="missionGlow missionGlowB" />
-      <div className="missionGlow missionGlowC" />
+    <section className={styles.missionSection}>
+      <div className={`${styles.missionGlow} ${styles.missionGlowA}`} />
+      <div className={`${styles.missionGlow} ${styles.missionGlowB}`} />
+      <div className={`${styles.missionGlow} ${styles.missionGlowC}`} />
 
-      <div className="missionHeader">
-        <div className="missionHeaderLeft">
-          <div className="missionKicker">GUFO MISSIONS</div>
-          <h2 className="missionTitle">Missioni attive</h2>
-          <p className="missionSubtitle">
+      <div className={styles.missionHeader}>
+        <div className={styles.missionHeaderLeft}>
+          <div className={styles.missionKicker}>GUFO MISSIONS</div>
+          <h2 className={styles.missionTitle}>Missioni attive</h2>
+          <p className={styles.missionSubtitle}>
             Completa le missioni, aumenta l’attività e sblocca reward extra
             nel tuo ecosistema GUFO.
           </p>
         </div>
 
-        <div className="missionHeaderBadge">
-          <span className="missionHeaderBadgeDot" />
+        <div className={styles.missionHeaderBadge}>
+          <span className={styles.missionHeaderBadgeDot} />
           Layer missioni online
         </div>
       </div>
 
-      <div className="missionRecapGrid">
-        <div className="missionRecapCard">
-          <span className="missionRecapLabel">Missioni attive</span>
-          <strong className="missionRecapValue">{activeCount}</strong>
-          <div className="missionRecapLine missionRecapBlue" />
+      <div className={styles.missionRecapGrid}>
+        <div className={styles.missionRecapCard}>
+          <span className={styles.missionRecapLabel}>Missioni attive</span>
+          <strong className={styles.missionRecapValue}>{activeCount}</strong>
+          <div className={`${styles.missionRecapLine} ${styles.missionRecapBlue}`} />
         </div>
 
-        <div className="missionRecapCard">
-          <span className="missionRecapLabel">Completate</span>
-          <strong className="missionRecapValue">{completedCount}</strong>
-          <div className="missionRecapLine missionRecapGreen" />
+        <div className={styles.missionRecapCard}>
+          <span className={styles.missionRecapLabel}>Completate</span>
+          <strong className={styles.missionRecapValue}>{completedCount}</strong>
+          <div className={`${styles.missionRecapLine} ${styles.missionRecapGreen}`} />
         </div>
 
-        <div className="missionRecapCard">
-          <span className="missionRecapLabel">Reward potenziale</span>
-          <strong className="missionRecapValue">+{totalPotentialReward} GUFO</strong>
-          <div className="missionRecapLine missionRecapPurple" />
+        <div className={styles.missionRecapCard}>
+          <span className={styles.missionRecapLabel}>Reward potenziale</span>
+          <strong className={styles.missionRecapValue}>+{totalPotentialReward} GUFO</strong>
+          <div className={`${styles.missionRecapLine} ${styles.missionRecapPurple}`} />
         </div>
 
-        <div className="missionRecapCard">
-          <span className="missionRecapLabel">Partner esplorati</span>
-          <strong className="missionRecapValue">{uniquePartners}</strong>
-          <div className="missionRecapLine missionRecapPink" />
+        <div className={styles.missionRecapCard}>
+          <span className={styles.missionRecapLabel}>Partner esplorati</span>
+          <strong className={styles.missionRecapValue}>{uniquePartners}</strong>
+          <div className={`${styles.missionRecapLine} ${styles.missionRecapPink}`} />
         </div>
       </div>
 
-      <div className="missionGrid">
+      <div className={styles.missionGrid}>
         {missions.map((mission) => {
           const progressPercent =
             mission.total > 0 ? Math.min((mission.progress / mission.total) * 100, 100) : 0;
@@ -221,27 +223,27 @@ export default function MissionCard({
           return (
             <div
               key={mission.id}
-              className={`missionCard ${completed ? "completed" : ""}`}
+              className={`${styles.missionCard} ${completed ? styles.completed : ""}`}
             >
-              <div className="missionCardTop">
-                <span className={`missionBadge ${getMissionTypeClass(mission.type)}`}>
+              <div className={styles.missionCardTop}>
+                <span className={`${styles.missionBadge} ${getMissionTypeClass(mission.type)}`}>
                   {getMissionTypeLabel(mission.type)}
                 </span>
 
-                <span className="missionReward">{mission.reward}</span>
+                <span className={styles.missionReward}>{mission.reward}</span>
               </div>
 
-              <h3 className="missionCardTitle">{mission.title}</h3>
+              <h3 className={styles.missionCardTitle}>{mission.title}</h3>
 
-              <p className="missionCardDescription">{mission.description}</p>
+              <p className={styles.missionCardDescription}>{mission.description}</p>
 
-              <div className="missionMetaRow">
-                <div className="missionMetaBox">
+              <div className={styles.missionMetaRow}>
+                <div className={styles.missionMetaBox}>
                   <span>Stato</span>
                   <strong>{completed ? "Completata" : "In corso"}</strong>
                 </div>
 
-                <div className="missionMetaBox">
+                <div className={styles.missionMetaBox}>
                   <span>Progresso</span>
                   <strong>
                     {mission.progress}/{mission.total}
@@ -249,16 +251,16 @@ export default function MissionCard({
                 </div>
               </div>
 
-              <div className="missionProgressShell">
-                <div className="missionProgressTrack">
+              <div className={styles.missionProgressShell}>
+                <div className={styles.missionProgressTrack}>
                   <div
-                    className="missionProgressBar"
+                    className={styles.missionProgressBar}
                     style={{ width: `${progressPercent}%` }}
                   />
                 </div>
               </div>
 
-              <div className={`missionProgressText ${completed ? "done" : ""}`}>
+              <div className={`${styles.missionProgressText} ${completed ? styles.done : ""}`}>
                 {completed
                   ? "Missione completata"
                   : `Avanzamento ${Math.round(progressPercent)}%`}
@@ -267,453 +269,6 @@ export default function MissionCard({
           );
         })}
       </div>
-
-      <style jsx>{`
-        .missionSection {
-          position: relative;
-          z-index: 2;
-          overflow: hidden;
-          margin: 24px 0;
-          padding: 26px;
-          border-radius: 28px;
-          border: 1px solid rgba(220, 225, 255, 0.16);
-          background:
-            linear-gradient(180deg, rgba(15, 18, 58, 0.58), rgba(10, 12, 38, 0.48));
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.06),
-            0 16px 40px rgba(0, 0, 0, 0.28),
-            0 0 28px rgba(90, 127, 255, 0.1);
-        }
-
-        .missionSection::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(255, 255, 255, 0.06),
-              rgba(255, 255, 255, 0.015) 32%,
-              transparent 70%
-            );
-        }
-
-        .missionGlow {
-          position: absolute;
-          border-radius: 999px;
-          filter: blur(38px);
-          pointer-events: none;
-          opacity: 0.42;
-        }
-
-        .missionGlowA {
-          top: -20px;
-          right: 12%;
-          width: 180px;
-          height: 180px;
-          background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-        }
-
-        .missionGlowB {
-          bottom: -30px;
-          left: 4%;
-          width: 200px;
-          height: 200px;
-          background: radial-gradient(circle, rgba(236, 72, 153, 0.16), transparent 70%);
-        }
-
-        .missionGlowC {
-          top: 42%;
-          left: 44%;
-          width: 160px;
-          height: 160px;
-          background: radial-gradient(circle, rgba(139, 92, 246, 0.14), transparent 70%);
-        }
-
-        .missionHeader {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 20px;
-          margin-bottom: 20px;
-        }
-
-        .missionHeaderLeft {
-          min-width: 0;
-        }
-
-        .missionKicker {
-          display: inline-flex;
-          align-items: center;
-          padding: 8px 12px;
-          margin-bottom: 14px;
-          border-radius: 999px;
-          background: rgba(109, 140, 255, 0.14);
-          border: 1px solid rgba(109, 140, 255, 0.22);
-          color: #d8e8ff;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-          text-transform: uppercase;
-        }
-
-        .missionTitle {
-          margin: 0;
-          font-size: 2rem;
-          line-height: 1;
-          font-weight: 900;
-          color: #ffffff;
-          letter-spacing: -0.03em;
-          text-shadow:
-            0 0 14px rgba(56, 189, 248, 0.1),
-            0 0 22px rgba(139, 92, 246, 0.08);
-        }
-
-        .missionSubtitle {
-          margin: 10px 0 0;
-          max-width: 720px;
-          color: rgba(255, 255, 255, 0.76);
-          font-size: 0.98rem;
-          line-height: 1.6;
-        }
-
-        .missionHeaderBadge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          min-height: 40px;
-          padding: 0 14px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.09);
-          color: #eef2ff;
-          font-size: 0.82rem;
-          font-weight: 800;
-          white-space: nowrap;
-        }
-
-        .missionHeaderBadgeDot {
-          width: 8px;
-          height: 8px;
-          border-radius: 999px;
-          background: linear-gradient(180deg, #4ade80, #22c55e);
-          box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
-        }
-
-        .missionRecapGrid {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 14px;
-          margin-bottom: 20px;
-        }
-
-        .missionRecapCard {
-          position: relative;
-          overflow: hidden;
-          padding: 16px;
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.045);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.03),
-            0 8px 20px rgba(0, 0, 0, 0.14);
-        }
-
-        .missionRecapLabel {
-          display: block;
-          margin-bottom: 10px;
-          font-size: 0.76rem;
-          color: rgba(255, 255, 255, 0.62);
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          font-weight: 700;
-        }
-
-        .missionRecapValue {
-          display: block;
-          font-size: 1.26rem;
-          font-weight: 900;
-          color: #ffffff;
-          word-break: break-word;
-        }
-
-        .missionRecapLine {
-          margin-top: 12px;
-          height: 4px;
-          border-radius: 999px;
-        }
-
-        .missionRecapBlue {
-          background: linear-gradient(90deg, #38bdf8, #60a5fa);
-          box-shadow: 0 0 12px rgba(56, 189, 248, 0.18);
-        }
-
-        .missionRecapGreen {
-          background: linear-gradient(90deg, #22c55e, #4ade80);
-          box-shadow: 0 0 12px rgba(34, 197, 94, 0.16);
-        }
-
-        .missionRecapPurple {
-          background: linear-gradient(90deg, #8b5cf6, #a855f7);
-          box-shadow: 0 0 12px rgba(139, 92, 246, 0.16);
-        }
-
-        .missionRecapPink {
-          background: linear-gradient(90deg, #ec4899, #f472b6);
-          box-shadow: 0 0 12px rgba(236, 72, 153, 0.16);
-        }
-
-        .missionGrid {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 16px;
-        }
-
-        .missionCard {
-          position: relative;
-          overflow: hidden;
-          border-radius: 22px;
-          padding: 18px;
-          background:
-            linear-gradient(
-              135deg,
-              rgba(109, 72, 255, 0.18),
-              rgba(46, 168, 255, 0.12)
-            );
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.04),
-            0 14px 24px rgba(0, 0, 0, 0.16);
-          transition:
-            transform 0.22s ease,
-            box-shadow 0.22s ease,
-            border-color 0.22s ease;
-        }
-
-        .missionCard::before {
-          content: "";
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.08),
-            rgba(255, 255, 255, 0.015) 34%,
-            transparent 72%
-          );
-        }
-
-        .missionCard:hover {
-          transform: translateY(-4px);
-          box-shadow:
-            0 14px 28px rgba(0, 0, 0, 0.22),
-            0 0 18px rgba(96, 165, 250, 0.08);
-        }
-
-        .missionCard.completed {
-          background:
-            linear-gradient(
-              135deg,
-              rgba(34, 197, 94, 0.16),
-              rgba(56, 189, 248, 0.14)
-            );
-          border-color: rgba(74, 222, 128, 0.28);
-        }
-
-        .missionCardTop {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 12px;
-          flex-wrap: wrap;
-        }
-
-        .missionBadge {
-          font-size: 0.74rem;
-          padding: 7px 11px;
-          border-radius: 999px;
-          font-weight: 800;
-          border: 1px solid transparent;
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-        }
-
-        .missionBadge.daily {
-          background: rgba(59, 130, 246, 0.18);
-          border-color: rgba(96, 165, 250, 0.34);
-          color: #dbeafe;
-        }
-
-        .missionBadge.weekly {
-          background: rgba(168, 85, 247, 0.18);
-          border-color: rgba(192, 132, 252, 0.34);
-          color: #f3e8ff;
-        }
-
-        .missionBadge.monthly {
-          background: rgba(16, 185, 129, 0.18);
-          border-color: rgba(52, 211, 153, 0.34);
-          color: #d1fae5;
-        }
-
-        .missionReward {
-          position: relative;
-          z-index: 1;
-          font-weight: 900;
-          color: #ffffff;
-          text-shadow: 0 0 10px rgba(139, 92, 246, 0.14);
-        }
-
-        .missionCardTitle {
-          position: relative;
-          z-index: 1;
-          margin: 0 0 8px;
-          color: #ffffff;
-          font-size: 1.08rem;
-          font-weight: 900;
-          letter-spacing: -0.02em;
-        }
-
-        .missionCardDescription {
-          position: relative;
-          z-index: 1;
-          margin: 0 0 14px;
-          color: rgba(255, 255, 255, 0.78);
-          font-size: 0.92rem;
-          line-height: 1.5;
-        }
-
-        .missionMetaRow {
-          position: relative;
-          z-index: 1;
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 10px;
-          margin-bottom: 14px;
-        }
-
-        .missionMetaBox {
-          padding: 12px;
-          border-radius: 16px;
-          background: rgba(255, 255, 255, 0.045);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .missionMetaBox span {
-          display: block;
-          margin-bottom: 6px;
-          font-size: 0.72rem;
-          color: rgba(255, 255, 255, 0.62);
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-        }
-
-        .missionMetaBox strong {
-          font-size: 0.94rem;
-          color: #ffffff;
-          font-weight: 800;
-          word-break: break-word;
-        }
-
-        .missionProgressShell {
-          position: relative;
-          z-index: 1;
-        }
-
-        .missionProgressTrack {
-          height: 10px;
-          width: 100%;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.1);
-          overflow: hidden;
-          box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.16);
-        }
-
-        .missionProgressBar {
-          height: 100%;
-          border-radius: 999px;
-          background: linear-gradient(90deg, #8b5cf6, #38bdf8, #60a5fa);
-          transition: width 0.32s ease;
-          box-shadow: 0 0 14px rgba(96, 165, 250, 0.18);
-        }
-
-        .missionCard.completed .missionProgressBar {
-          background: linear-gradient(90deg, #22c55e, #38bdf8);
-        }
-
-        .missionProgressText {
-          position: relative;
-          z-index: 1;
-          margin-top: 10px;
-          font-size: 0.84rem;
-          font-weight: 800;
-          color: #ffffff;
-        }
-
-        .missionProgressText.done {
-          color: #bbf7d0;
-        }
-
-        @media (max-width: 980px) {
-          .missionRecapGrid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-        }
-
-        @media (max-width: 720px) {
-          .missionSection {
-            padding: 18px;
-            border-radius: 22px;
-          }
-
-          .missionHeader {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .missionTitle {
-            font-size: 1.5rem;
-          }
-
-          .missionSubtitle {
-            font-size: 0.92rem;
-          }
-
-          .missionGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .missionMetaRow {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 560px) {
-          .missionRecapGrid {
-            grid-template-columns: 1fr;
-          }
-
-          .missionRecapValue {
-            font-size: 1.12rem;
-          }
-
-          .missionCard {
-            padding: 16px;
-          }
-        }
-      `}</style>
     </section>
   );
 }
