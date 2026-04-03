@@ -39,8 +39,6 @@ type DashboardApiResponse = {
     gufo_earned?: number | string | null;
     level?: string | null;
     cashback_percent?: number | string | null;
-    monthlyExpenses?: Array<number | string | null>;
-    monthly_expenses?: Array<number | string | null>;
   };
   transactions?: Transaction[];
   profileName?: string;
@@ -63,7 +61,6 @@ type DashboardData = {
   totalGufoEarned: number;
   level: string;
   transactions: Transaction[];
-  monthlyExpenses: number[];
   profileName: string;
   profileEmail: string;
   profileInitial: string;
@@ -81,24 +78,6 @@ function formatLevel(level?: string | null): string {
   if (!level) return "Bronze";
   const normalized = String(level).trim().toLowerCase();
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
-function getMonthLabel(index: number): string {
-  const months = [
-    "Gen",
-    "Feb",
-    "Mar",
-    "Apr",
-    "Mag",
-    "Giu",
-    "Lug",
-    "Ago",
-    "Set",
-    "Ott",
-    "Nov",
-    "Dic",
-  ];
-  return months[index] || "";
 }
 
 function getTransactionAmount(tx: Transaction): number {
@@ -192,7 +171,6 @@ export default function DashboardPage() {
     totalGufoEarned: 0,
     level: "Bronze",
     transactions: [],
-    monthlyExpenses: Array(12).fill(0),
     profileName: "Utente GUFO",
     profileEmail: "",
     profileInitial: "U",
@@ -233,16 +211,6 @@ export default function DashboardPage() {
         const rawTransactions = Array.isArray(dashboard?.transactions)
           ? dashboard.transactions
           : [];
-
-        const monthlySource = Array.isArray(stats?.monthlyExpenses)
-          ? stats.monthlyExpenses
-          : Array.isArray(stats?.monthly_expenses)
-          ? stats.monthly_expenses
-          : Array(12).fill(0);
-
-        const normalizedMonthlyExpenses = Array.from({ length: 12 }, (_, index) =>
-          toNumberSafe(monthlySource[index] ?? 0)
-        );
 
         const normalizedTransactions: Transaction[] = rawTransactions.map((tx) => ({
           id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id ?? undefined,
@@ -285,7 +253,6 @@ export default function DashboardPage() {
           ),
           level: formatLevel(wallet?.current_level ?? stats?.level ?? "Bronze"),
           transactions: normalizedTransactions,
-          monthlyExpenses: normalizedMonthlyExpenses,
           profileName,
           profileEmail,
           profileInitial: profileName.charAt(0).toUpperCase() || "U",
@@ -306,29 +273,17 @@ export default function DashboardPage() {
   }, []);
 
   const recentTransactions = useMemo(() => {
-    return dashboardData.transactions.slice(0, 8);
+    return dashboardData.transactions.slice(0, 6);
   }, [dashboardData.transactions]);
-
-  const maxMonthlyValue = useMemo(() => {
-    return Math.max(...dashboardData.monthlyExpenses, 1);
-  }, [dashboardData.monthlyExpenses]);
 
   if (loading) {
     return (
       <div className={styles.page}>
-        <div className={styles.orbA} />
-        <div className={styles.orbB} />
-        <div className={styles.orbC} />
-
-        <section className={styles.hero}>
-          <div className={styles.heroMain}>
-            <div className={styles.kicker}>GUFO CONTROL PANEL</div>
-            <h1 className={styles.title}>Dashboard</h1>
-            <p className={styles.subtitle}>Caricamento ecosistema premium...</p>
-          </div>
-        </section>
-
-        <div className={styles.statusBox}>Connessione ai dati in corso...</div>
+        <div className={styles.cosmicGlowA} />
+        <div className={styles.cosmicGlowB} />
+        <div className={styles.screenFrame}>
+          <div className={styles.loadingBox}>Caricamento dashboard GUFO...</div>
+        </div>
       </div>
     );
   }
@@ -336,277 +291,256 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className={styles.page}>
-        <div className={styles.orbA} />
-        <div className={styles.orbB} />
-        <div className={styles.orbC} />
-
-        <section className={styles.hero}>
-          <div className={styles.heroMain}>
-            <div className={styles.kicker}>GUFO CONTROL PANEL</div>
-            <h1 className={styles.title}>Dashboard</h1>
-            <p className={styles.subtitle}>Errore di caricamento</p>
-          </div>
-        </section>
-
-        <div className={styles.errorBox}>{error}</div>
+        <div className={styles.cosmicGlowA} />
+        <div className={styles.cosmicGlowB} />
+        <div className={styles.screenFrame}>
+          <div className={styles.errorBox}>{error}</div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.orbA} />
-      <div className={styles.orbB} />
-      <div className={styles.orbC} />
-      <div className={styles.scanLine} />
+      <div className={styles.cosmicGlowA} />
+      <div className={styles.cosmicGlowB} />
+      <div className={styles.cosmicGlowC} />
 
-      <section className={styles.hero}>
-        <div className={styles.heroMain}>
-          <div className={styles.kicker}>GUFO PREMIUM OS</div>
+      <div className={styles.screenFrame}>
+        <div className={styles.topStrip} />
 
-          <p className={styles.welcome}>Bentornato 👋</p>
-          <h1 className={styles.title}>{dashboardData.profileName}</h1>
-
-          {dashboardData.profileEmail ? (
-            <p className={styles.email}>{dashboardData.profileEmail}</p>
-          ) : null}
-
-          <p className={styles.subtitle}>
-            Una dashboard più cinematica, futuristica e pronta per stupire in demo.
-          </p>
-
-          <div className={styles.heroActions}>
-            <Link href="/customer-code" className={styles.primaryBtn}>
-              Apri QR Code
-            </Link>
-            <Link href="/wallet" className={styles.secondaryBtn}>
-              Apri Wallet
-            </Link>
+        <div className={styles.topBalanceRow}>
+          <div className={styles.balancePill}>
+            <span>+ {dashboardData.balanceGufo.toFixed(2)} GUFO</span>
           </div>
         </div>
 
-        <div className={styles.heroVisual}>
-          <div className={styles.visualRing} />
-          <div className={styles.visualRing2} />
-          <div className={styles.visualCore}>
-            <div className={styles.visualDisc} />
-            <div className={styles.visualOwl}>🦉</div>
-          </div>
-
-          <div className={styles.visualInfo}>
-            <span className={styles.visualLabel}>Saldo GUFO</span>
-            <strong className={styles.visualValue}>
-              {dashboardData.balanceGufo.toFixed(2)}
-            </strong>
-            <span className={styles.visualSub}>Livello {dashboardData.level}</span>
+        <div className={styles.logoRail}>
+          <div className={styles.logoWrap}>
+            <div className={styles.logoHalo} />
+            <div className={styles.logoShip} />
+            <div className={styles.logoOwl}>🦉</div>
           </div>
         </div>
-      </section>
 
-      <section className={styles.metricsGrid}>
-        <div className={`${styles.metricCard} ${styles.metricCyan}`}>
-          <span className={styles.metricTopLabel}>Transazioni</span>
-          <strong className={styles.metricValue}>
-            {dashboardData.totalTransactions}
-          </strong>
-          <span className={styles.metricBottom}>Attività registrata</span>
-        </div>
+        <section className={styles.heroGrid}>
+          <div className={styles.heroInfo}>
+            <p className={styles.welcome}>Bentornato,</p>
+            <h1 className={styles.userName}>{dashboardData.profileName}</h1>
 
-        <div className={`${styles.metricCard} ${styles.metricViolet}`}>
-          <span className={styles.metricTopLabel}>Livello attuale</span>
-          <strong className={styles.metricValue}>{dashboardData.level}</strong>
-          <span className={styles.metricBottom}>Progressione stagionale</span>
-        </div>
-
-        <div className={`${styles.metricCard} ${styles.metricOrange}`}>
-          <span className={styles.metricTopLabel}>Spesa stagione</span>
-          <strong className={styles.metricValue}>
-            {formatCurrency(dashboardData.totalSpent)}
-          </strong>
-          <span className={styles.metricBottom}>Volume spesa</span>
-        </div>
-
-        <div className={`${styles.metricCard} ${styles.metricPink}`}>
-          <span className={styles.metricTopLabel}>GUFO ottenuti</span>
-          <strong className={styles.metricValue}>
-            {dashboardData.totalGufoEarned.toFixed(2)}
-          </strong>
-          <span className={styles.metricBottom}>Reward accumulati</span>
-        </div>
-      </section>
-
-      <div className={styles.commandGrid}>
-        <section className={`${styles.panel} ${styles.analyticsPanel}`}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h3>Radar spese</h3>
-              <p>Ultimi 12 mesi</p>
-            </div>
-            <div className={styles.panelChip}>Analytics</div>
-          </div>
-
-          <div className={styles.chartScroll}>
-            <div className={styles.chartWrap}>
-              {dashboardData.monthlyExpenses.map((value, index) => {
-                const safeHeight = Math.max((value / maxMonthlyValue) * 180, 10);
-
-                return (
-                  <div
-                    key={`${getMonthLabel(index)}-${index}`}
-                    className={styles.chartItem}
-                  >
-                    <span className={styles.chartValue}>€ {value.toFixed(0)}</span>
-
-                    <div className={styles.chartBarShell}>
-                      <div
-                        className={styles.chartBar}
-                        style={{ height: `${safeHeight}px` }}
-                      />
-                    </div>
-
-                    <span className={styles.chartLabel}>{getMonthLabel(index)}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <aside className={`${styles.panel} ${styles.identityPanel}`}>
-          <div className={styles.panelHeader}>
-            <div>
-              <h3>Identità account</h3>
-              <p>Layer personale</p>
-            </div>
-            <div className={styles.panelChip}>Profile</div>
-          </div>
-
-          <div className={styles.identityCore}>
-            <div className={styles.identityAvatar}>{dashboardData.profileInitial}</div>
-            <div className={styles.identityText}>
-              <strong>{dashboardData.profileName}</strong>
+            <div className={styles.userMeta}>
+              <span className={styles.userMetaIcon}>◉</span>
               <span>{dashboardData.profileEmail || "Profilo GUFO attivo"}</span>
             </div>
           </div>
 
-          <div className={styles.identityStats}>
-            <div className={styles.identityBox}>
-              <span>Saldo</span>
-              <strong>{dashboardData.balanceGufo.toFixed(2)} GUFO</strong>
-            </div>
-            <div className={styles.identityBox}>
-              <span>Livello</span>
-              <strong>{dashboardData.level}</strong>
-            </div>
-            <div className={styles.identityBox}>
-              <span>Stagione</span>
-              <strong>Attiva</strong>
-            </div>
-            <div className={styles.identityBox}>
-              <span>Reward</span>
-              <strong>{dashboardData.totalGufoEarned.toFixed(2)}</strong>
+          <div className={styles.balanceCard}>
+            <div className={styles.balanceCardGlow} />
+            <span className={styles.balanceLabel}>Saldo disponibile</span>
+            <h2 className={styles.balanceValue}>
+              {dashboardData.balanceGufo.toFixed(2)} GUFO
+            </h2>
+
+            <div className={styles.balanceButtons}>
+              <Link href="/customer-code" className={styles.primaryBtn}>
+                Il mio codice
+              </Link>
+              <Link href="/wallet" className={styles.secondaryBtn}>
+                Wallet
+              </Link>
             </div>
           </div>
-        </aside>
-      </div>
+        </section>
 
-      <div className={styles.missionWrap}>
+        <section className={styles.statsGrid}>
+          <div className={`${styles.statCard} ${styles.statBlue}`}>
+            <div>
+              <div className={styles.statValue}>{dashboardData.totalTransactions}</div>
+              <div className={styles.statLabel}>Transazioni</div>
+            </div>
+            <div className={styles.statMeta}>
+              <div className={styles.statIcon}>↗</div>
+              <div className={styles.statHint}>Attività</div>
+            </div>
+          </div>
+
+          <div className={`${styles.statCard} ${styles.statPurple}`}>
+            <div>
+              <div className={styles.statValue}>{dashboardData.level}</div>
+              <div className={styles.statLabel}>Livello</div>
+            </div>
+            <div className={styles.statMeta}>
+              <div className={styles.statIcon}>⬒</div>
+              <div className={styles.statHint}>Stagionale</div>
+            </div>
+          </div>
+
+          <div className={`${styles.statCard} ${styles.statPink}`}>
+            <div>
+              <div className={styles.statValue}>Variabile</div>
+              <div className={styles.statLabel}>Cashback</div>
+            </div>
+            <div className={styles.statMeta}>
+              <div className={styles.statIcon}>%</div>
+              <div className={styles.statHint}>Partner</div>
+            </div>
+          </div>
+        </section>
+
         <MissionCard transactions={dashboardData.transactions} />
-      </div>
 
-      <section className={styles.panel}>
-        <div className={styles.panelHeader}>
-          <div>
-            <h3>Transazioni recenti</h3>
-            <p>Ultime 8 operazioni</p>
-          </div>
-          <div className={styles.panelChip}>Live</div>
-        </div>
+        <section className={styles.contentGrid}>
+          <div className={styles.transactionsPanel}>
+            <div className={styles.panelHeader}>
+              <h3>Transazioni recenti</h3>
+            </div>
 
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Partner</th>
-                <th>Data</th>
-                <th>Tipo</th>
-                <th>Importo</th>
-                <th>GUFO</th>
-              </tr>
-            </thead>
-            <tbody>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Partner</th>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Importo</th>
+                    <th>GUFO</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentTransactions.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className={styles.emptyRow}>
+                        Nessuna transazione disponibile
+                      </td>
+                    </tr>
+                  ) : (
+                    recentTransactions.map((tx, index) => (
+                      <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
+                        <td className={styles.partnerCell}>
+                          {getTransactionMerchant(tx)}
+                        </td>
+                        <td>
+                          {tx.created_at
+                            ? new Date(tx.created_at).toLocaleString("it-IT", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "-"}
+                        </td>
+                        <td>
+                          <span className={styles.badge}>
+                            {formatTransactionType(getTransactionType(tx))}
+                          </span>
+                        </td>
+                        <td>{formatCurrency(getTransactionAmount(tx))}</td>
+                        <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className={styles.mobileTransactions}>
               {recentTransactions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className={styles.emptyRow}>
-                    Nessuna transazione disponibile
-                  </td>
-                </tr>
+                <div className={styles.mobileEmpty}>Nessuna transazione</div>
               ) : (
                 recentTransactions.map((tx, index) => (
-                  <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
-                    <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
-                    <td>
-                      {tx.created_at
-                        ? new Date(tx.created_at).toLocaleDateString("it-IT")
-                        : "-"}
-                    </td>
-                    <td>
+                  <div
+                    key={tx.id || `${getTransactionMerchant(tx)}-mobile-${index}`}
+                    className={styles.mobileTransactionCard}
+                  >
+                    <div className={styles.mobileTransactionTop}>
+                      <strong className={styles.mobileMerchant}>
+                        {getTransactionMerchant(tx)}
+                      </strong>
                       <span className={styles.badge}>
                         {formatTransactionType(getTransactionType(tx))}
                       </span>
-                    </td>
-                    <td>{formatCurrency(getTransactionAmount(tx))}</td>
-                    <td>{getTransactionGufo(tx).toFixed(2)}</td>
-                  </tr>
+                    </div>
+
+                    <div className={styles.mobileMetaItem}>
+                      <span>Data</span>
+                      <strong>
+                        {tx.created_at
+                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
+                          : "-"}
+                      </strong>
+                    </div>
+
+                    <div className={styles.mobileMetaItem}>
+                      <span>Importo</span>
+                      <strong>{formatCurrency(getTransactionAmount(tx))}</strong>
+                    </div>
+
+                    <div className={styles.mobileMetaItem}>
+                      <span>GUFO</span>
+                      <strong>{getTransactionGufo(tx).toFixed(2)}</strong>
+                    </div>
+                  </div>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
+            </div>
 
-        <div className={styles.mobileTransactions}>
-          {recentTransactions.length === 0 ? (
-            <div className={styles.mobileEmpty}>Nessuna transazione</div>
-          ) : (
-            recentTransactions.map((tx, index) => (
-              <div
-                key={tx.id || `${getTransactionMerchant(tx)}-mobile-${index}`}
-                className={styles.mobileTransactionCard}
-              >
-                <div className={styles.mobileTransactionTop}>
-                  <strong className={styles.mobileMerchant}>
-                    {getTransactionMerchant(tx)}
-                  </strong>
-                  <span className={styles.badge}>
-                    {formatTransactionType(getTransactionType(tx))}
-                  </span>
-                </div>
+            <div className={styles.panelFooter}>
+              <Link href="/transactions" className={styles.detailBtn}>
+                Vedi tutte →
+              </Link>
+            </div>
+          </div>
 
-                <div className={styles.mobileTransactionMeta}>
-                  <div className={styles.mobileMetaItem}>
-                    <span>Data</span>
-                    <strong>
-                      {tx.created_at
-                        ? new Date(tx.created_at).toLocaleDateString("it-IT")
-                        : "-"}
-                    </strong>
-                  </div>
+          <aside className={styles.summaryPanel}>
+            <div className={styles.panelHeader}>
+              <h3>Riepilogo</h3>
+              <span className={styles.summaryBrand}>GUFO</span>
+            </div>
 
-                  <div className={styles.mobileMetaItem}>
-                    <span>Importo</span>
-                    <strong>{formatCurrency(getTransactionAmount(tx))}</strong>
-                  </div>
+            <div className={styles.summaryProfile}>
+              <div className={styles.summaryAvatar}>{dashboardData.profileInitial}</div>
 
-                  <div className={styles.mobileMetaItem}>
-                    <span>GUFO</span>
-                    <strong>{getTransactionGufo(tx).toFixed(2)}</strong>
-                  </div>
-                </div>
+              <div className={styles.summaryProfileText}>
+                <strong>{dashboardData.profileName}</strong>
+                <span>{dashboardData.level}</span>
               </div>
-            ))
-          )}
-        </div>
-      </section>
+
+              <div className={styles.summaryLevel}>
+                {dashboardData.level.toUpperCase()}
+              </div>
+            </div>
+
+            <div className={styles.summaryMainValue}>
+              + {dashboardData.balanceGufo.toFixed(2)} GUFO
+            </div>
+
+            <div className={styles.summaryCards}>
+              <div className={styles.summaryItem}>
+                <div className={styles.summaryItemIcon}>✦</div>
+                <div className={styles.summaryItemText}>
+                  <strong>+{dashboardData.totalGufoEarned.toFixed(2)} GUFO</strong>
+                  <span>GUFO guadagnati</span>
+                </div>
+                <div className={styles.summaryItemTag}>GUFO</div>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <div className={styles.summaryItemIcon}>◌</div>
+                <div className={styles.summaryItemText}>
+                  <strong>{formatCurrency(dashboardData.totalSpent)}</strong>
+                  <span>Spesa stagione</span>
+                </div>
+                <div className={styles.summaryItemTag}>SPESA</div>
+              </div>
+            </div>
+
+            <Link href="/wallet" className={styles.detailWideBtn}>
+              Vedi dettagli →
+            </Link>
+          </aside>
+        </section>
+      </div>
     </div>
   );
 }
