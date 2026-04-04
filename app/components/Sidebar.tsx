@@ -55,22 +55,21 @@ export default function Sidebar() {
       )}
 
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
-        <div className={styles.sidebarBgGlowA} />
-        <div className={styles.sidebarBgGlowB} />
-        <div className={styles.sidebarBgGlowC} />
-        <div className={styles.sidebarStars} />
-
-        <div className={styles.sidebarInner}>
-          <div className={styles.sidebarTop}>
+        <div className={styles.bgGlowA} />
+        <div className={styles.bgGlowB} />
+        <div className={styles.bgGlowC} />
+        <div className={styles.bgStars} />
+        <div className={styles.inner}>
+          <div className={styles.top}>
             <div className={styles.brandRow}>
-              <div className={styles.brandLogo}>
-                <div className={styles.brandLogoHalo} />
-                <div className={styles.brandLogoDisc} />
-                <div className={styles.brandLogoOwl}>🦉</div>
+              <div className={styles.logoWrap}>
+                <div className={styles.logoHalo} />
+                <div className={styles.logoDisc} />
+                <div className={styles.logoOwl}>🦉</div>
               </div>
 
               <div className={styles.brandText}>
-                <div className={styles.brandEyebrow}>Rainbow Cashback Network</div>
+                <div className={styles.brandKicker}>Rainbow Cashback Network</div>
                 <div className={styles.brandTitle}>GUFO</div>
                 <div className={styles.brandSub}>Neon Loyalty OS</div>
               </div>
@@ -78,7 +77,7 @@ export default function Sidebar() {
 
             <button
               onClick={() => setOpen(false)}
-              className={styles.sidebarClose}
+              className={styles.closeBtn}
               aria-label="Chiudi menu"
               type="button"
             >
@@ -100,18 +99,18 @@ export default function Sidebar() {
             </div>
 
             <div className={styles.statusGrid}>
-              <div className={styles.statusMiniCard}>
+              <div className={styles.statusMini}>
                 <span>Mode</span>
                 <strong>Private</strong>
               </div>
-              <div className={styles.statusMiniCard}>
+              <div className={styles.statusMini}>
                 <span>Layer</span>
                 <strong>Premium</strong>
               </div>
             </div>
           </div>
 
-          <div className={styles.navTitle}>Navigation</div>
+          <div className={styles.navHead}>Navigation</div>
 
           <nav className={styles.nav}>
             {links.map((link) => {
@@ -123,7 +122,7 @@ export default function Sidebar() {
                   href={link.href}
                   className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                 >
-                  <div className={styles.navItemLeft}>
+                  <div className={styles.navLeft}>
                     <div className={styles.navIcon}>{link.icon}</div>
 
                     <div className={styles.navText}>
@@ -142,7 +141,7 @@ export default function Sidebar() {
             <div className={styles.bottomKicker}>GUFO CORE</div>
             <div className={styles.bottomTitle}>Futuristic loyalty dashboard</div>
             <div className={styles.bottomText}>
-              Cashback, livelli, premi e strumenti partner in un’unica esperienza premium.
+              Cashback, premi, membership e strumenti partner in una UI premium.
             </div>
           </div>
 

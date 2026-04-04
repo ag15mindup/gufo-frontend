@@ -308,31 +308,23 @@ export default function DashboardPage() {
       <div className={styles.rainbowBeam} />
 
       <div className={styles.shell}>
-        <div className={styles.topLine} />
+        <div className={styles.frameLine} />
 
-        <section className={styles.topBar}>
-          <div className={styles.brandBlock}>
-            <div className={styles.logoWrap}>
-              <div className={styles.logoHalo} />
-              <div className={styles.logoDisc} />
-              <div className={styles.logoOwl}>🦉</div>
-            </div>
-
-            <div className={styles.brandText}>
-              <span className={styles.brandMini}>Rainbow Cashback Network</span>
-              <strong className={styles.brandTitle}>GUFO</strong>
-            </div>
-          </div>
-
-          <div className={styles.balancePill}>
-            + {dashboardData.balanceGufo.toFixed(2)} GUFO
-          </div>
-        </section>
-
-        <div className={styles.heroLine} />
-
-        <section className={styles.heroGrid}>
+        <section className={styles.heroWrap}>
           <div className={styles.heroLeft}>
+            <div className={styles.heroMiniTop}>
+              <div className={styles.brandChip}>
+                <div className={styles.brandChipLogo}>
+                  <div className={styles.brandChipDisc} />
+                  <span>🦉</span>
+                </div>
+                <div className={styles.brandChipText}>
+                  <span>Rainbow Cashback Network</span>
+                  <strong>GUFO</strong>
+                </div>
+              </div>
+            </div>
+
             <div className={styles.welcomeTag}>Bentornato</div>
             <h1 className={styles.userName}>{dashboardData.profileName}</h1>
 
@@ -342,21 +334,21 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className={styles.balanceCard}>
-            <div className={styles.balanceCardGlowA} />
-            <div className={styles.balanceCardGlowB} />
-            <span className={styles.balanceLabel}>Saldo disponibile</span>
-            <h2 className={styles.balanceValue}>
-              {dashboardData.balanceGufo.toFixed(2)} GUFO
-            </h2>
+          <div className={styles.heroRight}>
+            <div className={styles.topBalanceCard}>
+              <span className={styles.balanceLabel}>Saldo disponibile</span>
+              <h2 className={styles.balanceValue}>
+                {dashboardData.balanceGufo.toFixed(2)} GUFO
+              </h2>
 
-            <div className={styles.balanceButtons}>
-              <Link href="/customer-code" className={styles.primaryBtn}>
-                Il mio codice
-              </Link>
-              <Link href="/wallet" className={styles.secondaryBtn}>
-                Wallet
-              </Link>
+              <div className={styles.balanceButtons}>
+                <Link href="/customer-code" className={styles.primaryBtn}>
+                  Il mio codice
+                </Link>
+                <Link href="/wallet" className={styles.secondaryBtn}>
+                  Wallet
+                </Link>
+              </div>
             </div>
           </div>
         </section>
