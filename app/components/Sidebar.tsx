@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import styles from "./sidebar.module.css";
+import styles from "./Sidebar.module.css";
 
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
