@@ -1,6 +1,6 @@
 "use client";
 
-import styles from "./missioncard.module.css";
+import styles from "./Missioncard.module.css";
 
 type Transaction = {
   id?: string;
@@ -21,6 +21,10 @@ type Mission = {
   type: "daily" | "weekly" | "monthly";
   progress: number;
   total: number;
+};
+
+type MissionCardProps = {
+  transactions?: Transaction[];
 };
 
 function getMissionTypeLabel(type: Mission["type"]) {
@@ -141,10 +145,6 @@ function buildDynamicMissions(transactions: Transaction[]): Mission[] {
   ];
 }
 
-type MissionCardProps = {
-  transactions?: Transaction[];
-};
-
 export default function MissionCard({
   transactions = [],
 }: MissionCardProps) {
@@ -162,71 +162,99 @@ export default function MissionCard({
   );
 
   const uniquePartners = new Set(
-    transactions.map((tx) => String(getTransactionMerchant(tx)).trim())
+    transactions
+      .map((tx) => String(getTransactionMerchant(tx)).trim())
+      .filter(Boolean)
   ).size;
 
   return (
     <section className={styles.missionSection}>
-      <div className={`${styles.missionGlow} ${styles.missionGlowA}`} />
-      <div className={`${styles.missionGlow} ${styles.missionGlowB}`} />
-      <div className={`${styles.missionGlow} ${styles.missionGlowC}`} />
-
       <div className={styles.missionHeader}>
         <div className={styles.missionHeaderLeft}>
-          <div className={styles.missionKicker}>GUFO MISSIONS</div>
           <h2 className={styles.missionTitle}>Missioni attive</h2>
           <p className={styles.missionSubtitle}>
-            Completa le missioni, aumenta l’attività e sblocca reward extra
-            nel tuo ecosistema GUFO.
+            Completa le missioni, aumenta l’attività e sblocca reward extra nel
+            tuo ecosistema GUFO.
           </p>
-        </div>
-
-        <div className={styles.missionHeaderBadge}>
-          <span className={styles.missionHeaderBadgeDot} />
-          Layer missioni online
-        </div>
-      </div>
-
-      <div className={styles.missionRecapGrid}>
-        <div className={styles.missionRecapCard}>
-          <span className={styles.missionRecapLabel}>Missioni attive</span>
-          <strong className={styles.missionRecapValue}>{activeCount}</strong>
-          <div className={`${styles.missionRecapLine} ${styles.missionRecapBlue}`} />
-        </div>
-
-        <div className={styles.missionRecapCard}>
-          <span className={styles.missionRecapLabel}>Completate</span>
-          <strong className={styles.missionRecapValue}>{completedCount}</strong>
-          <div className={`${styles.missionRecapLine} ${styles.missionRecapGreen}`} />
-        </div>
-
-        <div className={styles.missionRecapCard}>
-          <span className={styles.missionRecapLabel}>Reward potenziale</span>
-          <strong className={styles.missionRecapValue}>+{totalPotentialReward} GUFO</strong>
-          <div className={`${styles.missionRecapLine} ${styles.missionRecapPurple}`} />
-        </div>
-
-        <div className={styles.missionRecapCard}>
-          <span className={styles.missionRecapLabel}>Partner esplorati</span>
-          <strong className={styles.missionRecapValue}>{uniquePartners}</strong>
-          <div className={`${styles.missionRecapLine} ${styles.missionRecapPink}`} />
         </div>
       </div>
 
       <div className={styles.missionGrid}>
+        <div className={styles.missionCard}>
+          <div className={styles.missionCardTop}>
+            <span className={`${styles.missionBadge} ${styles.daily}`}>
+              Attive
+            </span>
+            <span className={styles.missionReward}>{activeCount}</span>
+          </div>
+          <h3 className={styles.missionCardTitle}>Missioni disponibili</h3>
+          <p className={styles.missionCardDescription}>
+            Numero di missioni ancora da completare.
+          </p>
+        </div>
+
+        <div className={`${styles.missionCard} ${styles.completed}`}>
+          <div className={styles.missionCardTop}>
+            <span className={`${styles.missionBadge} ${styles.monthly}`}>
+              Fatte
+            </span>
+            <span className={styles.missionReward}>{completedCount}</span>
+          </div>
+          <h3 className={styles.missionCardTitle}>Missioni completate</h3>
+          <p className={styles.missionCardDescription}>
+            Traguardi già raggiunti nel tuo percorso GUFO.
+          </p>
+        </div>
+
+        <div className={styles.missionCard}>
+          <div className={styles.missionCardTop}>
+            <span className={`${styles.missionBadge} ${styles.weekly}`}>
+              Reward
+            </span>
+            <span className={styles.missionReward}>+{totalPotentialReward} GUFO</span>
+          </div>
+          <h3 className={styles.missionCardTitle}>Reward potenziale</h3>
+          <p className={styles.missionCardDescription}>
+            Valore massimo ottenibile completando tutte le missioni.
+          </p>
+        </div>
+
+        <div className={styles.missionCard}>
+          <div className={styles.missionCardTop}>
+            <span className={`${styles.missionBadge} ${styles.daily}`}>
+              Partner
+            </span>
+            <span className={styles.missionReward}>{uniquePartners}</span>
+          </div>
+          <h3 className={styles.missionCardTitle}>Partner esplorati</h3>
+          <p className={styles.missionCardDescription}>
+            Numero di partner distinti con cui hai interagito.
+          </p>
+        </div>
+      </div>
+
+      <div className={styles.missionGrid} style={{ marginTop: 18 }}>
         {missions.map((mission) => {
           const progressPercent =
-            mission.total > 0 ? Math.min((mission.progress / mission.total) * 100, 100) : 0;
+            mission.total > 0
+              ? Math.min((mission.progress / mission.total) * 100, 100)
+              : 0;
 
           const completed = mission.progress >= mission.total;
 
           return (
             <div
               key={mission.id}
-              className={`${styles.missionCard} ${completed ? styles.completed : ""}`}
+              className={`${styles.missionCard} ${
+                completed ? styles.completed : ""
+              }`}
             >
               <div className={styles.missionCardTop}>
-                <span className={`${styles.missionBadge} ${getMissionTypeClass(mission.type)}`}>
+                <span
+                  className={`${styles.missionBadge} ${getMissionTypeClass(
+                    mission.type
+                  )}`}
+                >
                   {getMissionTypeLabel(mission.type)}
                 </span>
 
@@ -235,7 +263,9 @@ export default function MissionCard({
 
               <h3 className={styles.missionCardTitle}>{mission.title}</h3>
 
-              <p className={styles.missionCardDescription}>{mission.description}</p>
+              <p className={styles.missionCardDescription}>
+                {mission.description}
+              </p>
 
               <div className={styles.missionMetaRow}>
                 <div className={styles.missionMetaBox}>
@@ -260,7 +290,7 @@ export default function MissionCard({
                 </div>
               </div>
 
-              <div className={`${styles.missionProgressText} ${completed ? styles.done : ""}`}>
+              <div className={styles.missionProgressText}>
                 {completed
                   ? "Missione completata"
                   : `Avanzamento ${Math.round(progressPercent)}%`}
