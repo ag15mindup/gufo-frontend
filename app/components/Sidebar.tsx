@@ -17,17 +17,8 @@ type HudRoute = {
 function PrismGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <path
-        d="M12 3 21 12 12 21 3 12 12 3Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M12 6 18 12 12 18 6 12 12 6Z"
-        fill="currentColor"
-        opacity="0.18"
-      />
+      <path d="M12 3 21 12 12 21 3 12 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 6 18 12 12 18 6 12 12 6Z" fill="currentColor" opacity="0.18" />
     </svg>
   );
 }
@@ -57,22 +48,8 @@ function OrbitGlyph() {
 function LedgerGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <rect
-        x="4"
-        y="4"
-        width="16"
-        height="16"
-        rx="4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-      />
-      <path
-        d="M8 8h8M8 12h8M8 16h5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
+      <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
@@ -80,18 +57,8 @@ function LedgerGlyph() {
 function CrystalGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <path
-        d="M12 4 18.5 7.5v9L12 20 5.5 16.5v-9L12 4Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M12 4v16M5.5 7.5 12 12l6.5-4.5"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        opacity="0.5"
-      />
+      <path d="M12 4 18.5 7.5v9L12 20 5.5 16.5v-9L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 4v16M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" strokeWidth="1.3" opacity="0.5" />
     </svg>
   );
 }
@@ -112,14 +79,7 @@ function NovaGlyph() {
 function PersonaGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <circle
-        cx="12"
-        cy="8"
-        r="3.1"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+      <circle cx="12" cy="8" r="3.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <path
         d="M5.5 19c1.8-3 4-4.2 6.5-4.2S16.7 16 18.5 19"
         fill="none"
@@ -134,16 +94,8 @@ function PersonaGlyph() {
 function MatrixGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <path
-        d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M15 15h2v2h-2zM18 18h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2z"
-        fill="currentColor"
-      />
+      <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M15 15h2v2h-2zM18 18h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2z" fill="currentColor" />
     </svg>
   );
 }
@@ -151,12 +103,7 @@ function MatrixGlyph() {
 function BeaconGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <path
-        d="M12 4 20 18H4L12 4Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+      <path d="M12 4 20 18H4L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <circle cx="12" cy="13.1" r="1.2" fill="currentColor" />
     </svg>
   );
@@ -165,46 +112,10 @@ function BeaconGlyph() {
 function ClusterGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
-      <rect
-        x="4"
-        y="4"
-        width="6"
-        height="6"
-        rx="1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <rect
-        x="14"
-        y="4"
-        width="6"
-        height="6"
-        rx="1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <rect
-        x="4"
-        y="14"
-        width="6"
-        height="6"
-        rx="1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
-      <rect
-        x="14"
-        y="14"
-        width="6"
-        height="6"
-        rx="1.4"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-      />
+      <rect x="4" y="4" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="14" y="4" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="4" y="14" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="14" y="14" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
     </svg>
   );
 }
@@ -221,9 +132,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1140) {
-        setDrawerOpen(false);
-      }
+      if (window.innerWidth >= 1140) setDrawerOpen(false);
     };
 
     handleResize();
@@ -238,90 +147,34 @@ export default function Sidebar() {
 
   const routes = useMemo<HudRoute[]>(
     () => [
-      {
-        href: "/dashboard",
-        title: "Dashboard",
-        subtitle: "Control center",
-        icon: <PrismGlyph />,
-      },
-      {
-        href: "/wallet",
-        title: "Wallet",
-        subtitle: "Saldo e movimenti",
-        icon: <OrbitGlyph />,
-      },
-      {
-        href: "/transactions",
-        title: "Transazioni",
-        subtitle: "Storico attività",
-        icon: <LedgerGlyph />,
-      },
-      {
-        href: "/membership",
-        title: "Membership",
-        subtitle: "Livello stagionale",
-        icon: <CrystalGlyph />,
-      },
-      {
-        href: "/rewards",
-        title: "Rewards",
-        subtitle: "Bonus e premi",
-        icon: <NovaGlyph />,
-      },
-      {
-        href: "/profile",
-        title: "Profilo",
-        subtitle: "Identità account",
-        icon: <PersonaGlyph />,
-      },
-      {
-        href: "/customer-code",
-        title: "QR Code",
-        subtitle: "Codice cliente",
-        icon: <MatrixGlyph />,
-      },
-      {
-        href: "/partner-demo",
-        title: "Partner Demo",
-        subtitle: "Anteprima partner",
-        icon: <BeaconGlyph />,
-      },
-      {
-        href: "/partner-dashboard",
-        title: "Partner Dashboard",
-        subtitle: "Pannello business",
-        icon: <ClusterGlyph />,
-      },
+      { href: "/dashboard", title: "Dashboard", subtitle: "Control center", icon: <PrismGlyph /> },
+      { href: "/wallet", title: "Wallet", subtitle: "Saldo e movimenti", icon: <OrbitGlyph /> },
+      { href: "/transactions", title: "Transazioni", subtitle: "Storico attività", icon: <LedgerGlyph /> },
+      { href: "/membership", title: "Membership", subtitle: "Livello stagionale", icon: <CrystalGlyph /> },
+      { href: "/rewards", title: "Rewards", subtitle: "Bonus e premi", icon: <NovaGlyph /> },
+      { href: "/profile", title: "Profilo", subtitle: "Identità account", icon: <PersonaGlyph /> },
+      { href: "/customer-code", title: "QR Code", subtitle: "Codice cliente", icon: <MatrixGlyph /> },
+      { href: "/partner-demo", title: "Partner Demo", subtitle: "Anteprima partner", icon: <BeaconGlyph /> },
+      { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Pannello business", icon: <ClusterGlyph /> },
     ],
     []
   );
 
   const activeRoute =
-    routes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
-    routes[0];
+    routes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ?? routes[0];
 
   const secondaryRoutes = routes.filter((route) => route.href !== activeRoute.href);
 
   return (
     <>
-      <button
-        type="button"
-        className={styles.hudToggle}
-        aria-label="Apri menu"
-        onClick={() => setDrawerOpen(true)}
-      >
+      <button type="button" className={styles.hudToggle} aria-label="Apri menu" onClick={() => setDrawerOpen(true)}>
         <span />
         <span />
         <span />
       </button>
 
       {drawerOpen && (
-        <button
-          type="button"
-          className={styles.backdrop}
-          aria-label="Chiudi menu"
-          onClick={() => setDrawerOpen(false)}
-        />
+        <button type="button" className={styles.backdrop} aria-label="Chiudi menu" onClick={() => setDrawerOpen(false)} />
       )}
 
       <aside className={`${styles.sidebarHud} ${drawerOpen ? styles.sidebarHudOpen : ""}`}>
@@ -329,9 +182,12 @@ export default function Sidebar() {
         <div className={styles.sidebarGlowB} />
         <div className={styles.sidebarStars} />
         <div className={styles.sidebarEdge} />
+        <div className={styles.sidebarFrameGlow} />
 
         <div className={styles.sidebarShell}>
           <div className={styles.rail}>
+            <div className={styles.railInnerLine} />
+
             <div className={styles.logoBlock}>
               <div className={styles.logoOrb}>
                 <div className={styles.logoOrbGlow} />
@@ -341,8 +197,7 @@ export default function Sidebar() {
                   <Image
                     src="/gufo-sidebar-logo.png"
                     alt="Logo GUFO"
-                    width={54}
-                    height={54}
+                    fill
                     className={styles.owlLogoImg}
                     priority
                   />
@@ -360,8 +215,7 @@ export default function Sidebar() {
 
             <nav className={styles.iconStack}>
               {routes.map((route) => {
-                const isActive =
-                  pathname === route.href || pathname.startsWith(`${route.href}/`);
+                const isActive = pathname === route.href || pathname.startsWith(`${route.href}/`);
 
                 return (
                   <Link
@@ -399,7 +253,7 @@ export default function Sidebar() {
             <div className={styles.panelHeader}>
               <div>
                 <div className={styles.panelTag}>SPECTRAL HUD</div>
-                <div className={styles.panelCaption}>Rainbow Cashback Network</div>
+                <div className={styles.panelCaption}>RAINBOW CASHBACK NETWORK</div>
               </div>
 
               <button
@@ -415,6 +269,7 @@ export default function Sidebar() {
             <div className={styles.activeDock}>
               <div className={styles.activeDockArrow} />
               <div className={styles.activeDockGlow} />
+              <div className={styles.activeDockLine} />
 
               <div className={styles.activeIcon}>{activeRoute.icon}</div>
 

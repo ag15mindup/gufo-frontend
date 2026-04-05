@@ -13,12 +13,11 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 18px;
   cursor: pointer;
-  background:
-    linear-gradient(180deg, rgba(8, 14, 30, 0.96), rgba(5, 8, 20, 0.94));
+  background: linear-gradient(180deg, rgba(8, 14, 30, 0.96), rgba(5, 8, 20, 0.94));
   box-shadow:
     0 18px 42px rgba(0, 0, 0, 0.44),
     0 0 24px rgba(73, 202, 255, 0.14),
-    0 0 20px rgba(191, 104, 255, 0.1);
+    0 0 20px rgba(191, 104, 255, 0.10);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
@@ -48,14 +47,14 @@
   top: 0;
   left: 0;
   z-index: 1800;
-  width: 356px;
+  width: 442px;
   height: 100vh;
   overflow: hidden;
   transform: translateX(0);
   transition: transform 0.32s ease;
   background:
-    linear-gradient(180deg, rgba(3, 7, 18, 0.94), rgba(5, 10, 22, 0.96)),
-    radial-gradient(circle at 18% 16%, rgba(73, 202, 255, 0.1), transparent 22%),
+    linear-gradient(180deg, rgba(3, 7, 18, 0.96), rgba(5, 10, 22, 0.98)),
+    radial-gradient(circle at 18% 16%, rgba(73, 202, 255, 0.10), transparent 22%),
     radial-gradient(circle at 20% 82%, rgba(168, 85, 247, 0.12), transparent 26%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
@@ -84,7 +83,7 @@
   left: -40px;
   width: 170px;
   height: 170px;
-  background: radial-gradient(circle, rgba(73, 202, 255, 0.28), transparent 72%);
+  background: radial-gradient(circle, rgba(73, 202, 255, 0.30), transparent 72%);
 }
 
 .sidebarGlowB {
@@ -99,7 +98,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.14;
+  opacity: 0.13;
   background-image:
     radial-gradient(circle at 12% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px),
     radial-gradient(circle at 28% 24%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
@@ -117,40 +116,67 @@
   height: 100%;
   background: linear-gradient(
     180deg,
-    rgba(73, 202, 255, 0.92),
+    rgba(73, 202, 255, 0.96),
     rgba(34, 197, 94, 0.84),
     rgba(250, 204, 21, 0.82),
     rgba(244, 114, 182, 0.82),
-    rgba(168, 85, 247, 0.88)
+    rgba(168, 85, 247, 0.90)
   );
   box-shadow:
     0 0 18px rgba(73, 202, 255, 0.34),
-    0 0 18px rgba(244, 114, 182, 0.2);
+    0 0 18px rgba(244, 114, 182, 0.20);
+}
+
+.sidebarFrameGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.04),
+    inset 16px 0 28px rgba(73, 202, 255, 0.06);
 }
 
 .sidebarShell {
   position: relative;
   z-index: 2;
   display: flex;
-  gap: 12px;
+  gap: 16px;
   height: 100%;
   padding: 14px 12px 14px 14px;
 }
 
 .rail {
-  width: 88px;
+  position: relative;
+  width: 108px;
   height: 100%;
-  border-radius: 34px;
+  border-radius: 38px;
   padding: 14px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
-  border: 1px solid rgba(255,255,255,0.1);
+    linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025));
+  border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.04),
-    0 18px 36px rgba(0,0,0,0.24);
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 18px 36px rgba(0,0,0,0.24),
+    0 0 24px rgba(73,202,255,0.08);
+}
+
+.railInnerLine {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.00),
+    rgba(255,255,255,0.08),
+    rgba(255,255,255,0.00)
+  );
+  pointer-events: none;
 }
 
 .logoBlock {
@@ -162,24 +188,24 @@
 
 .logoOrb {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 86px;
+  height: 86px;
   display: grid;
   place-items: center;
 }
 
 .logoOrbGlow {
   position: absolute;
-  inset: -8px;
+  inset: -10px;
   border-radius: 999px;
   background: radial-gradient(
     circle,
-    rgba(73, 202, 255, 0.18),
-    rgba(168, 85, 247, 0.16),
-    rgba(244, 114, 182, 0.12),
+    rgba(73, 202, 255, 0.24),
+    rgba(168, 85, 247, 0.18),
+    rgba(244, 114, 182, 0.14),
     transparent 72%
   );
-  filter: blur(14px);
+  filter: blur(16px);
 }
 
 .logoOrbRing {
@@ -189,32 +215,33 @@
   border: 1.5px solid rgba(131, 221, 255, 0.76);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.05) inset,
-    0 0 20px rgba(73, 202, 255, 0.14),
-    0 0 18px rgba(191, 104, 255, 0.12);
+    0 0 24px rgba(73, 202, 255, 0.18),
+    0 0 18px rgba(191, 104, 255, 0.14);
 }
 
 .owlAvatar {
   position: relative;
   z-index: 2;
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
+  width: 74px;
+  height: 74px;
+  border-radius: 999px;
+  overflow: hidden;
 }
 
 .owlLogoImg {
-  width: 54px;
-  height: 54px;
-  object-fit: contain;
-  display: block;
+  object-fit: cover;
+  border-radius: 999px;
+  transform: scale(1.22);
   filter:
-    drop-shadow(0 0 10px rgba(73, 202, 255, 0.34))
-    drop-shadow(0 0 18px rgba(168, 85, 247, 0.24))
-    drop-shadow(0 0 22px rgba(244, 114, 182, 0.16));
+    saturate(1.10)
+    contrast(1.03)
+    drop-shadow(0 0 14px rgba(73, 202, 255, 0.42))
+    drop-shadow(0 0 24px rgba(168, 85, 247, 0.30))
+    drop-shadow(0 0 28px rgba(244, 114, 182, 0.20));
 }
 
 .brandName {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 900;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -235,12 +262,13 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.09);
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.12em;
   color: #ffffff;
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.10);
 }
 
 .statusDot {
@@ -261,7 +289,7 @@
 .iconNode {
   position: relative;
   width: 100%;
-  height: 60px;
+  height: 66px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -288,18 +316,18 @@
     linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
   box-shadow:
     0 14px 28px rgba(0,0,0,0.18),
-    0 0 20px rgba(73, 202, 255, 0.1);
+    0 0 20px rgba(73, 202, 255, 0.10);
 }
 
 .iconNodeActive {
   color: #ffffff;
   border-color: rgba(131, 221, 255, 0.34);
   background:
-    radial-gradient(circle at 50% 35%, rgba(77, 202, 255, 0.18), transparent 70%),
+    radial-gradient(circle at 50% 35%, rgba(77, 202, 255, 0.24), transparent 70%),
     linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
   box-shadow:
-    0 0 24px rgba(86, 202, 255, 0.18),
-    0 0 18px rgba(191, 104, 255, 0.1),
+    0 0 24px rgba(86, 202, 255, 0.20),
+    0 0 18px rgba(191, 104, 255, 0.10),
     0 0 18px rgba(244, 114, 182, 0.08);
 }
 
@@ -343,7 +371,7 @@
 
 .coreMeter {
   margin-top: auto;
-  width: 70px;
+  width: 74px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -353,13 +381,15 @@
 
 .coreTrack {
   position: relative;
-  width: 10px;
-  height: 118px;
+  width: 12px;
+  height: 134px;
   border-radius: 999px;
   overflow: hidden;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.06);
-  box-shadow: inset 0 0 18px rgba(255,255,255,0.03);
+  box-shadow:
+    inset 0 0 18px rgba(255,255,255,0.03),
+    0 0 18px rgba(73,202,255,0.08);
 }
 
 .coreFill {
@@ -367,7 +397,7 @@
   left: 1px;
   right: 1px;
   bottom: 1px;
-  height: 78%;
+  height: 82%;
   border-radius: inherit;
   background: linear-gradient(180deg, #49caff, #22c55e, #facc15, #f472b6, #8b5cf6);
   box-shadow:
@@ -385,8 +415,8 @@
 }
 
 .logoutButton {
-  width: 64px;
-  height: 48px;
+  width: 72px;
+  height: 52px;
   margin-top: 14px;
   border: none;
   border-radius: 18px;
@@ -402,15 +432,16 @@
 }
 
 .panel {
+  position: relative;
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding: 16px 16px 14px;
-  border-radius: 28px;
+  border-radius: 30px;
   background:
-    linear-gradient(180deg, rgba(10, 16, 38, 0.94), rgba(7, 11, 28, 0.92));
-  border: 1px solid rgba(255,255,255,0.1);
+    linear-gradient(180deg, rgba(10, 16, 38, 0.95), rgba(7, 11, 28, 0.93));
+  border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
     0 18px 36px rgba(0,0,0,0.24),
@@ -458,7 +489,7 @@
   display: none;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
   color: #ffffff;
   background: rgba(255,255,255,0.05);
@@ -468,30 +499,31 @@
 
 .activeDock {
   position: relative;
-  min-height: 102px;
+  min-height: 116px;
   display: grid;
-  grid-template-columns: 54px 1fr;
+  grid-template-columns: 64px 1fr;
   align-items: center;
-  gap: 14px;
-  padding: 0 18px;
-  margin-bottom: 10px;
-  border-radius: 24px;
+  gap: 16px;
+  padding: 0 22px 0 22px;
+  margin-bottom: 12px;
+  margin-left: -8px;
+  border-radius: 26px;
   color: #ffffff;
   background:
-    radial-gradient(circle at 18% 50%, rgba(88, 203, 255, 0.18), transparent 42%),
-    linear-gradient(180deg, rgba(103, 92, 255, 0.2), rgba(78, 54, 198, 0.14));
-  border: 1px solid rgba(131, 221, 255, 0.36);
+    radial-gradient(circle at 18% 50%, rgba(88, 203, 255, 0.26), transparent 42%),
+    linear-gradient(180deg, rgba(103, 92, 255, 0.22), rgba(78, 54, 198, 0.18));
+  border: 1px solid rgba(131, 221, 255, 0.42);
   box-shadow:
-    0 0 34px rgba(86, 202, 255, 0.18),
-    0 0 22px rgba(191, 104, 255, 0.14),
-    0 0 18px rgba(244, 114, 182, 0.1),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 0 42px rgba(86, 202, 255, 0.22),
+    0 0 28px rgba(191, 104, 255, 0.16),
+    0 0 20px rgba(244, 114, 182, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .activeDockGlow {
   position: absolute;
   inset: -1px;
-  border-radius: 24px;
+  border-radius: 26px;
   pointer-events: none;
   background: linear-gradient(
     135deg,
@@ -505,36 +537,49 @@
   opacity: 0.72;
 }
 
+.activeDockLine {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  left: 82px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.30), transparent);
+  opacity: 0.25;
+}
+
 .activeDockArrow {
   position: absolute;
-  left: -14px;
+  left: -22px;
   top: 50%;
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   transform: translateY(-50%) rotate(45deg);
-  border-left: 1px solid rgba(131, 221, 255, 0.4);
-  border-bottom: 1px solid rgba(131, 221, 255, 0.4);
+  border-left: 1px solid rgba(131, 221, 255, 0.46);
+  border-bottom: 1px solid rgba(131, 221, 255, 0.46);
   background: linear-gradient(
     180deg,
-    rgba(73,202,255,0.24),
-    rgba(244,114,182,0.16),
-    rgba(168,85,247,0.16)
+    rgba(73,202,255,0.30),
+    rgba(244,114,182,0.18),
+    rgba(168,85,247,0.18)
   );
-  box-shadow: 0 0 16px rgba(86, 202, 255, 0.18);
+  box-shadow: 0 0 20px rgba(86, 202, 255, 0.24);
 }
 
 .activeIcon {
   position: relative;
   z-index: 1;
-  width: 54px;
-  height: 54px;
+  width: 62px;
+  height: 62px;
   border-radius: 999px;
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at 50% 35%, rgba(108, 216, 255, 0.2), transparent 70%),
+    radial-gradient(circle at 50% 35%, rgba(108, 216, 255, 0.20), transparent 70%),
     rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 18px rgba(73,202,255,0.10);
 }
 
 .activeCopy {
@@ -544,7 +589,7 @@
 }
 
 .activeTitle {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 900;
   color: #ffffff;
 }
@@ -563,9 +608,9 @@
 }
 
 .menuRow {
-  min-height: 74px;
+  min-height: 76px;
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 42px 1fr;
   align-items: center;
   gap: 14px;
   padding: 0 6px;
@@ -586,8 +631,8 @@
 }
 
 .menuIcon {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -626,7 +671,7 @@
   }
 
   .sidebarHud {
-    width: min(94vw, 356px);
+    width: min(94vw, 442px);
     transform: translateX(-100%);
   }
 
@@ -640,8 +685,7 @@
   }
 
   .rail {
-    width: 80px;
-    padding: 12px 8px;
+    width: 90px;
   }
 
   .panel {
@@ -649,15 +693,17 @@
   }
 
   .activeDock {
-    min-height: 90px;
-    grid-template-columns: 50px 1fr;
+    min-height: 96px;
+    grid-template-columns: 54px 1fr;
     gap: 12px;
     padding: 0 14px;
+    margin-left: 0;
   }
 
-  .activeIcon {
-    width: 50px;
-    height: 50px;
+  .activeDockArrow {
+    left: -16px;
+    width: 22px;
+    height: 22px;
   }
 
   .mobileClose {
@@ -676,19 +722,18 @@
   }
 
   .rail {
-    width: 72px;
-    border-radius: 26px;
+    width: 78px;
+    border-radius: 28px;
   }
 
   .logoOrb {
-    width: 64px;
-    height: 64px;
+    width: 66px;
+    height: 66px;
   }
 
-  .owlAvatar,
-  .owlLogoImg {
-    width: 48px;
-    height: 48px;
+  .owlAvatar {
+    width: 56px;
+    height: 56px;
   }
 
   .iconNode {
@@ -700,7 +745,7 @@
   }
 
   .logoutButton {
-    width: 56px;
+    width: 58px;
     height: 44px;
   }
 

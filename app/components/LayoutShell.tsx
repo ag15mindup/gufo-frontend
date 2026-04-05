@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 
 const FREE_PAGES = ["/", "/login", "/register"];
-const HUD_WIDTH = 356;
+const HUD_WIDTH = 442;
 
 export default function LayoutShell({
   children,
@@ -23,7 +23,6 @@ export default function LayoutShell({
 
     updateViewport();
     window.addEventListener("resize", updateViewport);
-
     return () => window.removeEventListener("resize", updateViewport);
   }, []);
 
@@ -65,7 +64,7 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  opacity: 0.14,
+                  opacity: 0.13,
                   backgroundImage:
                     "radial-gradient(circle at 12% 12%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px), radial-gradient(circle at 24% 72%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px), radial-gradient(circle at 72% 18%, rgba(255,255,255,0.90) 0 1px, transparent 1.5px), radial-gradient(circle at 84% 58%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px), radial-gradient(circle at 56% 36%, rgba(255,255,255,0.76) 0 1px, transparent 1.5px), radial-gradient(circle at 40% 88%, rgba(255,255,255,0.62) 0 1px, transparent 1.5px)",
                 }}
@@ -76,7 +75,7 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  opacity: 0.04,
+                  opacity: 0.035,
                   backgroundImage:
                     "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
                   backgroundSize: "38px 38px",
