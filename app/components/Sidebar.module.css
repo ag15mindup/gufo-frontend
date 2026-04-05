@@ -1,112 +1,134 @@
-.trigger {
+.sparkToggle {
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 1800;
-  width: 56px;
-  height: 56px;
+  z-index: 1900;
+  width: 58px;
+  height: 58px;
   display: none;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: 5px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 18px;
   cursor: pointer;
-  background: linear-gradient(180deg, rgba(8, 14, 30, 0.96), rgba(5, 9, 22, 0.94));
+  background:
+    linear-gradient(180deg, rgba(8, 14, 30, 0.96), rgba(5, 8, 20, 0.94));
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.42),
-    0 0 24px rgba(73, 202, 255, 0.12);
+    0 18px 42px rgba(0, 0, 0, 0.44),
+    0 0 24px rgba(73, 202, 255, 0.14),
+    0 0 20px rgba(191, 104, 255, 0.10);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
 
-.trigger span {
+.sparkToggle span {
   width: 22px;
   height: 2px;
   border-radius: 999px;
   background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.34);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.34);
 }
 
-.shade {
+.voidLayer {
   position: fixed;
   inset: 0;
-  z-index: 1690;
+  z-index: 1790;
   border: none;
   padding: 0;
   cursor: pointer;
-  background: rgba(2, 5, 16, 0.80);
+  background: rgba(2, 5, 16, 0.82);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-.wrap {
+.rainbowHud {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1700;
-  width: 366px;
+  z-index: 1800;
+  width: 394px;
   height: 100vh;
   overflow: hidden;
   transform: translateX(0);
-  transition: transform 0.28s ease;
+  transition: transform 0.3s ease;
   background:
     linear-gradient(180deg, rgba(4, 8, 20, 0.98), rgba(7, 11, 24, 0.98)),
-    radial-gradient(circle at top left, rgba(73, 202, 255, 0.08), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(147, 51, 234, 0.10), transparent 30%);
+    radial-gradient(circle at top left, rgba(73, 202, 255, 0.10), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.12), transparent 30%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    24px 0 70px rgba(0, 0, 0, 0.40),
-    0 0 28px rgba(73, 202, 255, 0.08);
+    24px 0 76px rgba(0, 0, 0, 0.44),
+    0 0 28px rgba(73, 202, 255, 0.10),
+    0 0 24px rgba(191, 104, 255, 0.08);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
 
-.wrapOpen {
+.rainbowHudOpen {
   transform: translateX(0);
 }
 
-.sparkA,
-.sparkB {
+.rainbowLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(73, 202, 255, 0.88),
+    rgba(34, 197, 94, 0.84),
+    rgba(250, 204, 21, 0.82),
+    rgba(244, 114, 182, 0.82),
+    rgba(168, 85, 247, 0.84)
+  );
+  box-shadow:
+    0 0 18px rgba(73, 202, 255, 0.34),
+    0 0 18px rgba(244, 114, 182, 0.20);
+}
+
+.glareA,
+.glareB {
   position: absolute;
   border-radius: 999px;
-  filter: blur(48px);
+  filter: blur(54px);
   pointer-events: none;
-  opacity: 0.50;
+  opacity: 0.52;
 }
 
-.sparkA {
-  top: -42px;
-  left: -52px;
-  width: 176px;
-  height: 176px;
-  background: radial-gradient(circle, rgba(73, 202, 255, 0.28), transparent 72%);
+.glareA {
+  top: -44px;
+  left: -54px;
+  width: 186px;
+  height: 186px;
+  background: radial-gradient(circle, rgba(73, 202, 255, 0.30), transparent 72%);
 }
 
-.sparkB {
-  bottom: -46px;
-  left: 18px;
-  width: 188px;
-  height: 188px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.24), transparent 72%);
+.glareB {
+  bottom: -52px;
+  left: 22px;
+  width: 206px;
+  height: 206px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.26), transparent 72%);
 }
 
-.mesh {
+.pixelDust {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.14;
+  opacity: 0.16;
   background-image:
-    radial-gradient(circle at 12% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 28% 26%, rgba(255,255,255,0.74) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 82% 14%, rgba(255,255,255,0.78) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 70% 40%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 18% 68%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 54% 84%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px);
+    radial-gradient(circle at 12% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 28% 24%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 80% 14%, rgba(255,255,255,0.82) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 72% 38%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 18% 68%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 56% 84%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px);
 }
 
-.frame {
+.hudGrid {
   position: relative;
   z-index: 2;
   display: flex;
@@ -115,35 +137,42 @@
   padding: 14px;
 }
 
-.spine {
-  width: 92px;
+.spectrumRail {
+  width: 96px;
   height: 100%;
-  border-radius: 34px;
+  border-radius: 36px;
   padding: 16px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.04),
-    0 18px 34px rgba(0,0,0,0.22);
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 18px 36px rgba(0,0,0,0.24);
 }
 
-.owlDock {
+.coreBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.owlSphere {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 74px;
+  height: 74px;
   display: grid;
   place-items: center;
 }
 
-.owlAura {
+.owlBloom {
   position: absolute;
   inset: -8px;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(73, 202, 255, 0.22), rgba(191, 104, 255, 0.18), transparent 72%);
+  background: radial-gradient(circle, rgba(73, 202, 255, 0.22), rgba(191, 104, 255, 0.18), rgba(244,114,182,0.12), transparent 72%);
   filter: blur(12px);
 }
 
@@ -151,38 +180,34 @@
   position: absolute;
   inset: 4px;
   border-radius: 999px;
-  border: 1.5px solid rgba(121, 218, 255, 0.70);
+  border: 1.5px solid rgba(131, 221, 255, 0.72);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.06) inset,
-    0 0 22px rgba(73, 202, 255, 0.18);
+    0 0 22px rgba(73, 202, 255, 0.18),
+    0 0 16px rgba(191, 104, 255, 0.12);
 }
 
-.owlPad {
+.owlPlatform {
   position: absolute;
   left: 14px;
   right: 14px;
   bottom: 13px;
   height: 11px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #49caff, #8b5cf6, #f472b6, #facc15);
+  background: linear-gradient(90deg, #49caff, #22c55e, #facc15, #f472b6, #8b5cf6);
   box-shadow:
-    0 0 18px rgba(73, 202, 255, 0.22),
-    0 0 20px rgba(139, 92, 246, 0.12);
+    0 0 18px rgba(73, 202, 255, 0.24),
+    0 0 18px rgba(244, 114, 182, 0.18);
 }
 
-.owlFace {
+.owlAvatar {
   position: relative;
   z-index: 2;
   font-size: 28px;
   line-height: 1;
 }
 
-.identity {
-  margin-top: 8px;
-  text-align: center;
-}
-
-.identityMain {
+.coreName {
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -190,13 +215,12 @@
   color: #ffffff;
 }
 
-.identitySub {
-  margin-top: 2px;
+.coreSub {
   font-size: 10px;
-  color: rgba(255,255,255,0.62);
+  color: rgba(255,255,255,0.64);
 }
 
-.statusChip {
+.liveNode {
   min-height: 32px;
   margin-top: 12px;
   margin-bottom: 18px;
@@ -213,7 +237,7 @@
   color: #ffffff;
 }
 
-.statusDot {
+.liveOrb {
   width: 8px;
   height: 8px;
   border-radius: 999px;
@@ -221,14 +245,14 @@
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
 }
 
-.lane {
+.iconColumn {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.node {
+.pulseKey {
   position: relative;
   width: 100%;
   height: 62px;
@@ -236,8 +260,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #dce5f5;
   text-decoration: none;
+  color: #dce5f5;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
   border: 1px solid rgba(255,255,255,0.08);
@@ -251,44 +275,52 @@
     background 0.22s ease;
 }
 
-.node:hover {
+.pulseKey:hover {
   transform: translateY(-2px);
   border-color: rgba(255,255,255,0.14);
   background:
     linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
   box-shadow:
     0 14px 28px rgba(0,0,0,0.18),
-    0 0 18px rgba(73, 202, 255, 0.08);
+    0 0 20px rgba(73, 202, 255, 0.10);
 }
 
-.nodeOn {
+.pulseKeyOn {
   color: #ffffff;
-  border-color: rgba(121, 210, 255, 0.30);
+  border-color: rgba(131, 221, 255, 0.30);
   background:
-    radial-gradient(circle at 50% 35%, rgba(77, 202, 255, 0.16), transparent 70%),
-    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+    radial-gradient(circle at 50% 35%, rgba(77, 202, 255, 0.18), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
   box-shadow:
-    0 0 24px rgba(86, 202, 255, 0.16),
-    0 0 18px rgba(191, 104, 255, 0.08);
+    0 0 24px rgba(86, 202, 255, 0.18),
+    0 0 18px rgba(191, 104, 255, 0.10),
+    0 0 18px rgba(244, 114, 182, 0.08);
 }
 
-.nodeGlow {
+.pulseAura {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s ease;
-  background: linear-gradient(135deg, rgba(86,202,255,0.24), rgba(191,104,255,0.20), rgba(244,114,182,0.16));
+  background: linear-gradient(
+    135deg,
+    rgba(73,202,255,0.28),
+    rgba(34,197,94,0.18),
+    rgba(250,204,21,0.16),
+    rgba(244,114,182,0.18),
+    rgba(168,85,247,0.18)
+  );
   filter: blur(10px);
 }
 
-.node:hover .nodeGlow,
-.nodeOn .nodeGlow {
+.pulseKey:hover .pulseAura,
+.pulseKeyOn .pulseAura {
   opacity: 1;
 }
 
-.nodeGlyph {
+.pulseGlyph {
   position: relative;
   z-index: 2;
   width: 24px;
@@ -297,15 +329,15 @@
   place-items: center;
 }
 
-.mark {
+.glyphSvg {
   width: 24px;
   height: 24px;
   display: block;
 }
 
-.engine {
+.energyCore {
   margin-top: auto;
-  width: 70px;
+  width: 72px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -313,10 +345,10 @@
   padding-top: 18px;
 }
 
-.engineTube {
+.energyTube {
   position: relative;
   width: 10px;
-  height: 108px;
+  height: 112px;
   border-radius: 999px;
   overflow: hidden;
   background: rgba(255,255,255,0.08);
@@ -324,28 +356,30 @@
   box-shadow: inset 0 0 18px rgba(255,255,255,0.03);
 }
 
-.engineCharge {
+.energyRainbow {
   position: absolute;
   left: 1px;
   right: 1px;
   bottom: 1px;
-  height: 74%;
+  height: 76%;
   border-radius: inherit;
-  background: linear-gradient(180deg, #49caff, #8b5cf6, #f472b6);
+  background: linear-gradient(180deg, #49caff, #22c55e, #facc15, #f472b6, #8b5cf6);
   box-shadow:
     0 0 18px rgba(73, 202, 255, 0.24),
-    0 0 20px rgba(139, 92, 246, 0.16);
+    0 0 18px rgba(244, 114, 182, 0.18);
+  animation: spectralFlow 3.2s linear infinite;
+  background-size: 100% 180%;
 }
 
-.engineLabel {
+.energyText {
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.16em;
-  color: rgba(255,255,255,0.62);
+  color: rgba(255,255,255,0.66);
 }
 
-.quit {
-  width: 66px;
+.escapeButton {
+  width: 68px;
   height: 50px;
   margin-top: 14px;
   border: none;
@@ -361,25 +395,26 @@
     0 0 18px rgba(239, 68, 68, 0.08);
 }
 
-.slate {
+.spectrumPanel {
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
   padding: 18px 18px 16px;
-  border-radius: 28px;
+  border-radius: 30px;
   background:
     linear-gradient(180deg, rgba(11, 18, 40, 0.94), rgba(8, 12, 30, 0.92));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
     0 18px 36px rgba(0,0,0,0.24),
-    0 0 24px rgba(86,202,255,0.06);
+    0 0 26px rgba(86,202,255,0.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
+  clip-path: polygon(0 0, 100% 0, 100% 94%, 92% 100%, 0 100%);
 }
 
-.slateTop {
+.panelHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -387,7 +422,7 @@
   margin-bottom: 16px;
 }
 
-.chip {
+.miniTag {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -397,13 +432,13 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.82);
+  color: rgba(255,255,255,0.84);
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.08);
   margin-bottom: 12px;
 }
 
-.overline {
+.panelTiny {
   font-size: 11px;
   line-height: 1.4;
   letter-spacing: 0.14em;
@@ -411,7 +446,7 @@
   color: rgba(255,255,255,0.58);
 }
 
-.dismiss {
+.panelClose {
   width: 40px;
   height: 40px;
   display: none;
@@ -425,61 +460,68 @@
   flex-shrink: 0;
 }
 
-.hero {
+.focusCard {
   position: relative;
-  min-height: 94px;
+  min-height: 102px;
   display: grid;
-  grid-template-columns: 54px 1fr;
+  grid-template-columns: 56px 1fr;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   padding: 0 18px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   border-radius: 24px;
   color: #ffffff;
   background:
-    radial-gradient(circle at 20% 50%, rgba(88, 203, 255, 0.18), transparent 42%),
-    linear-gradient(180deg, rgba(120, 118, 255, 0.16), rgba(82, 59, 194, 0.14));
-  border: 1px solid rgba(121, 210, 255, 0.32);
+    radial-gradient(circle at 18% 50%, rgba(88, 203, 255, 0.18), transparent 42%),
+    linear-gradient(180deg, rgba(103, 92, 255, 0.20), rgba(78, 54, 198, 0.16));
+  border: 1px solid rgba(131, 221, 255, 0.36);
   box-shadow:
-    0 0 32px rgba(86, 202, 255, 0.16),
-    0 0 18px rgba(191, 104, 255, 0.10),
+    0 0 34px rgba(86, 202, 255, 0.18),
+    0 0 22px rgba(191, 104, 255, 0.14),
+    0 0 18px rgba(244, 114, 182, 0.10),
     inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-.hero::after {
-  content: "";
+.focusHalo {
   position: absolute;
   inset: -1px;
   border-radius: 24px;
   pointer-events: none;
   background: linear-gradient(
     135deg,
-    rgba(131, 221, 255, 0.26),
-    rgba(182, 107, 255, 0.20),
-    rgba(255,255,255,0.06)
+    rgba(73,202,255,0.24),
+    rgba(34,197,94,0.16),
+    rgba(250,204,21,0.14),
+    rgba(244,114,182,0.18),
+    rgba(168,85,247,0.18)
   );
   filter: blur(10px);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
-.pointer {
+.focusPointer {
   position: absolute;
   left: -16px;
   top: 50%;
   width: 22px;
   height: 22px;
   transform: translateY(-50%) rotate(45deg);
-  border-left: 1px solid rgba(121, 210, 255, 0.34);
-  border-bottom: 1px solid rgba(121, 210, 255, 0.34);
-  background: linear-gradient(180deg, rgba(81, 191, 255, 0.22), rgba(153, 84, 255, 0.16));
+  border-left: 1px solid rgba(131, 221, 255, 0.38);
+  border-bottom: 1px solid rgba(131, 221, 255, 0.38);
+  background: linear-gradient(
+    180deg,
+    rgba(73,202,255,0.24),
+    rgba(244,114,182,0.16),
+    rgba(168,85,247,0.16)
+  );
   box-shadow: 0 0 16px rgba(86, 202, 255, 0.18);
 }
 
-.heroGlyph {
+.focusGlyph {
   position: relative;
   z-index: 1;
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -489,32 +531,32 @@
   border: 1px solid rgba(255,255,255,0.10);
 }
 
-.heroCopy {
+.focusCopy {
   position: relative;
   z-index: 1;
 }
 
-.heroTitle {
+.focusTitle {
   font-size: 18px;
   font-weight: 900;
   color: #ffffff;
 }
 
-.heroSub {
+.focusSubtitle {
   margin-top: 4px;
   font-size: 13px;
   color: rgba(255,255,255,0.72);
 }
 
-.catalog {
-  margin-top: 10px;
+.streamList {
+  margin-top: 8px;
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-.entry {
-  min-height: 82px;
+.streamRow {
+  min-height: 80px;
   display: grid;
   grid-template-columns: 44px 1fr;
   align-items: center;
@@ -523,19 +565,20 @@
   text-decoration: none;
   color: #dce5f5;
   border-bottom: 1px solid rgba(255,255,255,0.10);
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease, text-shadow 0.2s ease;
 }
 
-.entry:hover {
-  transform: translateX(2px);
+.streamRow:hover {
+  transform: translateX(3px);
   color: #ffffff;
+  text-shadow: 0 0 12px rgba(86, 202, 255, 0.18);
 }
 
-.entry:last-child {
+.streamRow:last-child {
   border-bottom: none;
 }
 
-.entryGlyph {
+.streamGlyph {
   width: 44px;
   height: 44px;
   border-radius: 999px;
@@ -545,123 +588,132 @@
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-.entryCopy {
+.streamCopy {
   min-width: 0;
 }
 
-.entryTitle {
+.streamTitle {
   font-size: 15px;
   font-weight: 800;
   color: inherit;
 }
 
-.entrySub {
+.streamSubtitle {
   margin-top: 4px;
   font-size: 12px;
   color: rgba(255,255,255,0.62);
 }
 
-@media (max-width: 1119px) {
-  .trigger {
+@keyframes spectralFlow {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 180%;
+  }
+}
+
+@media (max-width: 1139px) {
+  .sparkToggle {
     display: flex;
   }
 
-  .wrap {
-    width: min(94vw, 364px);
+  .rainbowHud {
+    width: min(94vw, 382px);
     transform: translateX(-100%);
   }
 
-  .wrap.wrapOpen {
+  .rainbowHud.rainbowHudOpen {
     transform: translateX(0);
   }
 
-  .frame {
+  .hudGrid {
     gap: 10px;
     padding: 10px;
   }
 
-  .spine {
+  .spectrumRail {
     width: 82px;
     padding: 12px 8px;
   }
 
-  .slate {
+  .spectrumPanel {
     padding: 14px;
   }
 
-  .hero {
-    min-height: 84px;
-    grid-template-columns: 48px 1fr;
+  .focusCard {
+    min-height: 88px;
+    grid-template-columns: 50px 1fr;
     gap: 12px;
     padding: 0 14px;
   }
 
-  .heroGlyph {
-    width: 48px;
-    height: 48px;
+  .focusGlyph {
+    width: 50px;
+    height: 50px;
   }
 
-  .dismiss {
+  .panelClose {
     display: inline-flex;
   }
 }
 
 @media (max-width: 640px) {
-  .wrap {
+  .rainbowHud {
     width: calc(100vw - 16px);
   }
 
-  .frame {
+  .hudGrid {
     gap: 8px;
     padding: 8px;
   }
 
-  .spine {
+  .spectrumRail {
     width: 72px;
     border-radius: 26px;
   }
 
-  .owlDock {
+  .owlSphere {
     width: 64px;
     height: 64px;
   }
 
-  .node {
+  .pulseKey {
     height: 56px;
   }
 
-  .engineTube {
+  .energyTube {
     height: 94px;
   }
 
-  .quit {
+  .escapeButton {
     width: 58px;
     height: 46px;
   }
 
-  .slate {
+  .spectrumPanel {
     border-radius: 24px;
     padding: 12px;
   }
 
-  .chip {
+  .miniTag {
     font-size: 9px;
   }
 
-  .heroTitle {
+  .focusTitle {
     font-size: 16px;
   }
 
-  .entry {
-    min-height: 74px;
+  .streamRow {
+    min-height: 72px;
     gap: 12px;
   }
 
-  .entryTitle {
+  .streamTitle {
     font-size: 14px;
   }
 
-  .entrySub {
+  .streamSubtitle {
     font-size: 11px;
   }
 }

@@ -1,93 +1,93 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
-type RouteCard = {
+type SpectrumRoute = {
   href: string;
   title: string;
-  caption: string;
-  glyph: React.ReactNode;
+  subtitle: string;
+  icon: ReactNode;
 };
 
-function GemMark() {
+function PrismGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
-      <path d="M12 3 21 12 12 21 3 12 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.9" />
-      <path d="M12 6 18 12 12 18 6 12 12 6Z" fill="currentColor" opacity="0.18" />
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
+      <path d="M12 3 21 12 12 21 3 12 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M12 6 18 12 12 18 6 12 12 6Z" fill="currentColor" opacity="0.2" />
     </svg>
   );
 }
 
-function VaultMark() {
+function OrbitGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
-      <rect x="3.5" y="6" width="17" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="1.9" />
-      <path d="M15.2 11h4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="15.3" cy="12" r="1.1" fill="currentColor" />
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
+      <circle cx="12" cy="12" r="2.2" fill="currentColor" />
+      <path d="M5.4 12c0-3.8 3-6.8 6.6-6.8 3.7 0 6.6 3 6.6 6.8S15.7 18.8 12 18.8c-3.6 0-6.6-3-6.6-6.8Z" fill="none" stroke="currentColor" strokeWidth="1.6" opacity="0.65" />
+      <path d="M8.2 6.2c2.6 1 5 4 5.8 7.2M16.2 8c-2 0-5.3 2-7.2 5.6" stroke="currentColor" strokeWidth="1.3" opacity="0.42" strokeLinecap="round" />
     </svg>
   );
 }
 
-function LedgerMark() {
+function LedgerGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
-      <path d="M7 7h10M7 12h10M7 17h6.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-      <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="1.6" opacity="0.55" />
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
+      <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
-function TierMark() {
+function CrystalGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
       <path d="M12 4 18.5 7.5v9L12 20 5.5 16.5v-9L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 4v16M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" strokeWidth="1.4" opacity="0.48" />
+      <path d="M12 4v16M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" strokeWidth="1.3" opacity="0.5" />
     </svg>
   );
 }
 
-function PulseMark() {
+function NovaGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
-      <path d="m12 3 2.2 5.5L20 10.2l-4.4 3.3 1.6 5.5L12 16l-5.2 3 1.6-5.5L4 10.2l5.8-1.7L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
+      <path d="M12 3.5 14 9l5.5 2-4.2 3.2 1.5 5.3L12 16.7 7.2 19.5l1.5-5.3L4.5 11 10 9l2-5.5Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
 
-function IdentityMark() {
+function PersonaGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
       <circle cx="12" cy="8" r="3.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5.7 19c1.7-2.9 4-4.2 6.3-4.2s4.6 1.3 6.3 4.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5.5 19c1.8-3 4-4.2 6.5-4.2S16.7 16 18.5 19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
-function MatrixMark() {
+function MatrixGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
       <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <path d="M15 15h2v2h-2zM18 18h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2z" fill="currentColor" />
     </svg>
   );
 }
 
-function BeaconMark() {
+function BeaconGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
       <path d="M12 4 20 18H4L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <circle cx="12" cy="13.1" r="1.2" fill="currentColor" />
     </svg>
   );
 }
 
-function GridMark() {
+function ClusterGlyph() {
   return (
-    <svg viewBox="0 0 24 24" className={styles.mark} aria-hidden="true">
+    <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
       <rect x="4" y="4" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <rect x="14" y="4" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <rect x="4" y="14" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -100,174 +100,177 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
-    setMobileOpen(false);
+    setDrawerOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    const sync = () => {
-      if (window.innerWidth >= 1120) {
-        setMobileOpen(false);
+    const handleViewport = () => {
+      if (window.innerWidth >= 1140) {
+        setDrawerOpen(false);
       }
     };
 
-    sync();
-    window.addEventListener("resize", sync);
+    handleViewport();
+    window.addEventListener("resize", handleViewport);
 
-    return () => window.removeEventListener("resize", sync);
+    return () => window.removeEventListener("resize", handleViewport);
   }, []);
 
-  async function signOutNow() {
+  async function exitSession() {
     await supabase.auth.signOut();
     router.push("/login");
   }
 
-  const routes = useMemo<RouteCard[]>(
+  const routes = useMemo<SpectrumRoute[]>(
     () => [
-      { href: "/dashboard", title: "Dashboard", caption: "Control center", glyph: <GemMark /> },
-      { href: "/wallet", title: "Wallet", caption: "Saldo e movimenti", glyph: <VaultMark /> },
-      { href: "/transactions", title: "Transazioni", caption: "Storico attività", glyph: <LedgerMark /> },
-      { href: "/membership", title: "Membership", caption: "Livello stagionale", glyph: <TierMark /> },
-      { href: "/rewards", title: "Rewards", caption: "Bonus e premi", glyph: <PulseMark /> },
-      { href: "/profile", title: "Profilo", caption: "Identità account", glyph: <IdentityMark /> },
-      { href: "/customer-code", title: "QR Code", caption: "Codice cliente", glyph: <MatrixMark /> },
-      { href: "/partner-demo", title: "Partner Demo", caption: "Anteprima partner", glyph: <BeaconMark /> },
-      { href: "/partner-dashboard", title: "Partner Dashboard", caption: "Pannello business", glyph: <GridMark /> },
+      { href: "/dashboard", title: "Dashboard", subtitle: "Control center", icon: <PrismGlyph /> },
+      { href: "/wallet", title: "Wallet", subtitle: "Saldo e movimenti", icon: <OrbitGlyph /> },
+      { href: "/transactions", title: "Transazioni", subtitle: "Storico attività", icon: <LedgerGlyph /> },
+      { href: "/membership", title: "Membership", subtitle: "Livello stagionale", icon: <CrystalGlyph /> },
+      { href: "/rewards", title: "Rewards", subtitle: "Bonus e premi", icon: <NovaGlyph /> },
+      { href: "/profile", title: "Profilo", subtitle: "Identità account", icon: <PersonaGlyph /> },
+      { href: "/customer-code", title: "QR Code", subtitle: "Codice cliente", icon: <MatrixGlyph /> },
+      { href: "/partner-demo", title: "Partner Demo", subtitle: "Anteprima partner", icon: <BeaconGlyph /> },
+      { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Pannello business", icon: <ClusterGlyph /> },
     ],
     []
   );
 
-  const selected =
+  const focused =
     routes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
     routes[0];
+
+  const secondary = routes.filter((route) => route.href !== focused.href);
 
   return (
     <>
       <button
         type="button"
-        className={styles.trigger}
-        aria-label="Apri navigazione"
-        onClick={() => setMobileOpen(true)}
+        className={styles.sparkToggle}
+        aria-label="Apri menu"
+        onClick={() => setDrawerOpen(true)}
       >
         <span />
         <span />
         <span />
       </button>
 
-      {mobileOpen && (
+      {drawerOpen && (
         <button
           type="button"
-          className={styles.shade}
-          aria-label="Chiudi navigazione"
-          onClick={() => setMobileOpen(false)}
+          className={styles.voidLayer}
+          aria-label="Chiudi menu"
+          onClick={() => setDrawerOpen(false)}
         />
       )}
 
-      <aside className={`${styles.wrap} ${mobileOpen ? styles.wrapOpen : ""}`}>
-        <div className={styles.sparkA} />
-        <div className={styles.sparkB} />
-        <div className={styles.mesh} />
+      <aside className={`${styles.rainbowHud} ${drawerOpen ? styles.rainbowHudOpen : ""}`}>
+        <div className={styles.rainbowLine} />
+        <div className={styles.glareA} />
+        <div className={styles.glareB} />
+        <div className={styles.pixelDust} />
 
-        <div className={styles.frame}>
-          <section className={styles.spine}>
-            <div className={styles.owlDock}>
-              <div className={styles.owlAura} />
-              <div className={styles.owlRing} />
-              <div className={styles.owlPad} />
-              <div className={styles.owlFace}>🦉</div>
+        <div className={styles.hudGrid}>
+          <div className={styles.spectrumRail}>
+            <div className={styles.coreBadge}>
+              <div className={styles.owlSphere}>
+                <div className={styles.owlBloom} />
+                <div className={styles.owlRing} />
+                <div className={styles.owlPlatform} />
+                <div className={styles.owlAvatar}>🦉</div>
+              </div>
+
+              <div className={styles.coreName}>GUFO</div>
+              <div className={styles.coreSub}>Neon OS</div>
             </div>
 
-            <div className={styles.identity}>
-              <div className={styles.identityMain}>GUFO</div>
-              <div className={styles.identitySub}>Neon OS</div>
-            </div>
-
-            <div className={styles.statusChip}>
-              <span className={styles.statusDot} />
+            <div className={styles.liveNode}>
+              <span className={styles.liveOrb} />
               LIVE
             </div>
 
-            <nav className={styles.lane}>
+            <nav className={styles.iconColumn}>
               {routes.map((route) => {
-                const enabled =
+                const isFocused =
                   pathname === route.href || pathname.startsWith(`${route.href}/`);
 
                 return (
                   <Link
                     key={route.href}
                     href={route.href}
-                    className={`${styles.node} ${enabled ? styles.nodeOn : ""}`}
+                    className={`${styles.pulseKey} ${isFocused ? styles.pulseKeyOn : ""}`}
                     title={route.title}
                   >
-                    <span className={styles.nodeGlow} />
-                    <span className={styles.nodeGlyph}>{route.glyph}</span>
+                    <span className={styles.pulseAura} />
+                    <span className={styles.pulseGlyph}>{route.icon}</span>
                   </Link>
                 );
               })}
             </nav>
 
-            <div className={styles.engine}>
-              <div className={styles.engineTube}>
-                <div className={styles.engineCharge} />
+            <div className={styles.energyCore}>
+              <div className={styles.energyTube}>
+                <div className={styles.energyRainbow} />
               </div>
-              <div className={styles.engineLabel}>CORE</div>
+              <div className={styles.energyText}>CORE</div>
             </div>
 
             <button
               type="button"
-              className={styles.quit}
+              className={styles.escapeButton}
+              onClick={exitSession}
               aria-label="Logout"
               title="Logout"
-              onClick={signOutNow}
             >
               ↗
             </button>
-          </section>
+          </div>
 
-          <section className={styles.slate}>
-            <div className={styles.slateTop}>
-              <div className={styles.slateMeta}>
-                <div className={styles.chip}>GUIDE ARRAY</div>
-                <div className={styles.overline}>Rainbow Cashback Network</div>
+          <div className={styles.spectrumPanel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <div className={styles.miniTag}>SPECTRAL HUD</div>
+                <div className={styles.panelTiny}>Rainbow Cashback Network</div>
               </div>
 
               <button
                 type="button"
-                className={styles.dismiss}
-                aria-label="Chiudi navigazione"
-                onClick={() => setMobileOpen(false)}
+                className={styles.panelClose}
+                aria-label="Chiudi menu"
+                onClick={() => setDrawerOpen(false)}
               >
                 ✕
               </button>
             </div>
 
-            <div className={styles.hero}>
-              <div className={styles.pointer} />
-              <div className={styles.heroGlyph}>{selected.glyph}</div>
+            <div className={styles.focusCard}>
+              <div className={styles.focusPointer} />
+              <div className={styles.focusHalo} />
 
-              <div className={styles.heroCopy}>
-                <div className={styles.heroTitle}>{selected.title}</div>
-                <div className={styles.heroSub}>{selected.caption}</div>
+              <div className={styles.focusGlyph}>{focused.icon}</div>
+
+              <div className={styles.focusCopy}>
+                <div className={styles.focusTitle}>{focused.title}</div>
+                <div className={styles.focusSubtitle}>{focused.subtitle}</div>
               </div>
             </div>
 
-            <div className={styles.catalog}>
-              {routes
-                .filter((route) => route.href !== selected.href)
-                .map((route) => (
-                  <Link key={route.href} href={route.href} className={styles.entry}>
-                    <div className={styles.entryGlyph}>{route.glyph}</div>
+            <div className={styles.streamList}>
+              {secondary.map((route) => (
+                <Link key={route.href} href={route.href} className={styles.streamRow}>
+                  <div className={styles.streamGlyph}>{route.icon}</div>
 
-                    <div className={styles.entryCopy}>
-                      <div className={styles.entryTitle}>{route.title}</div>
-                      <div className={styles.entrySub}>{route.caption}</div>
-                    </div>
-                  </Link>
-                ))}
+                  <div className={styles.streamCopy}>
+                    <div className={styles.streamTitle}>{route.title}</div>
+                    <div className={styles.streamSubtitle}>{route.subtitle}</div>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </section>
+          </div>
         </div>
       </aside>
     </>
