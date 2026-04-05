@@ -2,26 +2,24 @@
   position: fixed;
   top: 16px;
   left: 16px;
-  z-index: 1500;
-  width: 56px;
-  height: 56px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 18px;
+  z-index: 1600;
+  width: 58px;
+  height: 58px;
   display: none;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
   gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
   cursor: pointer;
-  color: #ffffff;
   background:
-    linear-gradient(180deg, rgba(12, 18, 38, 0.96), rgba(8, 12, 28, 0.94));
+    linear-gradient(180deg, rgba(8, 14, 34, 0.98), rgba(7, 11, 26, 0.95));
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.38),
-    0 0 28px rgba(56, 189, 248, 0.12),
-    0 0 24px rgba(168, 85, 247, 0.10);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+    0 18px 44px rgba(0, 0, 0, 0.38),
+    0 0 24px rgba(56, 189, 248, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .mobileToggle span {
@@ -35,11 +33,11 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 1390;
+  z-index: 1490;
   border: none;
   padding: 0;
   cursor: pointer;
-  background: rgba(2, 6, 18, 0.72);
+  background: rgba(2, 6, 18, 0.76);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -48,138 +46,91 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1400;
+  z-index: 1500;
   width: 320px;
   height: 100vh;
   overflow: hidden;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  background:
-    linear-gradient(180deg, rgba(5, 10, 24, 0.98), rgba(7, 12, 29, 0.98)),
-    radial-gradient(circle at top left, rgba(56, 189, 248, 0.10), transparent 26%),
-    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.10), transparent 24%);
-  box-shadow:
-    26px 0 72px rgba(0, 0, 0, 0.42),
-    0 0 26px rgba(56, 189, 248, 0.08),
-    0 0 40px rgba(168, 85, 247, 0.08);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
   transform: translateX(0);
-  transition: transform 0.28s ease;
-  will-change: transform;
+  transition: transform 0.3s ease;
+  background:
+    linear-gradient(180deg, rgba(4, 9, 24, 0.98), rgba(6, 11, 28, 0.98)),
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 22%),
+    radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.10), transparent 24%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    24px 0 70px rgba(0, 0, 0, 0.44),
+    0 0 28px rgba(56, 189, 248, 0.08),
+    0 0 34px rgba(168, 85, 247, 0.08);
 }
 
-.sidebar::before {
-  content: "";
+.sidebarOpen {
+  transform: translateX(0);
+}
+
+.stars {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.10) 0%,
-      rgba(255, 255, 255, 0.03) 12%,
-      transparent 34%
-    );
-  opacity: 0.7;
+  opacity: 0.16;
+  background-image:
+    radial-gradient(circle at 16% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 32% 26%, rgba(255,255,255,0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 78% 15%, rgba(255,255,255,0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 70% 42%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 18% 62%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 58% 72%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 30% 88%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px);
 }
 
-.sidebar::after {
-  content: "";
-  position: absolute;
-  inset: 1px 0 1px auto;
-  width: 1px;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(255, 255, 255, 0.18),
-    transparent
-  );
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.auroraA,
-.auroraB,
-.auroraC {
+.glowA,
+.glowB,
+.glowC {
   position: absolute;
   border-radius: 999px;
-  filter: blur(52px);
+  filter: blur(50px);
   pointer-events: none;
   opacity: 0.48;
 }
 
-.auroraA {
-  top: -50px;
+.glowA {
+  top: -40px;
   left: -60px;
-  width: 190px;
-  height: 190px;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.28), transparent 70%);
-}
-
-.auroraB {
-  top: 160px;
-  right: -80px;
   width: 180px;
   height: 180px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.30), transparent 70%);
+}
+
+.glowB {
+  top: 190px;
+  right: -60px;
+  width: 170px;
+  height: 170px;
   background: radial-gradient(circle, rgba(244, 114, 182, 0.22), transparent 72%);
 }
 
-.auroraC {
+.glowC {
   bottom: -60px;
-  left: 16px;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.26), transparent 70%);
+  left: 10px;
+  width: 210px;
+  height: 210px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25), transparent 72%);
 }
 
-.starField {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.18;
-  background-image:
-    radial-gradient(circle at 12% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 24% 26%, rgba(255,255,255,0.7) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 76% 14%, rgba(255,255,255,0.85) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 84% 32%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 18% 48%, rgba(255,255,255,0.7) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 60% 52%, rgba(255,255,255,0.8) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 80% 66%, rgba(255,255,255,0.78) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 24% 72%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 52% 84%, rgba(255,255,255,0.76) 0 1px, transparent 1.5px);
-}
-
-.gridGlow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.08;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.10) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
-  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
-}
-
-.scanline {
+.edgeLight {
   position: absolute;
   top: 0;
-  left: -20%;
-  width: 140%;
-  height: 2px;
-  pointer-events: none;
+  right: 0;
+  width: 2px;
+  height: 100%;
   background: linear-gradient(
-    90deg,
+    180deg,
     transparent,
-    rgba(56, 189, 248, 0.7),
-    rgba(168, 85, 247, 0.6),
-    rgba(244, 114, 182, 0.6),
+    rgba(56, 189, 248, 0.55),
+    rgba(168, 85, 247, 0.45),
     transparent
   );
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
-  animation: scanlineMove 8s linear infinite;
-  opacity: 0.5;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
+  pointer-events: none;
 }
 
 .inner {
@@ -188,7 +139,8 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 20px 16px 16px;
+  gap: 14px;
+  padding: 18px 16px 16px;
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -202,20 +154,14 @@
   border-radius: 999px;
 }
 
-.header {
+.topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 18px;
 }
 
-.brandBlock {
-  min-width: 0;
-  flex: 1;
-}
-
-.brandBadge {
+.kicker {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -223,72 +169,97 @@
   border-radius: 999px;
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.82);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 14px;
 }
 
-.logoCluster {
+.closeButton {
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.brandCard {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    0 18px 36px rgba(0, 0, 0, 0.18);
+}
+
+.brandLeft {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reactor {
   position: relative;
   width: 88px;
   height: 88px;
-  margin-bottom: 14px;
 }
 
-.logoHalo {
+.reactorRing {
   position: absolute;
-  inset: -12px;
+  inset: 6px;
   border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(56, 189, 248, 0.22), rgba(168, 85, 247, 0.14), transparent 72%);
-  filter: blur(14px);
-}
-
-.logoRing {
-  position: absolute;
-  inset: 8px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255,255,255,0.14);
   box-shadow:
-    inset 0 0 18px rgba(255, 255, 255, 0.03),
-    0 0 18px rgba(56, 189, 248, 0.10);
+    inset 0 0 18px rgba(255,255,255,0.04),
+    0 0 18px rgba(56, 189, 248, 0.12);
 }
 
-.logoDisc {
-  position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  height: 18px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #38bdf8, #8b5cf6, #f472b6, #facc15);
-  box-shadow:
-    0 0 18px rgba(56, 189, 248, 0.24),
-    0 0 24px rgba(168, 85, 247, 0.18);
-}
-
-.logoOwl {
+.reactorCore {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 40px;
-  line-height: 1;
+  font-size: 38px;
+  z-index: 2;
 }
 
-.brandText {
+.reactorDisc {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  height: 16px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #8b5cf6, #f472b6, #facc15);
+  box-shadow:
+    0 0 20px rgba(56, 189, 248, 0.22),
+    0 0 24px rgba(168, 85, 247, 0.16);
+}
+
+.brandRight {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.brandKicker {
+.brandMini {
   font-size: 10px;
-  line-height: 1.4;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: rgba(255, 255, 255, 0.60);
+  color: rgba(255,255,255,0.6);
   margin-bottom: 8px;
 }
 
@@ -298,93 +269,50 @@
   font-weight: 900;
   letter-spacing: -0.05em;
   color: #ffffff;
-  text-shadow:
-    0 0 18px rgba(255, 255, 255, 0.08),
-    0 0 24px rgba(56, 189, 248, 0.08);
 }
 
-.brandSubtitle {
+.brandSub {
   margin-top: 8px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255,255,255,0.72);
 }
 
-.closeButton {
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: 14px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.orbitalPanel {
-  position: relative;
+.commandCard {
   padding: 16px;
   border-radius: 24px;
-  margin-bottom: 18px;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.05),
-    0 16px 32px rgba(0, 0, 0, 0.20),
-    0 0 24px rgba(56, 189, 248, 0.06);
-  overflow: hidden;
+    0 16px 32px rgba(0, 0, 0, 0.18);
 }
 
-.orbitalPanel::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 24px;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgba(56, 189, 248, 0.34),
-    rgba(168, 85, 247, 0.22),
-    rgba(244, 114, 182, 0.18),
-    rgba(255, 255, 255, 0.08)
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-  opacity: 0.9;
-}
-
-.panelTop {
+.commandHeader {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 14px;
 }
 
-.panelLabel {
+.commandLabel {
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(255,255,255,0.56);
   margin-bottom: 6px;
 }
 
-.panelTitle {
+.commandTitle {
   font-size: 18px;
   line-height: 1.1;
   font-weight: 900;
   color: #ffffff;
 }
 
-.liveBadge {
+.livePill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -403,23 +331,23 @@
   height: 8px;
   border-radius: 999px;
   background: linear-gradient(180deg, #4ade80, #22c55e);
-  box-shadow: 0 0 14px rgba(34, 197, 94, 0.45);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
 }
 
-.statusGrid {
+.commandGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-.statusItem {
+.commandCell {
   padding: 11px 12px;
   border-radius: 16px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.07);
 }
 
-.statusItem span {
+.commandCell span {
   display: block;
   font-size: 10px;
   text-transform: uppercase;
@@ -428,81 +356,71 @@
   margin-bottom: 6px;
 }
 
-.statusItem strong {
+.commandCell strong {
   font-size: 13px;
   font-weight: 800;
   color: #ffffff;
 }
 
-.navLabel {
+.navHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding-left: 4px;
-  margin-bottom: 10px;
   font-size: 11px;
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255,255,255,0.62);
+}
+
+.navHeaderLine {
+  width: 28px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #38bdf8, #8b5cf6, #f472b6);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 10px;
 }
 
 .navItem {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 38px 40px 1fr 18px;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 68px;
+  gap: 10px;
+  min-height: 72px;
   padding: 0 14px;
-  border-radius: 20px;
+  border-radius: 22px;
   text-decoration: none;
-  color: #dce5f8;
+  color: #dce5f5;
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.03));
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.03),
-    0 8px 20px rgba(0, 0, 0, 0.10);
+    0 10px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
     background 0.22s ease,
     box-shadow 0.22s ease;
-  overflow: hidden;
-}
-
-.navItem::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      transparent,
-      rgba(255,255,255,0.05),
-      transparent
-    );
-  transform: translateX(-100%);
-  transition: transform 0.45s ease;
-  pointer-events: none;
 }
 
 .navItem:hover {
   transform: translateY(-2px);
   border-color: rgba(255,255,255,0.12);
   background:
-    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.04));
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
   box-shadow:
-    0 14px 30px rgba(0,0,0,0.16),
+    0 14px 28px rgba(0,0,0,0.16),
     0 0 18px rgba(56, 189, 248, 0.06);
-}
-
-.navItem:hover::before {
-  transform: translateX(100%);
 }
 
 .navItemActive {
@@ -510,37 +428,31 @@
   background:
     linear-gradient(
       90deg,
-      rgba(56, 189, 248, 0.14),
-      rgba(168, 85, 247, 0.16),
+      rgba(56, 189, 248, 0.15),
+      rgba(168, 85, 247, 0.15),
       rgba(244, 114, 182, 0.12)
     );
   border-color: rgba(56, 189, 248, 0.22);
   box-shadow:
-    0 0 24px rgba(56, 189, 248, 0.10),
-    0 0 22px rgba(168, 85, 247, 0.08),
-    inset 0 1px 0 rgba(255,255,255,0.05);
+    0 0 22px rgba(56, 189, 248, 0.10),
+    0 0 20px rgba(168, 85, 247, 0.08);
 }
 
-.navMain {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
+.navIndex {
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.44);
 }
 
 .navIcon {
   width: 40px;
   height: 40px;
-  flex-shrink: 0;
   border-radius: 14px;
   display: grid;
   place-items: center;
   font-size: 15px;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.03),
-    0 0 18px rgba(56, 189, 248, 0.04);
 }
 
 .navText {
@@ -549,7 +461,7 @@
   min-width: 0;
 }
 
-.navTitle {
+.navLabel {
   font-size: 14px;
   font-weight: 900;
   color: inherit;
@@ -562,14 +474,13 @@
 }
 
 .navArrow {
-  flex-shrink: 0;
-  font-size: 19px;
-  color: rgba(255,255,255,0.38);
+  font-size: 18px;
+  color: rgba(255,255,255,0.34);
+  text-align: right;
 }
 
-.signalCard {
-  position: relative;
-  margin-top: 14px;
+.bottomPanel {
+  margin-top: 4px;
   padding: 16px;
   border-radius: 22px;
   background:
@@ -577,23 +488,10 @@
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
-    0 12px 28px rgba(0, 0, 0, 0.16);
-  overflow: hidden;
+    0 12px 24px rgba(0, 0, 0, 0.16);
 }
 
-.signalCard::before {
-  content: "";
-  position: absolute;
-  inset: auto -20% -40% auto;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.18), transparent 70%);
-  filter: blur(10px);
-  pointer-events: none;
-}
-
-.signalTag {
+.bottomPanelLabel {
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.14em;
@@ -602,7 +500,7 @@
   margin-bottom: 8px;
 }
 
-.signalTitle {
+.bottomPanelTitle {
   font-size: 15px;
   line-height: 1.3;
   font-weight: 900;
@@ -610,26 +508,25 @@
   margin-bottom: 8px;
 }
 
-.signalText {
+.bottomPanelText {
   margin: 0;
   font-size: 12px;
   line-height: 1.55;
-  color: rgba(255,255,255,0.70);
+  color: rgba(255,255,255,0.7);
 }
 
-.signalBar {
-  margin-top: 14px;
+.energyBar {
   width: 100%;
   height: 8px;
+  margin-top: 14px;
   border-radius: 999px;
-  overflow: hidden;
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.06);
+  overflow: hidden;
 }
 
-.signalBar span {
-  display: block;
-  width: 68%;
+.energyFill {
+  width: 72%;
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #38bdf8, #8b5cf6, #f472b6, #facc15);
@@ -640,11 +537,11 @@
   position: relative;
   width: 100%;
   min-height: 56px;
-  margin-top: 14px;
+  margin-top: auto;
   border: none;
   border-radius: 20px;
-  cursor: pointer;
   overflow: hidden;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -655,16 +552,15 @@
   background: linear-gradient(90deg, rgba(239, 68, 68, 0.96), rgba(220, 38, 38, 0.96));
   box-shadow:
     0 16px 32px rgba(239, 68, 68, 0.18),
-    0 0 22px rgba(239, 68, 68, 0.10);
+    0 0 20px rgba(239, 68, 68, 0.08);
 }
 
 .logoutGlow {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, transparent, rgba(255,255,255,0.14), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
   transform: translateX(-100%);
-  animation: shineMove 3s linear infinite;
+  animation: logoutShine 3s linear infinite;
   pointer-events: none;
 }
 
@@ -674,28 +570,7 @@
   font-size: 15px;
 }
 
-.sidebarOpen {
-  transform: translateX(0);
-}
-
-@keyframes scanlineMove {
-  0% {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.38;
-  }
-  50% {
-    opacity: 0.55;
-  }
-  100% {
-    transform: translateY(100vh);
-    opacity: 0;
-  }
-}
-
-@keyframes shineMove {
+@keyframes logoutShine {
   0% {
     transform: translateX(-100%);
   }
@@ -714,10 +589,12 @@
     transform: translateX(-100%);
   }
 
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
+  }
+
   .closeButton {
     display: inline-flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
@@ -732,30 +609,23 @@
     padding: 18px 14px 14px;
   }
 
+  .brandCard {
+    grid-template-columns: 84px 1fr;
+    gap: 12px;
+  }
+
   .brandTitle {
     font-size: 30px;
   }
 
-  .logoCluster {
-    width: 80px;
-    height: 80px;
-  }
-
-  .statusGrid {
-    grid-template-columns: 1fr 1fr;
+  .reactor {
+    width: 78px;
+    height: 78px;
   }
 
   .navItem {
-    min-height: 64px;
+    grid-template-columns: 32px 38px 1fr 16px;
+    min-height: 68px;
     padding: 0 12px;
-  }
-
-  .navIcon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .logoutButton {
-    min-height: 54px;
   }
 }
