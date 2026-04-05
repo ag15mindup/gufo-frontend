@@ -6,68 +6,68 @@ import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
-type LinkItem = {
+type NavItem = {
   href: string;
   label: string;
   sub: string;
   icon: React.ReactNode;
 };
 
-function DiamondIcon() {
+function IconDiamond() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <path d="M12 3 21 12 12 21 3 12 12 3Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 6 18 12 12 18 6 12 12 6Z" fill="currentColor" opacity="0.22" />
+      <path d="M12 6 18 12 12 18 6 12 12 6Z" fill="currentColor" opacity="0.18" />
     </svg>
   );
 }
 
-function WalletIcon() {
+function IconWallet() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <rect x="3.5" y="6" width="17" height="12" rx="3" fill="none" stroke="currentColor" strokeWidth="1.8" />
       <path d="M15 11h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="15.5" cy="12" r="1.2" fill="currentColor" />
+      <circle cx="15.4" cy="12" r="1.1" fill="currentColor" />
     </svg>
   );
 }
 
-function TransactionsIcon() {
+function IconTransactions() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <path d="M7 7h10M7 12h10M7 17h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="1.6" opacity="0.55" />
+      <rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.55" />
     </svg>
   );
 }
 
-function MembershipIcon() {
+function IconCube() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <path d="M12 4 18.5 7.5v9L12 20 5.5 16.5v-9L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12 4v16M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" strokeWidth="1.4" opacity="0.55" />
+      <path d="M12 4v16M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" strokeWidth="1.4" opacity="0.5" />
     </svg>
   );
 }
 
-function RewardsIcon() {
+function IconStar() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
-      <path d="m12 3 2.1 5.4L20 10.2l-4.6 3.5 1.7 5.8L12 16.3 6.9 19.5l1.7-5.8L4 10.2l5.9-1.8L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
+      <path d="m12 3 2.2 5.5L20 10.2l-4.4 3.3 1.6 5.5L12 16l-5.2 3 1.6-5.5L4 10.2l5.8-1.7L12 3Z" fill="none" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   );
 }
 
-function ProfileIcon() {
+function IconUser() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
-      <circle cx="12" cy="8" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M5.5 19c1.8-3 4-4.2 6.5-4.2S16.7 16 18.5 19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="12" cy="8" r="3.1" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M5.5 19c1.7-2.9 4-4.2 6.5-4.2s4.8 1.3 6.5 4.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
-function QrIcon() {
+function IconQr() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -76,16 +76,16 @@ function QrIcon() {
   );
 }
 
-function PartnerIcon() {
+function IconTriangle() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <path d="M12 4 20 18H4L12 4Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-      <circle cx="12" cy="13.2" r="1.3" fill="currentColor" />
+      <circle cx="12" cy="13.2" r="1.2" fill="currentColor" />
     </svg>
   );
 }
 
-function DashboardBusinessIcon() {
+function IconGrid() {
   return (
     <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
       <rect x="4" y="4" width="6" height="6" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -108,14 +108,10 @@ export default function Sidebar() {
 
   useEffect(() => {
     const onResize = () => {
-      if (window.innerWidth > 1100) {
-        setOpen(false);
-      }
+      if (window.innerWidth > 1100) setOpen(false);
     };
-
     onResize();
     window.addEventListener("resize", onResize);
-
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
@@ -124,24 +120,24 @@ export default function Sidebar() {
     router.push("/login");
   }
 
-  const links = useMemo<LinkItem[]>(
+  const items = useMemo<NavItem[]>(
     () => [
-      { href: "/dashboard", label: "Dashboard", sub: "Control center", icon: <DiamondIcon /> },
-      { href: "/wallet", label: "Wallet", sub: "Saldo e movimenti", icon: <WalletIcon /> },
-      { href: "/transactions", label: "Transazioni", sub: "Storico attività", icon: <TransactionsIcon /> },
-      { href: "/membership", label: "Membership", sub: "Livello stagionale", icon: <MembershipIcon /> },
-      { href: "/rewards", label: "Rewards", sub: "Bonus e premi", icon: <RewardsIcon /> },
-      { href: "/profile", label: "Profilo", sub: "Identità account", icon: <ProfileIcon /> },
-      { href: "/customer-code", label: "QR Code", sub: "Codice cliente", icon: <QrIcon /> },
-      { href: "/partner-demo", label: "Partner Demo", sub: "Anteprima partner", icon: <PartnerIcon /> },
-      { href: "/partner-dashboard", label: "Partner Dashboard", sub: "Pannello business", icon: <DashboardBusinessIcon /> },
+      { href: "/dashboard", label: "Dashboard", sub: "Control center", icon: <IconDiamond /> },
+      { href: "/wallet", label: "Wallet", sub: "Saldo e movimenti", icon: <IconWallet /> },
+      { href: "/transactions", label: "Transazioni", sub: "Storico attività", icon: <IconTransactions /> },
+      { href: "/membership", label: "Membership", sub: "Livello stagionale", icon: <IconCube /> },
+      { href: "/rewards", label: "Rewards", sub: "Bonus e premi", icon: <IconStar /> },
+      { href: "/profile", label: "Profilo", sub: "Identità account", icon: <IconUser /> },
+      { href: "/customer-code", label: "QR Code", sub: "Codice cliente", icon: <IconQr /> },
+      { href: "/partner-demo", label: "Partner Demo", sub: "Anteprima partner", icon: <IconTriangle /> },
+      { href: "/partner-dashboard", label: "Partner Dashboard", sub: "Pannello business", icon: <IconGrid /> },
     ],
     []
   );
 
-  const activeLink =
-    links.find((link) => pathname === link.href || pathname.startsWith(`${link.href}/`)) ||
-    links[0];
+  const active =
+    items.find((item) => pathname === item.href || pathname.startsWith(`${item.href}/`)) ||
+    items[0];
 
   return (
     <>
@@ -166,77 +162,73 @@ export default function Sidebar() {
       )}
 
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
-        <div className={styles.stars} />
-        <div className={styles.glowA} />
-        <div className={styles.glowB} />
+        <div className={styles.neonBorder} />
+        <div className={styles.verticalGlow} />
+        <div className={styles.starDust} />
 
-        <div className={styles.shell}>
+        <div className={styles.hud}>
           <div className={styles.rail}>
-            <div className={styles.railTop}>
-              <div className={styles.logoWrap}>
-                <div className={styles.logoHalo} />
-                <div className={styles.logoRing} />
+            <div className={styles.brandBlock}>
+              <div className={styles.logoOrb}>
+                <div className={styles.logoGlow} />
+                <div className={styles.logoCircle} />
                 <div className={styles.logoDisc} />
                 <div className={styles.logoOwl}>🦉</div>
               </div>
 
-              <div className={styles.brandText}>
-                <span className={styles.brandTitle}>GUFO</span>
-                <span className={styles.brandSub}>Neon OS</span>
-              </div>
+              <div className={styles.brandName}>GUFO</div>
+              <div className={styles.brandSub}>Neon OS</div>
             </div>
 
-            <div className={styles.liveBadge}>
+            <div className={styles.livePill}>
               <span className={styles.liveDot} />
               LIVE
             </div>
 
-            <nav className={styles.railNav}>
-              {links.map((link) => {
+            <nav className={styles.iconNav}>
+              {items.map((item) => {
                 const isActive =
-                  pathname === link.href || pathname.startsWith(`${link.href}/`);
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
 
                 return (
                   <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`${styles.railItem} ${isActive ? styles.railItemActive : ""}`}
-                    title={link.label}
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.iconButton} ${isActive ? styles.iconButtonActive : ""}`}
+                    title={item.label}
                   >
-                    <span className={styles.railItemGlow} />
-                    <span className={styles.railIcon}>{link.icon}</span>
+                    <span className={styles.iconButtonHalo} />
+                    <span className={styles.iconInner}>{item.icon}</span>
                   </Link>
                 );
               })}
             </nav>
 
-            <div className={styles.railBottom}>
-              <div className={styles.energyBlock}>
-                <div className={styles.energyTrack}>
-                  <div className={styles.energyFill} />
+            <div className={styles.railFooter}>
+              <div className={styles.coreWrap}>
+                <div className={styles.coreTrack}>
+                  <div className={styles.coreFill} />
                 </div>
-                <span className={styles.energyLabel}>CORE</span>
+                <div className={styles.coreText}>CORE</div>
               </div>
 
               <button
                 type="button"
-                className={styles.logoutButton}
                 onClick={handleLogout}
-                aria-label="Logout"
+                className={styles.logoutButton}
                 title="Logout"
+                aria-label="Logout"
               >
                 ↗
               </button>
             </div>
           </div>
 
-          <div className={styles.panel}>
-            <div className={styles.panelHeader}>
-              <div>
-                <div className={styles.panelBadge}>GUFO ORBITAL PANEL</div>
+          <div className={styles.menuPanel}>
+            <div className={styles.menuHead}>
+              <div className={styles.menuHeadText}>
+                <div className={styles.panelTag}>GUFO ORBITAL PANEL</div>
                 <div className={styles.panelKicker}>Rainbow Cashback Network</div>
-                <div className={styles.panelTitle}>{activeLink.label}</div>
-                <div className={styles.panelSub}>{activeLink.sub}</div>
               </div>
 
               <button
@@ -249,37 +241,29 @@ export default function Sidebar() {
               </button>
             </div>
 
-            <div className={styles.panelList}>
-              {links.map((link) => {
-                const isActive =
-                  pathname === link.href || pathname.startsWith(`${link.href}/`);
+            <div className={styles.activeCard}>
+              <div className={styles.activeArrow} />
+              <div className={styles.activeIcon}>{active.icon}</div>
 
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`${styles.panelItem} ${isActive ? styles.panelItemActive : ""}`}
-                  >
-                    <div className={styles.panelItemIcon}>{link.icon}</div>
-
-                    <div className={styles.panelItemText}>
-                      <span className={styles.panelItemLabel}>{link.label}</span>
-                      <span className={styles.panelItemSub}>{link.sub}</span>
-                    </div>
-
-                    <div className={styles.panelItemArrow}>›</div>
-                  </Link>
-                );
-              })}
+              <div className={styles.activeText}>
+                <div className={styles.activeLabel}>{active.label}</div>
+                <div className={styles.activeSub}>{active.sub}</div>
+              </div>
             </div>
 
-            <div className={styles.panelFooter}>
-              <div className={styles.footerLabel}>SYSTEM NOTE</div>
-              <div className={styles.footerTitle}>Sidebar nuova, non derivata dalla vecchia</div>
-              <div className={styles.footerText}>
-                Rail luminosa a sinistra, pannello navigazione a destra, look più
-                spaziale e base migliore per uniformare tutto GUFO.
-              </div>
+            <div className={styles.menuList}>
+              {items
+                .filter((item) => item.href !== active.href)
+                .map((item) => (
+                  <Link key={item.href} href={item.href} className={styles.menuRow}>
+                    <div className={styles.menuRowIcon}>{item.icon}</div>
+
+                    <div className={styles.menuRowText}>
+                      <div className={styles.menuRowLabel}>{item.label}</div>
+                      <div className={styles.menuRowSub}>{item.sub}</div>
+                    </div>
+                  </Link>
+                ))}
             </div>
           </div>
         </div>

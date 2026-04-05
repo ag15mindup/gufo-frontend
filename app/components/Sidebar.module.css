@@ -13,7 +13,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
   cursor: pointer;
-  background: linear-gradient(180deg, rgba(10, 16, 34, 0.96), rgba(7, 12, 28, 0.94));
+  background: linear-gradient(180deg, rgba(9, 14, 32, 0.96), rgba(6, 10, 24, 0.94));
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.42),
     0 0 24px rgba(56, 189, 248, 0.12);
@@ -52,13 +52,13 @@
   transform: translateX(0);
   transition: transform 0.28s ease;
   background:
-    linear-gradient(180deg, rgba(6, 10, 26, 0.98), rgba(7, 11, 24, 0.98)),
+    linear-gradient(180deg, rgba(5, 9, 22, 0.98), rgba(6, 10, 24, 0.98)),
     radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), transparent 24%),
     radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.10), transparent 30%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
     24px 0 70px rgba(0, 0, 0, 0.40),
-    0 0 26px rgba(56, 189, 248, 0.08);
+    0 0 28px rgba(56, 189, 248, 0.08);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
@@ -67,149 +67,143 @@
   transform: translateX(0);
 }
 
-.stars {
+.neonBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(86, 202, 255, 0.78),
+    rgba(191, 104, 255, 0.52),
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(86, 202, 255, 0.35);
+}
+
+.verticalGlow {
   position: absolute;
   inset: 0;
-  opacity: 0.14;
   pointer-events: none;
+  opacity: 0.11;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.starDust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.16;
   background-image:
     radial-gradient(circle at 12% 10%, rgba(255,255,255,0.95) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 25% 28%, rgba(255,255,255,0.74) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 84% 16%, rgba(255,255,255,0.78) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 72% 42%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 18% 70%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
-    radial-gradient(circle at 54% 82%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px);
+    radial-gradient(circle at 26% 25%, rgba(255,255,255,0.74) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 84% 14%, rgba(255,255,255,0.78) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 72% 38%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 18% 66%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px),
+    radial-gradient(circle at 56% 84%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px);
 }
 
-.glowA,
-.glowB {
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(48px);
-  pointer-events: none;
-  opacity: 0.48;
-}
-
-.glowA {
-  top: -40px;
-  left: -50px;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.28), transparent 72%);
-}
-
-.glowB {
-  bottom: -48px;
-  left: 18px;
-  width: 190px;
-  height: 190px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.24), transparent 72%);
-}
-
-.shell {
+.hud {
   position: relative;
   z-index: 2;
-  height: 100%;
   display: flex;
   gap: 14px;
+  height: 100%;
   padding: 14px;
 }
 
 .rail {
-  width: 92px;
+  width: 94px;
   height: 100%;
-  border-radius: 30px;
-  padding: 14px 10px;
+  border-radius: 34px;
+  padding: 16px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
     0 18px 34px rgba(0,0,0,0.22);
 }
 
-.railTop {
+.brandBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.logoWrap {
+.logoOrb {
   position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: 22px;
+  width: 72px;
+  height: 72px;
   display: grid;
   place-items: center;
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.04),
-    0 12px 24px rgba(0,0,0,0.22);
 }
 
-.logoHalo {
+.logoGlow {
   position: absolute;
   inset: -8px;
-  border-radius: 24px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.18), rgba(168, 85, 247, 0.12), transparent 72%);
-  filter: blur(10px);
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(63, 173, 255, 0.22), rgba(207, 95, 255, 0.18), transparent 72%);
+  filter: blur(12px);
 }
 
-.logoRing {
+.logoCircle {
   position: absolute;
-  inset: 8px;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.10);
+  inset: 4px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(120, 214, 255, 0.70);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 0 22px rgba(63, 173, 255, 0.18);
 }
 
 .logoDisc {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  height: 10px;
+  left: 14px;
+  right: 14px;
+  bottom: 13px;
+  height: 11px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #38bdf8, #8b5cf6, #f472b6, #facc15);
+  background: linear-gradient(90deg, #49caff, #8b5cf6, #f472b6, #facc15);
   box-shadow:
-    0 0 16px rgba(56, 189, 248, 0.24),
-    0 0 20px rgba(168, 85, 247, 0.16);
+    0 0 18px rgba(73, 202, 255, 0.22),
+    0 0 20px rgba(139, 92, 246, 0.12);
 }
 
 .logoOwl {
   position: relative;
   z-index: 2;
-  font-size: 26px;
+  font-size: 28px;
   line-height: 1;
 }
 
-.brandText {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.brandTitle {
+.brandName {
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: #ffffff;
 }
 
 .brandSub {
   font-size: 10px;
-  color: rgba(255,255,255,0.58);
+  color: rgba(255,255,255,0.62);
 }
 
-.liveBadge {
+.livePill {
   min-height: 32px;
-  margin-top: 14px;
-  margin-bottom: 16px;
+  margin-top: 12px;
+  margin-bottom: 18px;
   padding: 0 10px;
   border-radius: 999px;
   display: inline-flex;
@@ -231,28 +225,29 @@
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.45);
 }
 
-.railNav {
+.iconNav {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.railItem {
+.iconButton {
   position: relative;
   width: 100%;
-  height: 60px;
-  border-radius: 20px;
+  height: 62px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #dce5f5;
   text-decoration: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.03));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
   border: 1px solid rgba(255,255,255,0.08);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.03),
-    0 10px 22px rgba(0,0,0,0.12);
+    0 12px 22px rgba(0,0,0,0.12);
   transition:
     transform 0.22s ease,
     border-color 0.22s ease,
@@ -260,105 +255,105 @@
     background 0.22s ease;
 }
 
-.railItem:hover {
+.iconButton:hover {
   transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.12);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-  box-shadow:
-    0 14px 26px rgba(0,0,0,0.16),
-    0 0 18px rgba(56,189,248,0.08);
-}
-
-.railItemActive {
-  color: #ffffff;
+  border-color: rgba(255,255,255,0.14);
   background:
-    linear-gradient(
-      180deg,
-      rgba(56, 189, 248, 0.14),
-      rgba(168, 85, 247, 0.14),
-      rgba(244, 114, 182, 0.10)
-    );
-  border-color: rgba(56, 189, 248, 0.22);
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.035));
   box-shadow:
-    0 0 20px rgba(56,189,248,0.12),
-    0 0 16px rgba(168,85,247,0.08);
+    0 14px 28px rgba(0,0,0,0.18),
+    0 0 18px rgba(86, 202, 255, 0.08);
 }
 
-.railItemGlow {
+.iconButtonActive {
+  color: #ffffff;
+  border-color: rgba(121, 210, 255, 0.30);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(77, 202, 255, 0.16), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+  box-shadow:
+    0 0 24px rgba(86, 202, 255, 0.16),
+    0 0 18px rgba(191, 104, 255, 0.08);
+}
+
+.iconButtonHalo {
   position: absolute;
   inset: -1px;
-  border-radius: 20px;
+  border-radius: inherit;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.22s ease;
-  background: linear-gradient(135deg, rgba(56,189,248,0.24), rgba(168,85,247,0.18), rgba(244,114,182,0.14));
+  background: linear-gradient(135deg, rgba(86,202,255,0.24), rgba(191,104,255,0.20), rgba(244,114,182,0.16));
   filter: blur(10px);
 }
 
-.railItem:hover .railItemGlow,
-.railItemActive .railItemGlow {
+.iconButton:hover .iconButtonHalo,
+.iconButtonActive .iconButtonHalo {
   opacity: 1;
 }
 
-.railIcon {
+.iconInner {
   position: relative;
   z-index: 2;
+  width: 24px;
+  height: 24px;
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
 }
 
 .iconSvg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: block;
 }
 
-.railBottom {
+.railFooter {
   margin-top: auto;
   width: 100%;
   padding-top: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 
-.energyBlock {
-  width: 68px;
+.coreWrap {
+  width: 70px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 
-.energyTrack {
+.coreTrack {
   position: relative;
-  width: 8px;
-  height: 74px;
+  width: 10px;
+  height: 110px;
   border-radius: 999px;
   overflow: hidden;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: inset 0 0 18px rgba(255,255,255,0.03);
 }
 
-.energyFill {
+.coreFill {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 72%;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  height: 74%;
   border-radius: inherit;
-  background: linear-gradient(180deg, #38bdf8, #8b5cf6, #f472b6);
-  box-shadow: 0 0 18px rgba(56,189,248,0.24);
+  background: linear-gradient(180deg, #49caff, #8b5cf6, #f472b6);
+  box-shadow:
+    0 0 18px rgba(73, 202, 255, 0.24),
+    0 0 20px rgba(139, 92, 246, 0.16);
 }
 
-.energyLabel {
+.coreText {
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.12em;
-  color: rgba(255,255,255,0.58);
+  letter-spacing: 0.16em;
+  color: rgba(255,255,255,0.62);
 }
 
 .logoutButton {
@@ -377,32 +372,33 @@
     0 0 18px rgba(239, 68, 68, 0.08);
 }
 
-.panel {
+.menuPanel {
   flex: 1;
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 18px;
-  border-radius: 30px;
-  background: linear-gradient(180deg, rgba(11,18,40,0.94), rgba(8,12,30,0.92));
+  padding: 18px 18px 16px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(11, 18, 40, 0.94), rgba(8, 12, 30, 0.92));
   border: 1px solid rgba(255,255,255,0.10);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.04),
     0 18px 36px rgba(0,0,0,0.24),
-    0 0 24px rgba(56,189,248,0.06);
+    0 0 24px rgba(86,202,255,0.06);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 }
 
-.panelHeader {
+.menuHead {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
-.panelBadge {
+.panelTag {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -420,24 +416,10 @@
 
 .panelKicker {
   font-size: 11px;
+  line-height: 1.4;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.56);
-  margin-bottom: 8px;
-}
-
-.panelTitle {
-  font-size: 34px;
-  line-height: 0.95;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  color: #ffffff;
-}
-
-.panelSub {
-  margin-top: 8px;
-  font-size: 14px;
-  color: rgba(255,255,255,0.70);
+  color: rgba(255,255,255,0.58);
 }
 
 .closeButton {
@@ -454,130 +436,141 @@
   flex-shrink: 0;
 }
 
-.panelList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.panelList::-webkit-scrollbar {
-  width: 6px;
-}
-
-.panelList::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
-  border-radius: 999px;
-}
-
-.panelItem {
-  min-height: 72px;
-  border-radius: 22px;
+.activeCard {
+  position: relative;
+  min-height: 92px;
   display: grid;
-  grid-template-columns: 44px 1fr 18px;
+  grid-template-columns: 54px 1fr;
   align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  text-decoration: none;
-  color: #dce5f5;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.03),
-    0 10px 24px rgba(0, 0, 0, 0.12);
-  transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    background 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.panelItem:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.12);
-  background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-  box-shadow:
-    0 14px 28px rgba(0,0,0,0.16),
-    0 0 18px rgba(56,189,248,0.08);
-}
-
-.panelItemActive {
+  gap: 14px;
+  padding: 0 18px;
+  margin-bottom: 8px;
+  border-radius: 24px;
   color: #ffffff;
   background:
-    linear-gradient(
-      90deg,
-      rgba(56, 189, 248, 0.15),
-      rgba(168, 85, 247, 0.15),
-      rgba(244, 114, 182, 0.12)
-    );
-  border-color: rgba(56, 189, 248, 0.22);
+    radial-gradient(circle at 20% 50%, rgba(88, 203, 255, 0.18), transparent 42%),
+    linear-gradient(180deg, rgba(120, 118, 255, 0.16), rgba(82, 59, 194, 0.14));
+  border: 1px solid rgba(121, 210, 255, 0.32);
   box-shadow:
-    0 0 22px rgba(56, 189, 248, 0.10),
-    0 0 18px rgba(168, 85, 247, 0.08);
+    0 0 32px rgba(86, 202, 255, 0.16),
+    0 0 18px rgba(191, 104, 255, 0.10),
+    inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
-.panelItemIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: 15px;
+.activeCard::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(131, 221, 255, 0.26),
+    rgba(182, 107, 255, 0.20),
+    rgba(255,255,255,0.06)
+  );
+  filter: blur(10px);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.activeArrow {
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translateY(-50%) rotate(45deg);
+  border-left: 1px solid rgba(121, 210, 255, 0.34);
+  border-bottom: 1px solid rgba(121, 210, 255, 0.34);
+  background: linear-gradient(180deg, rgba(81, 191, 255, 0.22), rgba(153, 84, 255, 0.16));
+  box-shadow: 0 0 16px rgba(86, 202, 255, 0.18);
+}
+
+.activeIcon {
+  position: relative;
+  z-index: 1;
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,0.07);
+  background:
+    radial-gradient(circle at 50% 35%, rgba(108, 216, 255, 0.20), transparent 70%),
+    rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.activeText {
+  position: relative;
+  z-index: 1;
+}
+
+.activeLabel {
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.activeSub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+}
+
+.menuList {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.menuRow {
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 0 6px;
+  text-decoration: none;
+  color: #dce5f5;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.menuRow:hover {
+  transform: translateX(2px);
+  color: #ffffff;
+}
+
+.menuRow:last-child {
+  border-bottom: none;
+}
+
+.menuRowIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-.panelItemText {
-  display: flex;
-  flex-direction: column;
+.menuRowText {
   min-width: 0;
 }
 
-.panelItemLabel {
+.menuRowLabel {
   font-size: 15px;
-  font-weight: 900;
+  font-weight: 800;
   color: inherit;
 }
 
-.panelItemSub {
+.menuRowSub {
   margin-top: 4px;
   font-size: 12px;
   color: rgba(255,255,255,0.62);
-}
-
-.panelItemArrow {
-  font-size: 18px;
-  color: rgba(255,255,255,0.34);
-  text-align: right;
-}
-
-.panelFooter {
-  margin-top: auto;
-  padding-top: 18px;
-}
-
-.footerLabel {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.58);
-  margin-bottom: 8px;
-}
-
-.footerTitle {
-  font-size: 16px;
-  line-height: 1.3;
-  font-weight: 900;
-  color: #ffffff;
-  margin-bottom: 8px;
-}
-
-.footerText {
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(255,255,255,0.70);
 }
 
 @media (max-width: 1100px) {
@@ -594,33 +587,30 @@
     transform: translateX(0);
   }
 
-  .shell {
+  .hud {
     gap: 10px;
     padding: 10px;
   }
 
   .rail {
-    width: 80px;
+    width: 82px;
     padding: 12px 8px;
   }
 
-  .panel {
+  .menuPanel {
     padding: 14px;
   }
 
-  .panelTitle {
-    font-size: 28px;
+  .activeCard {
+    min-height: 82px;
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+    padding: 0 14px;
   }
 
-  .panelItem {
-    min-height: 66px;
-    grid-template-columns: 40px 1fr 16px;
-    padding: 0 12px;
-  }
-
-  .panelItemIcon {
-    width: 40px;
-    height: 40px;
+  .activeIcon {
+    width: 48px;
+    height: 48px;
   }
 
   .closeButton {
@@ -633,23 +623,27 @@
     width: calc(100vw - 16px);
   }
 
-  .shell {
+  .hud {
     gap: 8px;
     padding: 8px;
   }
 
   .rail {
     width: 72px;
-    border-radius: 24px;
+    border-radius: 26px;
   }
 
-  .logoWrap {
-    width: 58px;
-    height: 58px;
+  .logoOrb {
+    width: 64px;
+    height: 64px;
   }
 
-  .railItem {
+  .iconButton {
     height: 56px;
+  }
+
+  .coreTrack {
+    height: 94px;
   }
 
   .logoutButton {
@@ -657,20 +651,29 @@
     height: 46px;
   }
 
-  .panel {
+  .menuPanel {
     border-radius: 24px;
     padding: 12px;
   }
 
-  .panelTitle {
-    font-size: 24px;
+  .panelTag {
+    font-size: 9px;
   }
 
-  .panelItemLabel {
+  .activeLabel {
+    font-size: 16px;
+  }
+
+  .menuRow {
+    min-height: 74px;
+    gap: 12px;
+  }
+
+  .menuRowLabel {
     font-size: 14px;
   }
 
-  .panelItemSub {
+  .menuRowSub {
     font-size: 11px;
   }
 }

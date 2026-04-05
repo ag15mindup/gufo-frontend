@@ -14,17 +14,12 @@ export default function LayoutShell({
 }>) {
   const pathname = usePathname();
   const isPublicPage = PUBLIC_ROUTES.includes(pathname);
-
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    const onResize = () => {
-      setIsDesktop(window.innerWidth > 1100);
-    };
-
+    const onResize = () => setIsDesktop(window.innerWidth > 1100);
     onResize();
     window.addEventListener("resize", onResize);
-
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
@@ -36,7 +31,7 @@ export default function LayoutShell({
         width: "100%",
         overflowX: "hidden",
         background:
-          "radial-gradient(circle at 15% 20%, rgba(56,189,248,0.10), transparent 20%), radial-gradient(circle at 80% 16%, rgba(244,114,182,0.10), transparent 20%), radial-gradient(circle at 55% 72%, rgba(168,85,247,0.10), transparent 24%), linear-gradient(180deg, #030614 0%, #060b1d 55%, #050915 100%)",
+          "radial-gradient(circle at 14% 18%, rgba(56,189,248,0.10), transparent 20%), radial-gradient(circle at 82% 14%, rgba(244,114,182,0.10), transparent 20%), radial-gradient(circle at 55% 75%, rgba(168,85,247,0.10), transparent 24%), linear-gradient(180deg, #030511 0%, #050916 50%, #060b1c 100%)",
       }}
     >
       {!isPublicPage && <Sidebar />}
@@ -66,9 +61,9 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  opacity: 0.15,
+                  opacity: 0.14,
                   backgroundImage:
-                    "radial-gradient(circle at 14% 20%, rgba(255,255,255,0.95) 0 1px, transparent 1.4px), radial-gradient(circle at 28% 76%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px), radial-gradient(circle at 72% 18%, rgba(255,255,255,0.86) 0 1px, transparent 1.4px), radial-gradient(circle at 84% 56%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px), radial-gradient(circle at 54% 38%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px)",
+                    "radial-gradient(circle at 12% 16%, rgba(255,255,255,0.95) 0 1px, transparent 1.4px), radial-gradient(circle at 28% 70%, rgba(255,255,255,0.74) 0 1px, transparent 1.4px), radial-gradient(circle at 73% 19%, rgba(255,255,255,0.88) 0 1px, transparent 1.4px), radial-gradient(circle at 84% 55%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px), radial-gradient(circle at 54% 34%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px)",
                 }}
               />
 
@@ -77,10 +72,10 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  opacity: 0.05,
+                  opacity: 0.045,
                   backgroundImage:
                     "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
-                  backgroundSize: "34px 34px",
+                  backgroundSize: "36px 36px",
                 }}
               />
             </>
