@@ -1,45 +1,114 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./Sidebar.module.css";
 
+type NavLink = {
+  href: string;
+  label: string;
+  sub: string;
+  icon: string;
+};
+
 export default function Sidebar() {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth > 1100) {
+        setOpen(false);
+      }
+    }
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.push("/login");
   }
 
-  const links = [
-    { href: "/dashboard", label: "Dashboard", sub: "Control center", icon: "✦" },
-    { href: "/wallet", label: "Wallet", sub: "Saldo e movimenti", icon: "◎" },
-    { href: "/transactions", label: "Transactions", sub: "Storico attività", icon: "◌" },
-    { href: "/membership", label: "Membership", sub: "Livello stagionale", icon: "⬒" },
-    { href: "/rewards", label: "Rewards", sub: "Bonus e premi", icon: "✪" },
-    { href: "/profile", label: "Profile", sub: "Identità account", icon: "◉" },
-    { href: "/customer-code", label: "QR Code", sub: "Codice cliente", icon: "▣" },
-    { href: "/partner-demo", label: "Partner Demo", sub: "Anteprima partner", icon: "△" },
-    { href: "/partner-dashboard", label: "Partner Dashboard", sub: "Pannello business", icon: "▤" },
-  ];
+  const links = useMemo<NavLink[]>(
+    () => [
+      {
+        href: "/dashboard",
+        label: "Dashboard",
+        sub: "Control center",
+        icon: "◈",
+      },
+      {
+        href: "/wallet",
+        label: "Wallet",
+        sub: "Saldo e movimenti",
+        icon: "◎",
+      },
+      {
+        href: "/transactions",
+        label: "Transazioni",
+        sub: "Storico attività",
+        icon: "◌",
+      },
+      {
+        href: "/membership",
+        label: "Membership",
+        sub: "Livello stagionale",
+        icon: "⬒",
+      },
+      {
+        href: "/rewards",
+        label: "Rewards",
+        sub: "Bonus e premi",
+        icon: "✦",
+      },
+      {
+        href: "/profile",
+        label: "Profilo",
+        sub: "Identità account",
+        icon: "◉",
+      },
+      {
+        href: "/customer-code",
+        label: "QR Code",
+        sub: "Codice cliente",
+        icon: "▣",
+      },
+      {
+        href: "/partner-demo",
+        label: "Partner Demo",
+        sub: "Anteprima partner",
+        icon: "△",
+      },
+      {
+        href: "/partner-dashboard",
+        label: "Partner Dashboard",
+        sub: "Pannello business",
+        icon: "▤",
+      },
+    ],
+    []
+  );
 
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
-        className={styles.sidebarToggle}
-        aria-label="Apri menu"
         type="button"
+        aria-label="Apri menu"
+        className={styles.mobileToggle}
+        onClick={() => setOpen(true)}
       >
         <span />
         <span />
@@ -47,23 +116,30 @@ export default function Sidebar() {
       </button>
 
       {open && (
-        <div
-          className={styles.sidebarOverlay}
+        <button
+          type="button"
+          aria-label="Chiudi overlay menu"
+          className={styles.overlay}
           onClick={() => setOpen(false)}
-          aria-hidden="true"
         />
       )}
 
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ""}`}>
-        <div className={styles.bgGlowA} />
-        <div className={styles.bgGlowB} />
-        <div className={styles.bgGlowC} />
-        <div className={styles.bgStars} />
+        <div className={styles.auroraA} />
+        <div className={styles.auroraB} />
+        <div className={styles.auroraC} />
+        <div className={styles.starField} />
+        <div className={styles.gridGlow} />
+        <div className={styles.scanline} />
+
         <div className={styles.inner}>
-          <div className={styles.top}>
-            <div className={styles.brandRow}>
-              <div className={styles.logoWrap}>
+          <div className={styles.header}>
+            <div className={styles.brandBlock}>
+              <div className={styles.brandBadge}>GUFO CORE</div>
+
+              <div className={styles.logoCluster}>
                 <div className={styles.logoHalo} />
+                <div className={styles.logoRing} />
                 <div className={styles.logoDisc} />
                 <div className={styles.logoOwl}>🦉</div>
               </div>
@@ -71,46 +147,57 @@ export default function Sidebar() {
               <div className={styles.brandText}>
                 <div className={styles.brandKicker}>Rainbow Cashback Network</div>
                 <div className={styles.brandTitle}>GUFO</div>
-                <div className={styles.brandSub}>Neon Loyalty OS</div>
+                <div className={styles.brandSubtitle}>Neon Loyalty OS</div>
               </div>
             </div>
 
             <button
-              onClick={() => setOpen(false)}
-              className={styles.closeBtn}
-              aria-label="Chiudi menu"
               type="button"
+              aria-label="Chiudi menu"
+              className={styles.closeButton}
+              onClick={() => setOpen(false)}
             >
               ✕
             </button>
           </div>
 
-          <div className={styles.statusCard}>
-            <div className={styles.statusTop}>
+          <section className={styles.orbitalPanel}>
+            <div className={styles.panelTop}>
               <div>
-                <div className={styles.statusLabel}>System status</div>
-                <div className={styles.statusTitle}>GUFO Network Live</div>
+                <div className={styles.panelLabel}>System status</div>
+                <div className={styles.panelTitle}>Network online</div>
               </div>
 
-              <div className={styles.statusBadge}>
-                <span className={styles.statusDot} />
-                Online
+              <div className={styles.liveBadge}>
+                <span className={styles.liveDot} />
+                LIVE
               </div>
             </div>
 
             <div className={styles.statusGrid}>
-              <div className={styles.statusMini}>
+              <div className={styles.statusItem}>
                 <span>Mode</span>
                 <strong>Private</strong>
               </div>
-              <div className={styles.statusMini}>
+
+              <div className={styles.statusItem}>
                 <span>Layer</span>
                 <strong>Premium</strong>
               </div>
-            </div>
-          </div>
 
-          <div className={styles.navHead}>Navigation</div>
+              <div className={styles.statusItem}>
+                <span>UI</span>
+                <strong>Cosmic</strong>
+              </div>
+
+              <div className={styles.statusItem}>
+                <span>Phase</span>
+                <strong>Demo</strong>
+              </div>
+            </div>
+          </section>
+
+          <div className={styles.navLabel}>Navigation</div>
 
           <nav className={styles.nav}>
             {links.map((link) => {
@@ -122,11 +209,11 @@ export default function Sidebar() {
                   href={link.href}
                   className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
                 >
-                  <div className={styles.navLeft}>
+                  <div className={styles.navMain}>
                     <div className={styles.navIcon}>{link.icon}</div>
 
                     <div className={styles.navText}>
-                      <span className={styles.navLabel}>{link.label}</span>
+                      <span className={styles.navTitle}>{link.label}</span>
                       <span className={styles.navSub}>{link.sub}</span>
                     </div>
                   </div>
@@ -137,15 +224,25 @@ export default function Sidebar() {
             })}
           </nav>
 
-          <div className={styles.bottomCard}>
-            <div className={styles.bottomKicker}>GUFO CORE</div>
-            <div className={styles.bottomTitle}>Futuristic loyalty dashboard</div>
-            <div className={styles.bottomText}>
-              Cashback, premi, membership e strumenti partner in una UI premium.
-            </div>
-          </div>
+          <section className={styles.signalCard}>
+            <div className={styles.signalTag}>DEMO SIGNAL</div>
+            <div className={styles.signalTitle}>Futuristic loyalty cockpit</div>
+            <p className={styles.signalText}>
+              Cashback, premi, membership e strumenti partner dentro una esperienza
+              visiva più forte, luminosa e credibile.
+            </p>
 
-          <button onClick={handleLogout} className={styles.logoutButton} type="button">
+            <div className={styles.signalBar}>
+              <span />
+            </div>
+          </section>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className={styles.logoutButton}
+          >
+            <span className={styles.logoutGlow} />
             <span className={styles.logoutIcon}>↗</span>
             <span>Logout</span>
           </button>

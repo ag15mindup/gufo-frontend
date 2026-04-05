@@ -147,6 +147,31 @@ function formatCurrency(value: number): string {
   return `€ ${value.toFixed(2)}`;
 }
 
+function formatDate(value?: string | null): string {
+  if (!value) return "-";
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "-";
+
+  return parsed.toLocaleString("it-IT", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function buildInviteLink(name: string): string {
+  const slug = name
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 8);
+
+  return `https://invita.gufo.app/${slug || "utente"}`;
+}
+
 async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     method: "GET",
@@ -272,12 +297,18 @@ export default function DashboardPage() {
     return dashboardData.transactions.slice(0, 6);
   }, [dashboardData.transactions]);
 
+  const inviteLink = useMemo(() => {
+    return buildInviteLink(dashboardData.profileName);
+  }, [dashboardData.profileName]);
+
   if (loading) {
     return (
       <div className={styles.page}>
+        <div className={styles.bgNoise} />
         <div className={styles.bgGlowA} />
         <div className={styles.bgGlowB} />
         <div className={styles.bgGlowC} />
+        <div className={styles.bgGlowD} />
         <div className={styles.shell}>
           <div className={styles.loadingBox}>Caricamento dashboard GUFO...</div>
         </div>
@@ -288,9 +319,11 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className={styles.page}>
+        <div className={styles.bgNoise} />
         <div className={styles.bgGlowA} />
         <div className={styles.bgGlowB} />
         <div className={styles.bgGlowC} />
+        <div className={styles.bgGlowD} />
         <div className={styles.shell}>
           <div className={styles.errorBox}>{error}</div>
         </div>
@@ -301,47 +334,64 @@ export default function DashboardPage() {
   return (
     <div className={styles.page}>
       <div className={styles.bgOverlay} />
+      <div className={styles.bgNoise} />
       <div className={styles.bgGlowA} />
       <div className={styles.bgGlowB} />
       <div className={styles.bgGlowC} />
       <div className={styles.bgGlowD} />
       <div className={styles.rainbowBeam} />
+      <div className={styles.topPill}>
+        <span className={styles.topPillPlus}>+</span>
+        <span>{dashboardData.balanceGufo.toFixed(2)} GUFO</span>
+      </div>
 
       <div className={styles.shell}>
-        <div className={styles.frameLine} />
+        <div className={styles.topRail}>
+          <div className={styles.owlDock}>
+            <div className={styles.owlHalo} />
+            <div className={styles.owlDisc} />
+            <span>🦉</span>
+          </div>
+          <div className={styles.topLine} />
+        </div>
 
-        <section className={styles.heroWrap}>
-          <div className={styles.heroLeft}>
-            <div className={styles.heroMiniTop}>
-              <div className={styles.brandChip}>
-                <div className={styles.brandChipLogo}>
-                  <div className={styles.brandChipDisc} />
-                  <span>🦉</span>
-                </div>
-                <div className={styles.brandChipText}>
-                  <span>Rainbow Cashback Network</span>
-                  <strong>GUFO</strong>
-                </div>
+        <section className={styles.hero}>
+          <div className={styles.heroMain}>
+            <div className={styles.kickerRow}>
+              <div className={styles.welcomeBadge}>Bentornato</div>
+              <div className={styles.liveChip}>
+                <span className={styles.liveDot} />
+                Profilo attivo
               </div>
             </div>
 
-            <div className={styles.welcomeTag}>Bentornato</div>
             <h1 className={styles.userName}>{dashboardData.profileName}</h1>
 
-            <div className={styles.userMeta}>
-              <span className={styles.userMetaDot}>◉</span>
-              <span>{dashboardData.profileEmail || "Profilo GUFO attivo"}</span>
+            <div className={styles.userSubline}>
+              <span className={styles.userSubIcon}>⦿</span>
+              <span className={styles.userSubText}>
+                {dashboardData.profileEmail || "Profilo GUFO attivo"}
+              </span>
+            </div>
+
+            <div className={styles.inviteCard}>
+              <div className={styles.inviteIcon}>↗</div>
+              <div className={styles.inviteText}>
+                <span>Link rapido GUFO</span>
+                <strong>{inviteLink}</strong>
+              </div>
             </div>
           </div>
 
-          <div className={styles.heroRight}>
-            <div className={styles.topBalanceCard}>
+          <div className={styles.balancePanel}>
+            <div className={styles.balanceCard}>
+              <div className={styles.balanceCardGlow} />
               <span className={styles.balanceLabel}>Saldo disponibile</span>
               <h2 className={styles.balanceValue}>
                 {dashboardData.balanceGufo.toFixed(2)} GUFO
               </h2>
 
-              <div className={styles.balanceButtons}>
+              <div className={styles.balanceActions}>
                 <Link href="/customer-code" className={styles.primaryBtn}>
                   Il mio codice
                 </Link>
@@ -355,10 +405,11 @@ export default function DashboardPage() {
 
         <section className={styles.statsGrid}>
           <div className={`${styles.statCard} ${styles.statBlue}`}>
-            <div>
+            <div className={styles.statContent}>
               <div className={styles.statValue}>{dashboardData.totalTransactions}</div>
               <div className={styles.statLabel}>Transazioni</div>
             </div>
+
             <div className={styles.statMeta}>
               <div className={styles.statIcon}>↗</div>
               <div className={styles.statHint}>Attività</div>
@@ -366,10 +417,11 @@ export default function DashboardPage() {
           </div>
 
           <div className={`${styles.statCard} ${styles.statPurple}`}>
-            <div>
+            <div className={styles.statContent}>
               <div className={styles.statValue}>{dashboardData.level}</div>
               <div className={styles.statLabel}>Livello</div>
             </div>
+
             <div className={styles.statMeta}>
               <div className={styles.statIcon}>⬒</div>
               <div className={styles.statHint}>Stagionale</div>
@@ -377,20 +429,21 @@ export default function DashboardPage() {
           </div>
 
           <div className={`${styles.statCard} ${styles.statPink}`}>
-            <div>
+            <div className={styles.statContent}>
               <div className={styles.statValue}>Variabile</div>
               <div className={styles.statLabel}>Cashback</div>
             </div>
+
             <div className={styles.statMeta}>
               <div className={styles.statIcon}>%</div>
-              <div className={styles.statHint}>Partner</div>
+              <div className={styles.statHint}>Deciso dai partner</div>
             </div>
           </div>
         </section>
 
-        <div className={styles.missionArea}>
+        <section className={styles.missionSection}>
           <MissionCard transactions={dashboardData.transactions} />
-        </div>
+        </section>
 
         <section className={styles.contentGrid}>
           <div className={styles.transactionsPanel}>
@@ -419,20 +472,8 @@ export default function DashboardPage() {
                   ) : (
                     recentTransactions.map((tx, index) => (
                       <tr key={tx.id || `${getTransactionMerchant(tx)}-${index}`}>
-                        <td className={styles.partnerCell}>
-                          {getTransactionMerchant(tx)}
-                        </td>
-                        <td>
-                          {tx.created_at
-                            ? new Date(tx.created_at).toLocaleString("it-IT", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
-                            : "-"}
-                        </td>
+                        <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
+                        <td>{formatDate(tx.created_at)}</td>
                         <td>
                           <span className={styles.badge}>
                             {formatTransactionType(getTransactionType(tx))}
@@ -460,6 +501,7 @@ export default function DashboardPage() {
                       <strong className={styles.mobileMerchant}>
                         {getTransactionMerchant(tx)}
                       </strong>
+
                       <span className={styles.badge}>
                         {formatTransactionType(getTransactionType(tx))}
                       </span>
@@ -467,11 +509,7 @@ export default function DashboardPage() {
 
                     <div className={styles.mobileMetaItem}>
                       <span>Data</span>
-                      <strong>
-                        {tx.created_at
-                          ? new Date(tx.created_at).toLocaleDateString("it-IT")
-                          : "-"}
-                      </strong>
+                      <strong>{formatDate(tx.created_at)}</strong>
                     </div>
 
                     <div className={styles.mobileMetaItem}>
