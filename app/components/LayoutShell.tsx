@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
-const DESKTOP_SIDEBAR_WIDTH = 320;
+const DESKTOP_SIDEBAR_WIDTH = 380;
 
 export default function LayoutShell({
   children,
@@ -17,9 +17,9 @@ export default function LayoutShell({
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    const checkViewport = () => {
+    function checkViewport() {
       setIsDesktop(window.innerWidth > 1100);
-    };
+    }
 
     checkViewport();
     window.addEventListener("resize", checkViewport);
