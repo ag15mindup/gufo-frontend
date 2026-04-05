@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
-const DESKTOP_SIDEBAR_WIDTH = 380;
+const DESKTOP_SIDEBAR_WIDTH = 372;
 
 export default function LayoutShell({
   children,
@@ -14,17 +14,18 @@ export default function LayoutShell({
 }>) {
   const pathname = usePathname();
   const isPublicPage = PUBLIC_ROUTES.includes(pathname);
+
   const [isDesktop, setIsDesktop] = useState(false);
 
   useEffect(() => {
-    function checkViewport() {
+    const onResize = () => {
       setIsDesktop(window.innerWidth > 1100);
-    }
+    };
 
-    checkViewport();
-    window.addEventListener("resize", checkViewport);
+    onResize();
+    window.addEventListener("resize", onResize);
 
-    return () => window.removeEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   return (
@@ -33,9 +34,9 @@ export default function LayoutShell({
         display: "flex",
         minHeight: "100vh",
         width: "100%",
-        background:
-          "radial-gradient(circle at top left, rgba(56,189,248,0.10), transparent 18%), radial-gradient(circle at top right, rgba(244,114,182,0.09), transparent 20%), radial-gradient(circle at bottom center, rgba(139,92,246,0.10), transparent 25%), linear-gradient(180deg, #030611 0%, #050816 45%, #060b1c 100%)",
         overflowX: "hidden",
+        background:
+          "radial-gradient(circle at 15% 20%, rgba(56,189,248,0.10), transparent 20%), radial-gradient(circle at 80% 16%, rgba(244,114,182,0.10), transparent 20%), radial-gradient(circle at 55% 72%, rgba(168,85,247,0.10), transparent 24%), linear-gradient(180deg, #030614 0%, #060b1d 55%, #050915 100%)",
       }}
     >
       {!isPublicPage && <Sidebar />}
@@ -65,8 +66,9 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  background:
-                    "radial-gradient(circle at 8% 18%, rgba(56,189,248,0.10), transparent 18%), radial-gradient(circle at 84% 14%, rgba(236,72,153,0.10), transparent 18%), radial-gradient(circle at 58% 68%, rgba(168,85,247,0.10), transparent 22%)",
+                  opacity: 0.15,
+                  backgroundImage:
+                    "radial-gradient(circle at 14% 20%, rgba(255,255,255,0.95) 0 1px, transparent 1.4px), radial-gradient(circle at 28% 76%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px), radial-gradient(circle at 72% 18%, rgba(255,255,255,0.86) 0 1px, transparent 1.4px), radial-gradient(circle at 84% 56%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px), radial-gradient(circle at 54% 38%, rgba(255,255,255,0.72) 0 1px, transparent 1.4px)",
                 }}
               />
 
@@ -75,25 +77,10 @@ export default function LayoutShell({
                   position: "absolute",
                   inset: 0,
                   pointerEvents: "none",
-                  opacity: 0.08,
+                  opacity: 0.05,
                   backgroundImage:
                     "linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)",
                   backgroundSize: "34px 34px",
-                  maskImage:
-                    "linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.2))",
-                  WebkitMaskImage:
-                    "linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.45) 55%, rgba(0,0,0,0.2))",
-                }}
-              />
-
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  pointerEvents: "none",
-                  opacity: 0.2,
-                  backgroundImage:
-                    "radial-gradient(circle at 12% 22%, rgba(255,255,255,0.95) 0 1px, transparent 1.5px), radial-gradient(circle at 32% 72%, rgba(255,255,255,0.72) 0 1px, transparent 1.5px), radial-gradient(circle at 72% 18%, rgba(255,255,255,0.9) 0 1px, transparent 1.5px), radial-gradient(circle at 82% 56%, rgba(255,255,255,0.75) 0 1px, transparent 1.5px), radial-gradient(circle at 52% 36%, rgba(255,255,255,0.78) 0 1px, transparent 1.5px), radial-gradient(circle at 24% 88%, rgba(255,255,255,0.7) 0 1px, transparent 1.5px)",
                 }}
               />
             </>
