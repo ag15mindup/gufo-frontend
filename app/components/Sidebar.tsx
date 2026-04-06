@@ -10,7 +10,7 @@ import styles from "./Sidebar.module.css";
 type HudRoute = {
   href: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   icon: ReactNode;
 };
 
@@ -33,13 +33,6 @@ function OrbitGlyph() {
         stroke="currentColor"
         strokeWidth="1.6"
         opacity="0.65"
-      />
-      <path
-        d="M8.2 6.2c2.6 1 5 4 5.8 7.2M16.2 8c-2 0-5.3 2-7.2 5.6"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        opacity="0.42"
-        strokeLinecap="round"
       />
     </svg>
   );
@@ -145,7 +138,7 @@ export default function Sidebar() {
     router.push("/login");
   }
 
-  const routes = useMemo<HudRoute[]>(
+  const mainRoutes = useMemo<HudRoute[]>(
     () => [
       { href: "/dashboard", title: "Dashboard", subtitle: "Control center", icon: <PrismGlyph /> },
       { href: "/wallet", title: "Wallet", subtitle: "Saldo e movimenti", icon: <OrbitGlyph /> },
@@ -154,16 +147,26 @@ export default function Sidebar() {
       { href: "/rewards", title: "Rewards", subtitle: "Bonus e premi", icon: <NovaGlyph /> },
       { href: "/profile", title: "Profilo", subtitle: "Identità account", icon: <PersonaGlyph /> },
       { href: "/customer-code", title: "QR Code", subtitle: "Codice cliente", icon: <MatrixGlyph /> },
-      { href: "/partner-demo", title: "Partner Demo", subtitle: "Anteprima partner", icon: <BeaconGlyph /> },
-      { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Pannello business", icon: <ClusterGlyph /> },
     ],
     []
   );
 
-  const activeRoute =
-    routes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ?? routes[0];
+  const partnerRoutes = useMemo<HudRoute[]>(
+    () => [
+      { href: "/partner-demo", title: "Partner Demo", icon: <BeaconGlyph /> },
+      { href: "/partner-dashboard", title: "Partner Dashboard", icon: <ClusterGlyph /> },
+    ],
+    []
+  );
 
-  const secondaryRoutes = routes.filter((route) => route.href !== activeRoute.href);
+  const allRoutes = [...mainRoutes, ...partnerRoutes];
+
+  const activeRoute =
+    allRoutes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
+    allRoutes[0];
+
+  const secondaryMain = mainRoutes.filter((route) => route.href !== activeRoute.href);
+  const secondaryPartners = partnerRoutes.filter((route) => route.href !== activeRoute.href);
 
   return (
     <>
@@ -180,20 +183,16 @@ export default function Sidebar() {
       <aside className={`${styles.sidebarHud} ${drawerOpen ? styles.sidebarHudOpen : ""}`}>
         <div className={styles.sidebarGlowA} />
         <div className={styles.sidebarGlowB} />
-        <div className={styles.sidebarStars} />
         <div className={styles.sidebarEdge} />
-        <div className={styles.sidebarFrameGlow} />
 
         <div className={styles.sidebarShell}>
           <div className={styles.rail}>
-            <div className={styles.railInnerLine} />
+            <div className={styles.railCoreLine} />
 
-            <div className={styles.logoBlock}>
+            <div className={styles.logoZone}>
               <div className={styles.logoOrb}>
                 <div className={styles.logoOrbGlow} />
                 <div className={styles.logoOrbRing} />
-                <div className={styles.logoOrbOuterGlow} />
-
                 <div className={styles.owlAvatar}>
                   <Image
                     src="/gufo-sidebar-logo.png"
@@ -209,34 +208,34 @@ export default function Sidebar() {
               <div className={styles.brandSub}>Neon OS</div>
             </div>
 
-            <div className={styles.statusPill}>
-              <span className={styles.statusDot} />
+            <div className={styles.livePill}>
+              <span className={styles.liveDot} />
               LIVE
             </div>
 
-            <nav className={styles.iconStack}>
-              {routes.map((route) => {
+            <nav className={styles.railNav}>
+              {allRoutes.map((route) => {
                 const isActive = pathname === route.href || pathname.startsWith(`${route.href}/`);
 
                 return (
                   <Link
                     key={route.href}
                     href={route.href}
-                    className={`${styles.iconNode} ${isActive ? styles.iconNodeActive : ""}`}
+                    className={`${styles.railNode} ${isActive ? styles.railNodeActive : ""}`}
                     title={route.title}
                   >
-                    <span className={styles.iconNodeGlow} />
-                    <span className={styles.iconNodeGlyph}>{route.icon}</span>
+                    <span className={styles.railNodeGlow} />
+                    <span className={styles.railNodeGlyph}>{route.icon}</span>
                   </Link>
                 );
               })}
             </nav>
 
-            <div className={styles.coreMeter}>
-              <div className={styles.coreTrack}>
-                <div className={styles.coreFill} />
+            <div className={styles.systemBlock}>
+              <div className={styles.systemTrack}>
+                <div className={styles.systemFill} />
               </div>
-              <div className={styles.coreLabel}>CORE</div>
+              <div className={styles.systemLabel}>CORE</div>
             </div>
 
             <button
@@ -251,8 +250,6 @@ export default function Sidebar() {
           </div>
 
           <div className={styles.panel}>
-            <div className={styles.panelCutGlow} />
-
             <div className={styles.panelHeader}>
               <div>
                 <div className={styles.panelTag}>SPECTRAL HUD</div>
@@ -269,32 +266,41 @@ export default function Sidebar() {
               </button>
             </div>
 
-            <div className={styles.activeDock}>
-              <div className={styles.activeDockArrow} />
-              <div className={styles.activeDockGlow} />
-              <div className={styles.activeDockLine} />
-              <div className={styles.activeDockSpark} />
-
+            <div className={styles.activeTab}>
+              <div className={styles.activeTabArrow} />
+              <div className={styles.activeTabGlow} />
               <div className={styles.activeIcon}>{activeRoute.icon}</div>
-
               <div className={styles.activeCopy}>
                 <div className={styles.activeTitle}>{activeRoute.title}</div>
-                <div className={styles.activeSubtitle}>{activeRoute.subtitle}</div>
+                <div className={styles.activeSubtitle}>{activeRoute.subtitle ?? "Access module"}</div>
               </div>
             </div>
 
+            <div className={styles.sectionLabel}>MAIN MODULES</div>
+
             <div className={styles.menuList}>
-              {secondaryRoutes.map((route) => (
+              {secondaryMain.map((route) => (
                 <Link key={route.href} href={route.href} className={styles.menuRow}>
                   <div className={styles.menuRowGlow} />
                   <div className={styles.menuIcon}>{route.icon}</div>
-
                   <div className={styles.menuText}>
                     <div className={styles.menuTitle}>{route.title}</div>
-                    <div className={styles.menuSubtitle}>{route.subtitle}</div>
                   </div>
                 </Link>
               ))}
+            </div>
+
+            <div className={styles.partnerBlock}>
+              <div className={styles.sectionLabel}>PARTNER LAYER</div>
+
+              <div className={styles.partnerList}>
+                {secondaryPartners.map((route) => (
+                  <Link key={route.href} href={route.href} className={styles.partnerRow}>
+                    <div className={styles.partnerIcon}>{route.icon}</div>
+                    <div className={styles.partnerTitle}>{route.title}</div>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
