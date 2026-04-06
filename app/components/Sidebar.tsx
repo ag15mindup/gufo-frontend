@@ -192,6 +192,7 @@ export default function Sidebar() {
               <div className={styles.logoOrb}>
                 <div className={styles.logoOrbGlow} />
                 <div className={styles.logoOrbRing} />
+                <div className={styles.logoOrbOuterGlow} />
 
                 <div className={styles.owlAvatar}>
                   <Image
@@ -250,6 +251,8 @@ export default function Sidebar() {
           </div>
 
           <div className={styles.panel}>
+            <div className={styles.panelCutGlow} />
+
             <div className={styles.panelHeader}>
               <div>
                 <div className={styles.panelTag}>SPECTRAL HUD</div>
@@ -270,6 +273,7 @@ export default function Sidebar() {
               <div className={styles.activeDockArrow} />
               <div className={styles.activeDockGlow} />
               <div className={styles.activeDockLine} />
+              <div className={styles.activeDockSpark} />
 
               <div className={styles.activeIcon}>{activeRoute.icon}</div>
 
@@ -282,6 +286,7 @@ export default function Sidebar() {
             <div className={styles.menuList}>
               {secondaryRoutes.map((route) => (
                 <Link key={route.href} href={route.href} className={styles.menuRow}>
+                  <div className={styles.menuRowGlow} />
                   <div className={styles.menuIcon}>{route.icon}</div>
 
                   <div className={styles.menuText}>

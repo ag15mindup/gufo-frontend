@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 
 const FREE_PAGES = ["/", "/login", "/register"];
-const HUD_WIDTH = 442;
+const HUD_WIDTH = 438;
 
 export default function LayoutShell({
   children,
