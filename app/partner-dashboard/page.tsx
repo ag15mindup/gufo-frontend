@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
+import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-dashboard.module.css";
+
+const supabase = createClient();
 
 type Transaction = {
   id?: string | null;
@@ -24,36 +27,20 @@ type Transaction = {
 };
 
 type PartnerStatsResponse = {
+  success?: boolean;
   total_transactions?: number | string | null;
   total_amount?: number | string | null;
   total_gufo_distributed?: number | string | null;
   total_customers?: number | string | null;
   current_default_cashback_percent?: number | string | null;
   recent_transactions?: Transaction[];
-  transactions?: Transaction[];
   partner_id?: number | string | null;
   partner_name?: string | null;
-  stats?: {
-    total_transactions?: number | string | null;
-    total_amount?: number | string | null;
-    total_gufo_distributed?: number | string | null;
-    total_customers?: number | string | null;
-    current_default_cashback_percent?: number | string | null;
-    recent_transactions?: Transaction[];
-    transactions?: Transaction[];
-    partner_id?: number | string | null;
-    partner_name?: string | null;
-  };
   error?: string;
 };
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
-
-const PARTNER_OPTIONS = [
-  { id: 2, label: "Eni" },
-  { id: 3, label: "Coop" },
-];
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -129,17 +116,6 @@ function getTransactionGufo(tx: any) {
   );
 }
 
-function getTransactionPartnerId(tx: any) {
-  return toNumberSafe(tx?.partner_id ?? tx?.raw?.partner_id);
-}
-
-function formatDate(value?: string | null) {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleDateString("it-IT");
-}
-
 function formatDateTime(value?: string | null) {
   if (!value) return "-";
   const date = new Date(value);
@@ -147,72 +123,46 @@ function formatDateTime(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
-function getTypeTone(type: string) {
+function getTypeTone(type: string, stylesObj: any) {
   const normalized = String(type).toLowerCase();
 
-  if (normalized.includes("cashback")) return styles.greenBadge;
-  if (normalized.includes("bonus")) return styles.purpleBadge;
-  if (normalized.includes("payment")) return styles.blueBadge;
-  if (normalized.includes("withdraw")) return styles.orangeBadge;
+  if (normalized.includes("cashback")) return stylesObj.greenBadge;
+  if (normalized.includes("bonus")) return stylesObj.purpleBadge;
+  if (normalized.includes("payment")) return stylesObj.blueBadge;
+  if (normalized.includes("withdraw")) return stylesObj.orangeBadge;
   if (normalized.includes("buy") || normalized.includes("acquisto")) {
-    return styles.cyanBadge;
+    return stylesObj.cyanBadge;
   }
 
   return "";
 }
 
 export default function PartnerDashboardPage() {
-  const [selectedPartnerId, setSelectedPartnerId] = useState<number>(3);
+  const [partnerUserId, setPartnerUserId] = useState<string>("");
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadStats(partnerId: number) {
+  async function loadPartnerStats(userId: string) {
     try {
       setLoading(true);
       setError("");
 
       const { response, data } = await safeJsonFetch(
-        `${API_URL}/partner/stats?partner_id=${partnerId}`
+        `${API_URL}/partner/stats/me?user_id=${encodeURIComponent(userId)}`
       );
 
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.error || "Errore nel caricamento statistiche");
+        throw new Error(data?.error || "Errore nel caricamento statistiche partner");
       }
 
-      const statsRoot: PartnerStatsResponse = data ?? {};
-      const stats: PartnerStatsResponse = statsRoot?.stats ?? statsRoot;
+      const rawTransactions = Array.isArray(data?.recent_transactions)
+        ? data.recent_transactions
+        : [];
 
-      const rawTransactions = Array.isArray(stats?.recent_transactions)
-        ? stats.recent_transactions
-        : Array.isArray(stats?.transactions)
-          ? stats.transactions
-          : [];
-
-      const normalizedTransactions: Transaction[] = rawTransactions
-        .map((tx: any) => ({
-          id: getTransactionId(tx),
-          transaction_id:
-            tx?.transaction_id ?? tx?.Transaction_id ?? tx?.id ?? null,
-          Transaction_id:
-            tx?.Transaction_id ?? tx?.transaction_id ?? tx?.id ?? null,
-          type: getTransactionType(tx),
-          merchant_name: getTransactionMerchant(tx),
-          amount_euro: getTransactionAmount(tx),
-          gufo_earned: getTransactionGufo(tx),
-          created_at: tx?.created_at ?? tx?.raw?.created_at ?? null,
-          partner_id: tx?.partner_id ?? tx?.raw?.partner_id ?? null,
-          raw: tx?.raw ?? tx,
-        }))
-        .sort((a, b) => {
-          const da = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const db = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return db - da;
-        });
-
-      setData(stats);
-      setTransactions(normalizedTransactions);
+      setData(data);
+      setTransactions(rawTransactions);
     } catch (err: any) {
       setError(err?.message || "Errore sconosciuto");
       setData(null);
@@ -223,13 +173,23 @@ export default function PartnerDashboardPage() {
   }
 
   useEffect(() => {
-    loadStats(selectedPartnerId);
-  }, [selectedPartnerId]);
+    async function init() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  const activePartnerLabel =
-    data?.partner_name ||
-    PARTNER_OPTIONS.find((p) => p.id === selectedPartnerId)?.label ||
-    `Partner ${selectedPartnerId}`;
+      if (!user) {
+        setError("Utente partner non autenticato");
+        setLoading(false);
+        return;
+      }
+
+      setPartnerUserId(user.id);
+      await loadPartnerStats(user.id);
+    }
+
+    init();
+  }, []);
 
   const avgTicket = useMemo(() => {
     const totalTransactions = toNumberSafe(data?.total_transactions);
@@ -246,16 +206,14 @@ export default function PartnerDashboardPage() {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
-
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
             <p className={styles.eyebrow}>GUFO Partner Analytics</p>
             <h1 className={styles.title}>Partner dashboard</h1>
-            <p className={styles.subtitle}>Caricamento statistiche partner...</p>
+            <p className={styles.subtitle}>Caricamento dati partner...</p>
           </div>
         </section>
-
         <div className={styles.loadingBox}>Recupero analytics partner...</div>
       </div>
     );
@@ -266,7 +224,6 @@ export default function PartnerDashboardPage() {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
-
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
@@ -275,44 +232,6 @@ export default function PartnerDashboardPage() {
             <p className={styles.subtitle}>Si è verificato un problema.</p>
           </div>
         </section>
-
-        <section className={styles.filterPanel}>
-          <div className={styles.filterPanelHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Partner Selection</p>
-              <h3>Seleziona partner</h3>
-            </div>
-            <span className={styles.panelBadge}>Analytics</span>
-          </div>
-
-          <div className={styles.filtersGrid}>
-            <div>
-              <label className={styles.inputLabel}>Partner</label>
-              <select
-                value={selectedPartnerId}
-                onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
-                className={styles.inputControl}
-              >
-                {PARTNER_OPTIONS.map((partner) => (
-                  <option key={partner.id} value={partner.id}>
-                    {partner.label} (ID {partner.id})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.buttonWrap}>
-              <button
-                type="button"
-                onClick={() => loadStats(selectedPartnerId)}
-                className={styles.primaryBtn}
-              >
-                Ricarica dati
-              </button>
-            </div>
-          </div>
-        </section>
-
         <div className={styles.errorBox}>{error}</div>
       </div>
     );
@@ -329,13 +248,12 @@ export default function PartnerDashboardPage() {
           <p className={styles.eyebrow}>GUFO Partner Analytics</p>
           <h1 className={styles.title}>Controllo partner</h1>
           <p className={styles.subtitle}>
-            Panoramica operativa del partner con volumi, clienti attivi, GUFO
-            distribuiti e attività recente.
+            Dashboard automatica del partner loggato con volumi, clienti attivi,
+            GUFO distribuiti e attività recente.
           </p>
           <p className={styles.heroDescription}>
-            Una dashboard pensata per il commerciante: deve far capire in pochi
-            secondi quanto sta muovendo, quanto cashback sta distribuendo e come si
-            sta comportando il punto vendita.
+            Il partner viene riconosciuto direttamente dal login. Non serve più
+            selezionarlo manualmente.
           </p>
         </div>
       </section>
@@ -351,24 +269,15 @@ export default function PartnerDashboardPage() {
           </div>
 
           <div className={styles.actionButtons}>
-            <button
-              className={`${styles.actionBtn} ${styles.primaryAction}`}
-              type="button"
-            >
+            <button className={`${styles.actionBtn} ${styles.primaryAction}`} type="button">
               💳 Registra pagamento
             </button>
 
-            <button
-              className={`${styles.actionBtn} ${styles.secondaryAction}`}
-              type="button"
-            >
+            <button className={`${styles.actionBtn} ${styles.secondaryAction}`} type="button">
               📷 Scansiona QR
             </button>
 
-            <button
-              className={`${styles.actionBtn} ${styles.tertiaryAction}`}
-              type="button"
-            >
+            <button className={`${styles.actionBtn} ${styles.tertiaryAction}`} type="button">
               ⚡ Imposta cashback
             </button>
           </div>
@@ -382,18 +291,17 @@ export default function PartnerDashboardPage() {
             <span className={styles.operatorStatus}>Dati recenti</span>
           </div>
 
-          <p className={styles.operatorLabel}>Merchant selezionato</p>
-          <h2 className={styles.operatorValue}>{activePartnerLabel}</h2>
+          <p className={styles.operatorLabel}>Merchant riconosciuto</p>
+          <h2 className={styles.operatorValue}>{data?.partner_name || "--"}</h2>
           <p className={styles.operatorNote}>
-            Monitoraggio rapido del partner con focus su pagamenti, reward, clienti
-            coinvolti e operazioni registrate di recente.
+            Il partner viene collegato automaticamente all’utente autenticato.
           </p>
         </div>
 
         <div className={styles.operatorCardRight}>
           <div className={styles.operatorMiniCard}>
             <span>Partner ID</span>
-            <strong>{selectedPartnerId}</strong>
+            <strong>{toNumberSafe(data?.partner_id)}</strong>
           </div>
 
           <div className={styles.operatorMiniCard}>
@@ -405,44 +313,7 @@ export default function PartnerDashboardPage() {
 
           <div className={styles.operatorMiniCard}>
             <span>Ultima attività</span>
-            <strong>{latestDate ? formatDate(latestDate) : "-"}</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.filterPanel}>
-        <div className={styles.filterPanelHeader}>
-          <div>
-            <p className={styles.sectionEyebrow}>Partner Selection</p>
-            <h3>Selezione partner</h3>
-          </div>
-          <span className={styles.panelBadge}>Dashboard attiva</span>
-        </div>
-
-        <div className={styles.filtersGrid}>
-          <div>
-            <label className={styles.inputLabel}>Partner</label>
-            <select
-              value={selectedPartnerId}
-              onChange={(e) => setSelectedPartnerId(Number(e.target.value))}
-              className={styles.inputControl}
-            >
-              {PARTNER_OPTIONS.map((partner) => (
-                <option key={partner.id} value={partner.id}>
-                  {partner.label} (ID {partner.id})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={styles.buttonWrap}>
-            <button
-              type="button"
-              onClick={() => loadStats(selectedPartnerId)}
-              className={styles.primaryBtn}
-            >
-              Ricarica dati
-            </button>
+            <strong>{latestDate ? formatDateTime(latestDate) : "-"}</strong>
           </div>
         </div>
       </section>
@@ -520,19 +391,14 @@ export default function PartnerDashboardPage() {
                   </thead>
                   <tbody>
                     {transactions.map((tx, index) => (
-                      <tr
-                        key={
-                          tx.id || tx.transaction_id || tx.Transaction_id || index
-                        }
-                      >
+                      <tr key={tx.id || tx.transaction_id || tx.Transaction_id || index}>
                         <td>{getTransactionId(tx) || "-"}</td>
-                        <td className={styles.partnerCell}>
-                          {getTransactionMerchant(tx)}
-                        </td>
+                        <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
                         <td>
                           <span
                             className={`${styles.badge} ${getTypeTone(
-                              getTransactionType(tx)
+                              getTransactionType(tx),
+                              styles
                             )}`}
                           >
                             {formatTransactionType(getTransactionType(tx))}
@@ -557,7 +423,8 @@ export default function PartnerDashboardPage() {
                       <strong>{getTransactionMerchant(tx)}</strong>
                       <span
                         className={`${styles.badge} ${getTypeTone(
-                          getTransactionType(tx)
+                          getTransactionType(tx),
+                          styles
                         )}`}
                       >
                         {formatTransactionType(getTransactionType(tx))}
@@ -580,11 +447,6 @@ export default function PartnerDashboardPage() {
                     </div>
 
                     <div className={styles.mobileTxRow}>
-                      <span>Partner ID</span>
-                      <span>{getTransactionPartnerId(tx)}</span>
-                    </div>
-
-                    <div className={styles.mobileTxRow}>
                       <span>Data</span>
                       <span>{formatDateTime(tx.created_at)}</span>
                     </div>
@@ -598,15 +460,13 @@ export default function PartnerDashboardPage() {
         <aside className={styles.sideColumn}>
           <div className={styles.sideCard}>
             <p className={styles.sideLabel}>Partner attivo</p>
-            <h4>{activePartnerLabel}</h4>
-            <span>Merchant selezionato nella dashboard</span>
+            <h4>{data?.partner_name || "--"}</h4>
+            <span>Merchant collegato al profilo loggato</span>
           </div>
 
           <div className={styles.sideCard}>
             <p className={styles.sideLabel}>Cashback base</p>
-            <h4>
-              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
-            </h4>
+            <h4>{toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%</h4>
             <span>Valore di riferimento del partner</span>
           </div>
 
@@ -617,9 +477,9 @@ export default function PartnerDashboardPage() {
           </div>
 
           <div className={styles.sideCard}>
-            <p className={styles.sideLabel}>Storico visibile</p>
-            <h4>{transactions.length}</h4>
-            <span>Record recenti caricati nella dashboard</span>
+            <p className={styles.sideLabel}>Utente partner</p>
+            <h4>{partnerUserId ? "Connesso" : "Non connesso"}</h4>
+            <span>Riconoscimento automatico via login</span>
           </div>
         </aside>
       </section>
