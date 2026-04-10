@@ -153,7 +153,7 @@ export default function Sidebar() {
 
   const partnerRoutes = useMemo<HudRoute[]>(
     () => [
-      { href: "/partner-demo", title: "Partner Demo", icon: <BeaconGlyph /> },
+      { href: "/partner-console", title: "Partner console", icon: <BeaconGlyph /> },
       { href: "/partner-dashboard", title: "Partner Dashboard", icon: <ClusterGlyph /> },
     ],
     []

@@ -980,3 +980,13 @@
     text-align: left;
   }
 }
+.actionLink {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionLink:hover {
+  opacity: 0.96;
+}

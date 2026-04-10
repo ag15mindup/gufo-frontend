@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
@@ -23,7 +24,7 @@ type Transaction = {
   gufo?: number | string | null;
   created_at?: string | null;
   partner_id?: number | string | null;
-  raw?: unknown;
+  raw?: any;
 };
 
 type PartnerStatsResponse = {
@@ -137,6 +138,30 @@ function getTypeTone(type: string, stylesObj: any) {
   return "";
 }
 
+function isToday(dateValue?: string | null) {
+  if (!dateValue) return false;
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return false;
+
+  const now = new Date();
+
+  return (
+    date.getDate() === now.getDate() &&
+    date.getMonth() === now.getMonth() &&
+    date.getFullYear() === now.getFullYear()
+  );
+}
+
+function getCustomerId(tx: any) {
+  return (
+    tx?.user_id ??
+    tx?.raw?.user_id ??
+    tx?.customer_id ??
+    tx?.raw?.customer_id ??
+    null
+  );
+}
+
 export default function PartnerDashboardPage() {
   const [partnerUserId, setPartnerUserId] = useState<string>("");
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
@@ -200,6 +225,56 @@ export default function PartnerDashboardPage() {
   }, [data]);
 
   const latestDate = transactions.length > 0 ? transactions[0]?.created_at : null;
+
+  const paymentTransactions = useMemo(() => {
+    return transactions.filter((tx) => {
+      const type = String(getTransactionType(tx)).toLowerCase();
+      return type === "payment";
+    });
+  }, [transactions]);
+
+  const todayCustomers = useMemo(() => {
+    const ids = new Set<string>();
+
+    paymentTransactions.forEach((tx) => {
+      if (isToday(tx?.created_at)) {
+        const customerId = getCustomerId(tx);
+        if (customerId) ids.add(String(customerId));
+      }
+    });
+
+    return ids.size;
+  }, [paymentTransactions]);
+
+  const returnedCustomers = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    paymentTransactions.forEach((tx) => {
+      const customerId = getCustomerId(tx);
+      if (!customerId) return;
+
+      const key = String(customerId);
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+
+    let returned = 0;
+    counts.forEach((count) => {
+      if (count >= 2) returned += 1;
+    });
+
+    return returned;
+  }, [paymentTransactions]);
+
+  const returnRate = useMemo(() => {
+    const totalCustomers = toNumberSafe(data?.total_customers);
+    if (totalCustomers <= 0) return 0;
+    return (returnedCustomers / totalCustomers) * 100;
+  }, [data, returnedCustomers]);
+
+  const latestRevenue = useMemo(() => {
+    const latestPayment = paymentTransactions[0];
+    return latestPayment ? getTransactionAmount(latestPayment) : 0;
+  }, [paymentTransactions]);
 
   if (loading) {
     return (
@@ -269,9 +344,12 @@ export default function PartnerDashboardPage() {
           </div>
 
           <div className={styles.actionButtons}>
-            <button className={`${styles.actionBtn} ${styles.primaryAction}`} type="button">
+            <Link
+              href="/partner-demo"
+              className={`${styles.actionBtn} ${styles.primaryAction} ${styles.actionLink}`}
+            >
               💳 Registra pagamento
-            </button>
+            </Link>
 
             <button className={`${styles.actionBtn} ${styles.secondaryAction}`} type="button">
               📷 Scansiona QR
@@ -355,6 +433,30 @@ export default function PartnerDashboardPage() {
           <p className={styles.metricLabel}>Scontrino medio</p>
           <h3 className={styles.metricValue}>€ {avgTicket.toFixed(2)}</h3>
           <span className={styles.metricHint}>Valore medio per pagamento</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Clienti tornati</p>
+          <h3 className={styles.metricValue}>{returnedCustomers}</h3>
+          <span className={styles.metricHint}>Clienti con almeno 2 pagamenti</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Tasso di ritorno</p>
+          <h3 className={styles.metricValue}>{returnRate.toFixed(1)}%</h3>
+          <span className={styles.metricHint}>Ritorno clienti / clienti unici</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Clienti oggi</p>
+          <h3 className={styles.metricValue}>{todayCustomers}</h3>
+          <span className={styles.metricHint}>Utenti serviti nella giornata</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Ultimo incasso</p>
+          <h3 className={styles.metricValue}>€ {latestRevenue.toFixed(2)}</h3>
+          <span className={styles.metricHint}>Ultima transazione payment</span>
         </div>
       </section>
 
@@ -474,6 +576,18 @@ export default function PartnerDashboardPage() {
             <p className={styles.sideLabel}>Clienti serviti</p>
             <h4>{toNumberSafe(data?.total_customers)}</h4>
             <span>Numero clienti unici coinvolti</span>
+          </div>
+
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Clienti tornati</p>
+            <h4>{returnedCustomers}</h4>
+            <span>Clienti che hanno comprato almeno due volte</span>
+          </div>
+
+          <div className={styles.sideCard}>
+            <p className={styles.sideLabel}>Tasso di ritorno</p>
+            <h4>{returnRate.toFixed(1)}%</h4>
+            <span>Quanto il cashback aiuta a far tornare i clienti</span>
           </div>
 
           <div className={styles.sideCard}>

@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
-import styles from "./partner-demo.module.css";
+import styles from "./partner-console.module.css";
 
 const supabase = createClient();
 
@@ -15,20 +16,23 @@ type CustomerResponse = {
   level: string;
   cashback_percent: number | null;
   season_spent: number;
+  region?: string;
+  reference_currency?: string;
 };
 
 type TransactionItem = {
   id?: string | null;
   transaction_id?: string | null;
   Transaction_id?: string | null;
-  amount?: number;
-  amount_euro?: number;
-  gufo_earned?: number;
-  cashback?: number;
-  cashback_percent?: number;
-  benefit?: string;
-  tipo?: string;
-  created_at?: string;
+  amount?: number | string | null;
+  amount_euro?: number | string | null;
+  gufo_earned?: number | string | null;
+  cashback?: number | string | null;
+  cashback_percent?: number | string | null;
+  benefit?: string | null;
+  tipo?: string | null;
+  type?: string | null;
+  created_at?: string | null;
 };
 
 type PartnerMeResponse = {
@@ -37,7 +41,7 @@ type PartnerMeResponse = {
     id?: number;
     name?: string;
     category?: string | null;
-    cashback_percent?: number;
+    cashback_percent?: number | string | null;
     user_id?: string;
   };
   error?: string;
@@ -46,17 +50,17 @@ type PartnerMeResponse = {
 type PaymentApiResponse = {
   success?: boolean;
   error?: string;
-  gufo_earned?: number;
-  cashback_percent?: number;
-  new_balance?: number;
+  gufo_earned?: number | string | null;
+  cashback_percent?: number | string | null;
+  new_balance?: number | string | null;
   payment_transaction?: TransactionItem;
   cashback_transaction?: TransactionItem | null;
   wallet?: {
-    balance_gufo?: number;
-    balance_eur?: number;
-    total_spent?: number;
-    season_spent?: number;
-    level?: string;
+    balance_gufo?: number | string | null;
+    balance_eur?: number | string | null;
+    total_spent?: number | string | null;
+    season_spent?: number | string | null;
+    level?: string | null;
   };
   partner?: {
     id?: number;
@@ -77,15 +81,12 @@ function toNumberSafe(value: unknown) {
 
 function formatLevel(level: string) {
   if (!level) return "Bronze";
-
   const normalized = String(level).toLowerCase().trim();
-
   if (normalized === "vip") return "VIP";
-
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
-function formatTransactionType(type?: string) {
+function formatTransactionType(type?: string | null) {
   const value = String(type || "-").toLowerCase();
 
   switch (value) {
@@ -96,7 +97,10 @@ function formatTransactionType(type?: string) {
     case "bonus":
       return "Bonus";
     case "buy":
+    case "acquisto":
       return "Acquisto";
+    case "withdraw":
+      return "Prelievo";
     default:
       return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -107,10 +111,18 @@ function getTransactionId(tx?: TransactionItem | null) {
   return tx.id || tx.transaction_id || tx.Transaction_id || null;
 }
 
-export default function PartnerDemoPage() {
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("it-IT");
+}
+
+export default function PartnerConsolePage() {
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [partnerId, setPartnerId] = useState<number | null>(null);
+  const [partnerCategory, setPartnerCategory] = useState("");
 
   const [customerCode, setCustomerCode] = useState(DEFAULT_CUSTOMER_CODE);
   const [customer, setCustomer] = useState<CustomerResponse | null>(null);
@@ -134,10 +146,13 @@ export default function PartnerDemoPage() {
       throw new Error(data?.error || "Partner non trovato");
     }
 
+    const payload = data as PartnerMeResponse;
+
     setPartnerUserId(userId);
-    setPartnerId(data.partner?.id ?? null);
-    setPartnerName(String(data.partner?.name || ""));
-    setCashbackPercent(String(toNumberSafe(data.partner?.cashback_percent) || 0));
+    setPartnerId(payload.partner?.id ?? null);
+    setPartnerName(String(payload.partner?.name || ""));
+    setPartnerCategory(String(payload.partner?.category || ""));
+    setCashbackPercent(String(toNumberSafe(payload.partner?.cashback_percent) || 0));
   }
 
   async function refreshCustomer(code: string) {
@@ -149,8 +164,8 @@ export default function PartnerDemoPage() {
       const payload = refreshed.data?.customer ?? refreshed.data;
 
       setCustomer({
-        id: payload.id,
-        customer_code: payload.customer_code,
+        id: String(payload.id),
+        customer_code: String(payload.customer_code || code),
         balance_gufo: toNumberSafe(payload.balance_gufo),
         balance_eur: toNumberSafe(payload.balance_eur),
         level: String(payload.level || "bronze"),
@@ -159,6 +174,10 @@ export default function PartnerDemoPage() {
             ? null
             : toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
+        region: payload.region ? String(payload.region) : undefined,
+        reference_currency: payload.reference_currency
+          ? String(payload.reference_currency)
+          : undefined,
       });
     }
   }
@@ -167,6 +186,8 @@ export default function PartnerDemoPage() {
     async function init() {
       try {
         setLoadingPartner(true);
+        setError("");
+
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -177,7 +198,7 @@ export default function PartnerDemoPage() {
 
         await loadPartnerMe(user.id);
       } catch (err: any) {
-        setError(err.message || "Errore caricamento partner");
+        setError(err?.message || "Errore caricamento partner");
       } finally {
         setLoadingPartner(false);
       }
@@ -214,8 +235,8 @@ export default function PartnerDemoPage() {
       const payload = data?.customer ?? data;
 
       setCustomer({
-        id: payload.id,
-        customer_code: payload.customer_code,
+        id: String(payload.id),
+        customer_code: String(payload.customer_code || code),
         balance_gufo: toNumberSafe(payload.balance_gufo),
         balance_eur: toNumberSafe(payload.balance_eur),
         level: String(payload.level || "bronze"),
@@ -224,12 +245,16 @@ export default function PartnerDemoPage() {
             ? null
             : toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
+        region: payload.region ? String(payload.region) : undefined,
+        reference_currency: payload.reference_currency
+          ? String(payload.reference_currency)
+          : undefined,
       });
 
-      setCustomerCode(payload.customer_code || code);
+      setCustomerCode(String(payload.customer_code || code));
     } catch (err: any) {
       setCustomer(null);
-      setError(err.message || "Errore durante la ricerca cliente");
+      setError(err?.message || "Errore durante la ricerca cliente");
     } finally {
       setLoadingCustomer(false);
     }
@@ -291,22 +316,23 @@ export default function PartnerDemoPage() {
       await refreshCustomer(customer.customer_code);
       setAmount("");
     } catch (err: any) {
-      setError(err.message || "Errore sconosciuto");
+      setError(err?.message || "Errore sconosciuto");
     } finally {
       setLoadingPayment(false);
     }
   }
 
   const previewAmount = useMemo(() => toNumberSafe(amount), [amount]);
-  const previewCashbackPercent = useMemo(
+
+  const previewCashbackValue = useMemo(
     () => toNumberSafe(cashbackPercent),
     [cashbackPercent]
   );
 
   const previewGufo = useMemo(() => {
-    if (!customer || previewAmount <= 0 || previewCashbackPercent <= 0) return 0;
-    return Number(((previewAmount * previewCashbackPercent) / 100).toFixed(2));
-  }, [customer, previewAmount, previewCashbackPercent]);
+    if (!customer || previewAmount <= 0 || previewCashbackValue <= 0) return 0;
+    return Number(((previewAmount * previewCashbackValue) / 100).toFixed(2));
+  }, [customer, previewAmount, previewCashbackValue]);
 
   const paymentTx = result?.payment_transaction || null;
   const cashbackTx = result?.cashback_transaction || null;
@@ -315,6 +341,8 @@ export default function PartnerDemoPage() {
     return (
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
+        <div className={styles.cosmicGlowA} />
+        <div className={styles.cosmicGlowB} />
         <div className={styles.rainbowLine} />
         <div className={styles.loadingBox}>Caricamento partner...</div>
       </div>
@@ -324,13 +352,29 @@ export default function PartnerDemoPage() {
   return (
     <div className={styles.page}>
       <div className={styles.bgOverlay} />
+      <div className={styles.cosmicGlowA} />
+      <div className={styles.cosmicGlowB} />
       <div className={styles.rainbowLine} />
+
+      <section className={styles.topBar}>
+        <div className={styles.brandWrap}>
+          <div className={styles.logoOrb}>🦉</div>
+          <div>
+            <p className={styles.brandTitle}>GUFO</p>
+            <p className={styles.brandSubtitle}>Partner Console</p>
+          </div>
+        </div>
+
+        <Link href="/partner-dashboard" className={styles.backPill}>
+          ← Dashboard partner
+        </Link>
+      </section>
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <div className={styles.heroBadge}>GUFO PARTNER CONSOLE</div>
           <p className={styles.eyebrow}>GUFO Partner Console</p>
-          <h1 className={styles.title}>Demo operativa partner</h1>
+          <h1 className={styles.title}>Registra pagamento</h1>
           <p className={styles.subtitle}>
             Il partner loggato viene riconosciuto automaticamente dal sistema.
           </p>
@@ -364,8 +408,13 @@ export default function PartnerDemoPage() {
           </div>
 
           <div className={styles.operatorMiniCard}>
+            <span>Categoria</span>
+            <strong>{partnerCategory || "--"}</strong>
+          </div>
+
+          <div className={styles.operatorMiniCard}>
             <span>Cashback transazione</span>
-            <strong>{previewCashbackPercent.toFixed(2)}%</strong>
+            <strong>{previewCashbackValue.toFixed(2)}%</strong>
           </div>
 
           <div className={styles.operatorMiniCard}>
@@ -444,8 +493,10 @@ export default function PartnerDemoPage() {
                 </div>
 
                 <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Partner attivo</p>
-                  <p className={styles.infoMiniValue}>{partnerName || "--"}</p>
+                  <p className={styles.infoMiniLabel}>Area</p>
+                  <p className={styles.infoMiniValue}>
+                    {customer.region || customer.reference_currency || "--"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -456,7 +507,7 @@ export default function PartnerDemoPage() {
           <div className={styles.panelHeader}>
             <div>
               <p className={styles.sectionEyebrow}>Payment Action</p>
-              <h3>Registra pagamento</h3>
+              <h3>Conferma pagamento</h3>
             </div>
             <span className={styles.panelBadge}>Payment</span>
           </div>
@@ -517,7 +568,7 @@ export default function PartnerDemoPage() {
                 </div>
                 <div className={styles.previewRow}>
                   <span>Cashback applicato</span>
-                  <strong>{previewCashbackPercent.toFixed(2)}%</strong>
+                  <strong>{previewCashbackValue.toFixed(2)}%</strong>
                 </div>
                 <div className={styles.previewRow}>
                   <span>GUFO previsti</span>
@@ -604,8 +655,13 @@ export default function PartnerDemoPage() {
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Tipo pagamento</p>
               <p className={styles.infoMiniValue}>
-                {formatTransactionType(paymentTx?.tipo || "-")}
+                {formatTransactionType(paymentTx?.tipo || paymentTx?.type || "-")}
               </p>
+            </div>
+
+            <div className={styles.infoMiniCard}>
+              <p className={styles.infoMiniLabel}>Data operazione</p>
+              <p className={styles.infoMiniValue}>{formatDateTime(paymentTx?.created_at)}</p>
             </div>
           </div>
         </section>
