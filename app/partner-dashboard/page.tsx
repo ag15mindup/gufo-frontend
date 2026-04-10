@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
 import styles from "./partner-dashboard.module.css";
 
@@ -27,16 +27,22 @@ type PartnerStatsResponse = {
   total_transactions?: number | string | null;
   total_amount?: number | string | null;
   total_gufo_distributed?: number | string | null;
+  total_customers?: number | string | null;
+  current_default_cashback_percent?: number | string | null;
   recent_transactions?: Transaction[];
   transactions?: Transaction[];
   partner_id?: number | string | null;
+  partner_name?: string | null;
   stats?: {
     total_transactions?: number | string | null;
     total_amount?: number | string | null;
     total_gufo_distributed?: number | string | null;
+    total_customers?: number | string | null;
+    current_default_cashback_percent?: number | string | null;
     recent_transactions?: Transaction[];
     transactions?: Transaction[];
     partner_id?: number | string | null;
+    partner_name?: string | null;
   };
   error?: string;
 };
@@ -134,6 +140,13 @@ function formatDate(value?: string | null) {
   return date.toLocaleDateString("it-IT");
 }
 
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("it-IT");
+}
+
 function getTypeTone(type: string) {
   const normalized = String(type).toLowerCase();
 
@@ -141,8 +154,9 @@ function getTypeTone(type: string) {
   if (normalized.includes("bonus")) return styles.purpleBadge;
   if (normalized.includes("payment")) return styles.blueBadge;
   if (normalized.includes("withdraw")) return styles.orangeBadge;
-  if (normalized.includes("buy") || normalized.includes("acquisto"))
+  if (normalized.includes("buy") || normalized.includes("acquisto")) {
     return styles.cyanBadge;
+  }
 
   return "";
 }
@@ -173,8 +187,8 @@ export default function PartnerDashboardPage() {
       const rawTransactions = Array.isArray(stats?.recent_transactions)
         ? stats.recent_transactions
         : Array.isArray(stats?.transactions)
-        ? stats.transactions
-        : [];
+          ? stats.transactions
+          : [];
 
       const normalizedTransactions: Transaction[] = rawTransactions
         .map((tx: any) => ({
@@ -213,13 +227,19 @@ export default function PartnerDashboardPage() {
   }, [selectedPartnerId]);
 
   const activePartnerLabel =
+    data?.partner_name ||
     PARTNER_OPTIONS.find((p) => p.id === selectedPartnerId)?.label ||
     `Partner ${selectedPartnerId}`;
 
-  const avgTicket =
-    toNumberSafe(data?.total_transactions) > 0
-      ? toNumberSafe(data?.total_amount) / toNumberSafe(data?.total_transactions)
-      : 0;
+  const avgTicket = useMemo(() => {
+    const totalTransactions = toNumberSafe(data?.total_transactions);
+    const totalAmount = toNumberSafe(data?.total_amount);
+
+    if (totalTransactions <= 0) return 0;
+    return totalAmount / totalTransactions;
+  }, [data]);
+
+  const latestDate = transactions.length > 0 ? transactions[0]?.created_at : null;
 
   if (loading) {
     return (
@@ -229,8 +249,8 @@ export default function PartnerDashboardPage() {
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
-            <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+            <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
+            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
             <h1 className={styles.title}>Partner dashboard</h1>
             <p className={styles.subtitle}>Caricamento statistiche partner...</p>
           </div>
@@ -249,8 +269,8 @@ export default function PartnerDashboardPage() {
 
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
-            <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
-            <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
+            <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
+            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
             <h1 className={styles.title}>Partner dashboard</h1>
             <p className={styles.subtitle}>Si è verificato un problema.</p>
           </div>
@@ -287,7 +307,7 @@ export default function PartnerDashboardPage() {
                 onClick={() => loadStats(selectedPartnerId)}
                 className={styles.primaryBtn}
               >
-                Ricarica
+                Ricarica dati
               </button>
             </div>
           </div>
@@ -305,17 +325,53 @@ export default function PartnerDashboardPage() {
 
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
-          <div className={styles.heroBadge}>GUFO MERCHANT ANALYTICS</div>
-          <p className={styles.eyebrow}>GUFO Merchant Analytics</p>
-          <h1 className={styles.title}>Performance partner</h1>
+          <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
+          <p className={styles.eyebrow}>GUFO Partner Analytics</p>
+          <h1 className={styles.title}>Controllo partner</h1>
           <p className={styles.subtitle}>
-            Panoramica operativa del partner con statistiche principali e
-            transazioni recenti.
+            Panoramica operativa del partner con volumi, clienti attivi, GUFO
+            distribuiti e attività recente.
           </p>
           <p className={styles.heroDescription}>
-            Una dashboard merchant pensata per leggere rapidamente volume,
-            reward distribuite e attività recente del punto vendita.
+            Una dashboard pensata per il commerciante: deve far capire in pochi
+            secondi quanto sta muovendo, quanto cashback sta distribuendo e come si
+            sta comportando il punto vendita.
           </p>
+        </div>
+      </section>
+
+      <section className={styles.actionBar}>
+        <div className={styles.actionCard}>
+          <div className={styles.actionLeft}>
+            <span className={styles.actionBadge}>Azioni rapide</span>
+            <h3 className={styles.actionTitle}>Controllo operativo partner</h3>
+            <p className={styles.actionSubtitle}>
+              Registra pagamenti, scansiona clienti e gestisci cashback in tempo reale.
+            </p>
+          </div>
+
+          <div className={styles.actionButtons}>
+            <button
+              className={`${styles.actionBtn} ${styles.primaryAction}`}
+              type="button"
+            >
+              💳 Registra pagamento
+            </button>
+
+            <button
+              className={`${styles.actionBtn} ${styles.secondaryAction}`}
+              type="button"
+            >
+              📷 Scansiona QR
+            </button>
+
+            <button
+              className={`${styles.actionBtn} ${styles.tertiaryAction}`}
+              type="button"
+            >
+              ⚡ Imposta cashback
+            </button>
+          </div>
         </div>
       </section>
 
@@ -323,14 +379,14 @@ export default function PartnerDashboardPage() {
         <div className={styles.operatorCardLeft}>
           <div className={styles.operatorTopRow}>
             <span className={styles.operatorChip}>Partner attivo</span>
-            <span className={styles.operatorStatus}>Live data</span>
+            <span className={styles.operatorStatus}>Dati recenti</span>
           </div>
 
           <p className={styles.operatorLabel}>Merchant selezionato</p>
           <h2 className={styles.operatorValue}>{activePartnerLabel}</h2>
           <p className={styles.operatorNote}>
-            Analytics riferite al partner con ID {selectedPartnerId},
-            comprensive di volumi, reward e attività recente.
+            Monitoraggio rapido del partner con focus su pagamenti, reward, clienti
+            coinvolti e operazioni registrate di recente.
           </p>
         </div>
 
@@ -341,13 +397,15 @@ export default function PartnerDashboardPage() {
           </div>
 
           <div className={styles.operatorMiniCard}>
-            <span>Volume totale</span>
-            <strong>€ {toNumberSafe(data?.total_amount).toFixed(2)}</strong>
+            <span>Cashback base</span>
+            <strong>
+              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
+            </strong>
           </div>
 
           <div className={styles.operatorMiniCard}>
-            <span>GUFO distribuiti</span>
-            <strong>{toNumberSafe(data?.total_gufo_distributed).toFixed(2)}</strong>
+            <span>Ultima attività</span>
+            <strong>{latestDate ? formatDate(latestDate) : "-"}</strong>
           </div>
         </div>
       </section>
@@ -358,7 +416,7 @@ export default function PartnerDashboardPage() {
             <p className={styles.sectionEyebrow}>Partner Selection</p>
             <h3>Selezione partner</h3>
           </div>
-          <span className={styles.panelBadge}>Analytics Active</span>
+          <span className={styles.panelBadge}>Dashboard attiva</span>
         </div>
 
         <div className={styles.filtersGrid}>
@@ -383,7 +441,7 @@ export default function PartnerDashboardPage() {
               onClick={() => loadStats(selectedPartnerId)}
               className={styles.primaryBtn}
             >
-              Ricarica
+              Ricarica dati
             </button>
           </div>
         </div>
@@ -391,11 +449,11 @@ export default function PartnerDashboardPage() {
 
       <section className={styles.metricsGrid}>
         <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
-          <p className={styles.metricLabel}>Totale transazioni</p>
+          <p className={styles.metricLabel}>Pagamenti registrati</p>
           <h3 className={styles.metricValue}>
             {toNumberSafe(data?.total_transactions)}
           </h3>
-          <span className={styles.metricHint}>Operazioni registrate</span>
+          <span className={styles.metricHint}>Operazioni gestite dal partner</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -403,7 +461,7 @@ export default function PartnerDashboardPage() {
           <h3 className={styles.metricValue}>
             € {toNumberSafe(data?.total_amount).toFixed(2)}
           </h3>
-          <span className={styles.metricHint}>Importo complessivo delle vendite</span>
+          <span className={styles.metricHint}>Importo complessivo registrato</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -411,13 +469,21 @@ export default function PartnerDashboardPage() {
           <h3 className={styles.metricValue}>
             {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
           </h3>
-          <span className={styles.metricHint}>Reward erogate dal partner</span>
+          <span className={styles.metricHint}>Reward accreditate ai clienti</span>
+        </div>
+
+        <div className={styles.metricCard}>
+          <p className={styles.metricLabel}>Clienti unici</p>
+          <h3 className={styles.metricValue}>
+            {toNumberSafe(data?.total_customers)}
+          </h3>
+          <span className={styles.metricHint}>Persone servite dal partner</span>
         </div>
 
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Scontrino medio</p>
           <h3 className={styles.metricValue}>€ {avgTicket.toFixed(2)}</h3>
-          <span className={styles.metricHint}>Valore medio per transazione</span>
+          <span className={styles.metricHint}>Valore medio per pagamento</span>
         </div>
       </section>
 
@@ -426,16 +492,16 @@ export default function PartnerDashboardPage() {
           <div className={styles.panelHeader}>
             <div>
               <p className={styles.sectionEyebrow}>Recent activity</p>
-              <h3>Ultime transazioni</h3>
+              <h3>Ultime operazioni</h3>
             </div>
             <span className={styles.panelBadge}>{transactions.length} record</span>
           </div>
 
           {transactions.length === 0 ? (
             <div className={styles.emptyState}>
-              <div className={styles.emptyTitle}>Nessuna transazione trovata</div>
+              <div className={styles.emptyTitle}>Nessuna operazione trovata</div>
               <div className={styles.emptyText}>
-                Le transazioni partner appariranno qui appena disponibili.
+                Le operazioni del partner appariranno qui appena disponibili.
               </div>
             </div>
           ) : (
@@ -444,12 +510,11 @@ export default function PartnerDashboardPage() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
-                      <th>ID</th>
+                      <th>Operazione</th>
                       <th>Merchant</th>
                       <th>Tipo</th>
                       <th>Importo</th>
                       <th>GUFO</th>
-                      <th>Partner ID</th>
                       <th>Data</th>
                     </tr>
                   </thead>
@@ -475,8 +540,7 @@ export default function PartnerDashboardPage() {
                         </td>
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
                         <td>{getTransactionGufo(tx).toFixed(2)}</td>
-                        <td>{getTransactionPartnerId(tx)}</td>
-                        <td>{formatDate(tx.created_at)}</td>
+                        <td>{formatDateTime(tx.created_at)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -501,7 +565,7 @@ export default function PartnerDashboardPage() {
                     </div>
 
                     <div className={styles.mobileTxRow}>
-                      <span>ID</span>
+                      <span>Operazione</span>
                       <span>{getTransactionId(tx) || "-"}</span>
                     </div>
 
@@ -522,7 +586,7 @@ export default function PartnerDashboardPage() {
 
                     <div className={styles.mobileTxRow}>
                       <span>Data</span>
-                      <span>{formatDate(tx.created_at)}</span>
+                      <span>{formatDateTime(tx.created_at)}</span>
                     </div>
                   </div>
                 ))}
@@ -539,21 +603,23 @@ export default function PartnerDashboardPage() {
           </div>
 
           <div className={styles.sideCard}>
-            <p className={styles.sideLabel}>Scontrino medio</p>
-            <h4>€ {avgTicket.toFixed(2)}</h4>
-            <span>Valore medio per operazione</span>
+            <p className={styles.sideLabel}>Cashback base</p>
+            <h4>
+              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
+            </h4>
+            <span>Valore di riferimento del partner</span>
           </div>
 
           <div className={styles.sideCard}>
-            <p className={styles.sideLabel}>GUFO distribuiti</p>
-            <h4>{toNumberSafe(data?.total_gufo_distributed).toFixed(2)}</h4>
-            <span>Reward totali erogate</span>
+            <p className={styles.sideLabel}>Clienti serviti</p>
+            <h4>{toNumberSafe(data?.total_customers)}</h4>
+            <span>Numero clienti unici coinvolti</span>
           </div>
 
           <div className={styles.sideCard}>
-            <p className={styles.sideLabel}>Movimenti caricati</p>
+            <p className={styles.sideLabel}>Storico visibile</p>
             <h4>{transactions.length}</h4>
-            <span>Record visibili nello storico</span>
+            <span>Record recenti caricati nella dashboard</span>
           </div>
         </aside>
       </section>
