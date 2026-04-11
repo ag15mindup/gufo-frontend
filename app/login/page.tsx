@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./login.module.css";
 
+type ProfileRow = {
+  id: string;
+  role?: string | null;
+};
+
 export default function LoginPage() {
   const supabase = createClient();
   const router = useRouter();
@@ -16,6 +21,27 @@ export default function LoginPage() {
   const [checkingUser, setCheckingUser] = useState(true);
   const [error, setError] = useState("");
 
+  async function redirectByRole(userId: string) {
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("id, role")
+      .eq("id", userId)
+      .maybeSingle<ProfileRow>();
+
+    if (profileError) {
+      throw new Error(profileError.message || "Errore lettura profilo");
+    }
+
+    const role = String(profile?.role || "user").toLowerCase();
+
+    if (role === "partner") {
+      router.push("/partner-dashboard");
+      return;
+    }
+
+    router.push("/dashboard");
+  }
+
   useEffect(() => {
     async function checkUser() {
       const {
@@ -23,7 +49,12 @@ export default function LoginPage() {
       } = await supabase.auth.getUser();
 
       if (user) {
-        router.push("/dashboard");
+        try {
+          await redirectByRole(user.id);
+        } catch (err: any) {
+          setError(err?.message || "Errore reindirizzamento");
+          setCheckingUser(false);
+        }
       } else {
         setCheckingUser(false);
       }
@@ -38,8 +69,8 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
       password,
     });
 
@@ -49,7 +80,21 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    if (!data.user) {
+      setError("Utente non trovato dopo il login");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await redirectByRole(data.user.id);
+    } catch (err: any) {
+      setError(err?.message || "Errore durante il redirect");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
   }
 
   if (checkingUser) {
@@ -80,8 +125,8 @@ export default function LoginPage() {
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Accedi alla tua area personale e controlla wallet, cashback,
-            membership, profilo e transazioni in tempo reale.
+            Accedi alla tua area personale o partner e controlla wallet, cashback,
+            membership, profilo, transazioni e operazioni in tempo reale.
           </p>
 
           <div className={styles.heroTags}>
@@ -89,6 +134,7 @@ export default function LoginPage() {
             <span className={styles.heroTag}>Membership</span>
             <span className={styles.heroTag}>Profilo</span>
             <span className={styles.heroTag}>Transazioni</span>
+            <span className={styles.heroTag}>Partner access</span>
           </div>
         </div>
 

@@ -10,12 +10,7 @@ export default function RegisterPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [checkingUser, setCheckingUser] = useState(true);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     async function checkUser() {
@@ -32,42 +27,6 @@ export default function RegisterPage() {
 
     checkUser();
   }, [router, supabase]);
-
-  async function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
-
-    setLoading(true);
-    setError("");
-    setMessage("");
-
-    const trimmedEmail = email.trim();
-
-    const { data, error } = await supabase.auth.signUp({
-      email: trimmedEmail,
-      password,
-    });
-
-    if (error) {
-      setError(error.message || "Errore durante la registrazione");
-      setLoading(false);
-      return;
-    }
-
-    const needsEmailConfirmation = !data.session && !!data.user;
-
-    if (needsEmailConfirmation) {
-      setMessage(
-        "Registrazione completata. Controlla la tua email e conferma l'account prima di accedere."
-      );
-    } else {
-      setMessage("Account creato con successo. Reindirizzamento al login...");
-      setTimeout(() => {
-        router.push("/login");
-      }, 1200);
-    }
-
-    setLoading(false);
-  }
 
   if (checkingUser) {
     return (
@@ -92,65 +51,53 @@ export default function RegisterPage() {
           <div className={styles.heroBadge}>GUFO Rainbow Access</div>
 
           <h1 className={styles.heroTitle}>
-            Crea il tuo
-            <span className={styles.heroTitleGlow}> account GUFO</span>
+            Scegli il tuo
+            <span className={styles.heroTitleGlow}> tipo di account</span>
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Registrati per entrare nell’ecosistema GUFO e accedere a wallet,
-            cashback, membership, profilo, codice cliente e dashboard personale.
+            GUFO ora separa il percorso di registrazione tra cliente e partner,
+            così ogni account entra direttamente nell’area giusta.
           </p>
 
           <div className={styles.heroTags}>
-            <span className={styles.heroTag}>Account personale</span>
-            <span className={styles.heroTag}>Cashback intelligente</span>
-            <span className={styles.heroTag}>Membership evolutiva</span>
-            <span className={styles.heroTag}>Partner network</span>
+            <span className={styles.heroTag}>Accesso utente</span>
+            <span className={styles.heroTag}>Accesso partner</span>
+            <span className={styles.heroTag}>Dashboard dedicate</span>
+            <span className={styles.heroTag}>Flussi separati</span>
           </div>
         </div>
 
-        <div className={styles.card}>
-          <div className={styles.cardTopline}>REGISTER</div>
-          <h2 className={styles.cardTitle}>Crea un nuovo account</h2>
+        <div className={styles.choiceWrap}>
+          <div className={styles.choiceHeaderTopline}>REGISTER</div>
+          <h2 className={styles.cardTitle}>Seleziona come vuoi entrare</h2>
           <p className={styles.cardSubtitle}>
-            Inserisci email e password per iniziare con GUFO.
+            Scegli il percorso corretto per creare il tuo account GUFO.
           </p>
 
-          <form onSubmit={handleRegister} className={styles.form}>
-            <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Email</label>
-              <input
-                type="email"
-                placeholder="Inserisci la tua email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-                className={styles.fieldInput}
-              />
-            </div>
+          <div className={styles.choiceGrid}>
+            <Link href="/register-user" className={styles.choiceCard}>
+              <div className={styles.choiceIcon}>👤</div>
+              <div className={styles.choiceContent}>
+                <h3 className={styles.choiceTitle}>Registrati come utente</h3>
+                <p className={styles.choiceText}>
+                  Accedi a wallet, cashback, membership, profilo, customer code e dashboard personale.
+                </p>
+                <span className={styles.choiceAction}>Vai alla registrazione utente</span>
+              </div>
+            </Link>
 
-            <div className={styles.fieldGroup}>
-              <label className={styles.fieldLabel}>Password</label>
-              <input
-                type="password"
-                placeholder="Scegli una password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                autoComplete="new-password"
-                className={styles.fieldInput}
-              />
-            </div>
-
-            <button type="submit" disabled={loading} className={styles.submitButton}>
-              {loading ? "Registrazione in corso..." : "Crea account"}
-            </button>
-          </form>
-
-          {message && <div className={styles.successBox}>{message}</div>}
-          {error && <div className={styles.errorBox}>{error}</div>}
+            <Link href="/register-partner" className={styles.choiceCard}>
+              <div className={styles.choiceIcon}>🏪</div>
+              <div className={styles.choiceContent}>
+                <h3 className={styles.choiceTitle}>Registrati come partner</h3>
+                <p className={styles.choiceText}>
+                  Crea il tuo account merchant per registrare pagamenti, gestire cashback e usare la partner dashboard.
+                </p>
+                <span className={styles.choiceAction}>Vai alla registrazione partner</span>
+              </div>
+            </Link>
+          </div>
 
           <div className={styles.cardFooter}>
             <p className={styles.footerText}>

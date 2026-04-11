@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
@@ -7,7 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-dashboard.module.css";
 
 const supabase = createClient();
-
+type ProfileRow = {
+  id: string;
+  role?: string | null;
+};
 type Transaction = {
   id?: string | null;
   transaction_id?: string | null;
@@ -163,12 +166,13 @@ function getCustomerId(tx: any) {
 }
 
 export default function PartnerDashboardPage() {
+  const router = useRouter();
   const [partnerUserId, setPartnerUserId] = useState<string>("");
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+const [authChecked, setAuthChecked] = useState(false);
   async function loadPartnerStats(userId: string) {
     try {
       setLoading(true);
@@ -197,24 +201,53 @@ export default function PartnerDashboardPage() {
     }
   }
 
-  useEffect(() => {
-    async function init() {
+ useEffect(() => {
+  async function init() {
+    try {
+      setLoading(true);
+      setError("");
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
       if (!user) {
-        setError("Utente partner non autenticato");
-        setLoading(false);
+        router.push("/login");
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, role")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>();
+
+      if (profileError) {
+        throw new Error(profileError.message || "Errore controllo profilo");
+      }
+
+      const role = String(profile?.role || "user").toLowerCase();
+
+      if (role !== "partner") {
+        router.push("/dashboard");
         return;
       }
 
       setPartnerUserId(user.id);
       await loadPartnerStats(user.id);
+      setAuthChecked(true);
+    } catch (err: any) {
+      setError(err?.message || "Errore sconosciuto");
+      setData(null);
+      setTransactions([]);
+      setAuthChecked(true);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    init();
-  }, []);
+  init();
+}, [router]);
 
   const avgTicket = useMemo(() => {
     const totalTransactions = toNumberSafe(data?.total_transactions);
@@ -276,23 +309,23 @@ export default function PartnerDashboardPage() {
     return latestPayment ? getTransactionAmount(latestPayment) : 0;
   }, [paymentTransactions]);
 
-  if (loading) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.bgOverlay} />
-        <div className={styles.rainbowLine} />
-        <section className={styles.hero}>
-          <div className={styles.heroCopy}>
-            <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
-            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
-            <h1 className={styles.title}>Partner dashboard</h1>
-            <p className={styles.subtitle}>Caricamento dati partner...</p>
-          </div>
-        </section>
-        <div className={styles.loadingBox}>Recupero analytics partner...</div>
-      </div>
-    );
-  }
+  if (loading || !authChecked) {
+  return (
+    <div className={styles.page}>
+      <div className={styles.bgOverlay} />
+      <div className={styles.rainbowLine} />
+      <section className={styles.hero}>
+        <div className={styles.heroCopy}>
+          <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
+          <p className={styles.eyebrow}>GUFO Partner Analytics</p>
+          <h1 className={styles.title}>Partner dashboard</h1>
+          <p className={styles.subtitle}>Controllo accesso partner...</p>
+        </div>
+      </section>
+      <div className={styles.loadingBox}>Verifica autorizzazione...</div>
+    </div>
+  );
+}
 
   if (error) {
     return (

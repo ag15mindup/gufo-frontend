@@ -14,6 +14,11 @@ type HudRoute = {
   icon: ReactNode;
 };
 
+type ProfileRow = {
+  id: string;
+  role?: string | null;
+};
+
 function PrismGlyph() {
   return (
     <svg viewBox="0 0 24 24" className={styles.glyphSvg} aria-hidden="true">
@@ -117,7 +122,10 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [role, setRole] = useState<"user" | "partner">("user");
+  const [loadingRole, setLoadingRole] = useState(true);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -132,6 +140,43 @@ export default function Sidebar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    async function loadRole() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          setRole("user");
+          setLoadingRole(false);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, role")
+          .eq("id", user.id)
+          .maybeSingle<ProfileRow>();
+
+        if (error) {
+          setRole("user");
+          setLoadingRole(false);
+          return;
+        }
+
+        const resolvedRole = String(data?.role || "user").toLowerCase();
+        setRole(resolvedRole === "partner" ? "partner" : "user");
+      } catch {
+        setRole("user");
+      } finally {
+        setLoadingRole(false);
+      }
+    }
+
+    loadRole();
+  }, [supabase]);
 
   async function exitSession() {
     await supabase.auth.signOut();
@@ -153,20 +198,28 @@ export default function Sidebar() {
 
   const partnerRoutes = useMemo<HudRoute[]>(
     () => [
-      { href: "/partner-console", title: "Partner console", icon: <BeaconGlyph /> },
-      { href: "/partner-dashboard", title: "Partner Dashboard", icon: <ClusterGlyph /> },
+      { href: "/partner-console", title: "Partner Console", subtitle: "Console pagamenti", icon: <BeaconGlyph /> },
+      { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Analytics partner", icon: <ClusterGlyph /> },
     ],
     []
   );
 
-  const allRoutes = [...mainRoutes, ...partnerRoutes];
+  const visibleRoutes = role === "partner" ? [...mainRoutes, ...partnerRoutes] : mainRoutes;
 
   const activeRoute =
-    allRoutes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
-    allRoutes[0];
+    visibleRoutes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
+    visibleRoutes[0];
 
-  const secondaryMain = mainRoutes.filter((route) => route.href !== activeRoute.href);
-  const secondaryPartners = partnerRoutes.filter((route) => route.href !== activeRoute.href);
+  const visibleMainRoutes =
+    role === "partner"
+      ? mainRoutes
+      : mainRoutes;
+
+  const secondaryMain = visibleMainRoutes.filter((route) => route.href !== activeRoute?.href);
+  const secondaryPartners =
+    role === "partner"
+      ? partnerRoutes.filter((route) => route.href !== activeRoute?.href)
+      : [];
 
   return (
     <>
@@ -177,7 +230,12 @@ export default function Sidebar() {
       </button>
 
       {drawerOpen && (
-        <button type="button" className={styles.backdrop} aria-label="Chiudi menu" onClick={() => setDrawerOpen(false)} />
+        <button
+          type="button"
+          className={styles.backdrop}
+          aria-label="Chiudi menu"
+          onClick={() => setDrawerOpen(false)}
+        />
       )}
 
       <aside className={`${styles.sidebarHud} ${drawerOpen ? styles.sidebarHudOpen : ""}`}>
@@ -205,30 +263,31 @@ export default function Sidebar() {
               </div>
 
               <div className={styles.brandName}>GUFO</div>
-              <div className={styles.brandSub}>Neon OS</div>
+              <div className={styles.brandSub}>{role === "partner" ? "Partner OS" : "Neon OS"}</div>
             </div>
 
             <div className={styles.livePill}>
               <span className={styles.liveDot} />
-              LIVE
+              {loadingRole ? "SYNC" : "LIVE"}
             </div>
 
             <nav className={styles.railNav}>
-              {allRoutes.map((route) => {
-                const isActive = pathname === route.href || pathname.startsWith(`${route.href}/`);
+              {!loadingRole &&
+                visibleRoutes.map((route) => {
+                  const isActive = pathname === route.href || pathname.startsWith(`${route.href}/`);
 
-                return (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    className={`${styles.railNode} ${isActive ? styles.railNodeActive : ""}`}
-                    title={route.title}
-                  >
-                    <span className={styles.railNodeGlow} />
-                    <span className={styles.railNodeGlyph}>{route.icon}</span>
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={route.href}
+                      href={route.href}
+                      className={`${styles.railNode} ${isActive ? styles.railNodeActive : ""}`}
+                      title={route.title}
+                    >
+                      <span className={styles.railNodeGlow} />
+                      <span className={styles.railNodeGlyph}>{route.icon}</span>
+                    </Link>
+                  );
+                })}
             </nav>
 
             <div className={styles.systemBlock}>
@@ -253,7 +312,9 @@ export default function Sidebar() {
             <div className={styles.panelHeader}>
               <div>
                 <div className={styles.panelTag}>SPECTRAL HUD</div>
-                <div className={styles.panelCaption}>RAINBOW CASHBACK NETWORK</div>
+                <div className={styles.panelCaption}>
+                  {role === "partner" ? "PARTNER CASHBACK NETWORK" : "RAINBOW CASHBACK NETWORK"}
+                </div>
               </div>
 
               <button
@@ -266,42 +327,51 @@ export default function Sidebar() {
               </button>
             </div>
 
-            <div className={styles.activeTab}>
-              <div className={styles.activeTabArrow} />
-              <div className={styles.activeTabGlow} />
-              <div className={styles.activeIcon}>{activeRoute.icon}</div>
-              <div className={styles.activeCopy}>
-                <div className={styles.activeTitle}>{activeRoute.title}</div>
-                <div className={styles.activeSubtitle}>{activeRoute.subtitle ?? "Access module"}</div>
+            {!loadingRole && activeRoute && (
+              <div className={styles.activeTab}>
+                <div className={styles.activeTabArrow} />
+                <div className={styles.activeTabGlow} />
+                <div className={styles.activeIcon}>{activeRoute.icon}</div>
+                <div className={styles.activeCopy}>
+                  <div className={styles.activeTitle}>{activeRoute.title}</div>
+                  <div className={styles.activeSubtitle}>{activeRoute.subtitle ?? "Access module"}</div>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className={styles.sectionLabel}>MAIN MODULES</div>
 
             <div className={styles.menuList}>
-              {secondaryMain.map((route) => (
-                <Link key={route.href} href={route.href} className={styles.menuRow}>
-                  <div className={styles.menuRowGlow} />
-                  <div className={styles.menuIcon}>{route.icon}</div>
-                  <div className={styles.menuText}>
-                    <div className={styles.menuTitle}>{route.title}</div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className={styles.partnerBlock}>
-              <div className={styles.sectionLabel}>PARTNER LAYER</div>
-
-              <div className={styles.partnerList}>
-                {secondaryPartners.map((route) => (
-                  <Link key={route.href} href={route.href} className={styles.partnerRow}>
-                    <div className={styles.partnerIcon}>{route.icon}</div>
-                    <div className={styles.partnerTitle}>{route.title}</div>
+              {!loadingRole &&
+                secondaryMain.map((route) => (
+                  <Link key={route.href} href={route.href} className={styles.menuRow}>
+                    <div className={styles.menuRowGlow} />
+                    <div className={styles.menuIcon}>{route.icon}</div>
+                    <div className={styles.menuText}>
+                      <div className={styles.menuTitle}>{route.title}</div>
+                      {route.subtitle ? <div className={styles.menuSubtitle}>{route.subtitle}</div> : null}
+                    </div>
                   </Link>
                 ))}
-              </div>
             </div>
+
+            {role === "partner" && !loadingRole && (
+              <div className={styles.partnerBlock}>
+                <div className={styles.sectionLabel}>PARTNER LAYER</div>
+
+                <div className={styles.partnerList}>
+                  {secondaryPartners.map((route) => (
+                    <Link key={route.href} href={route.href} className={styles.partnerRow}>
+                      <div className={styles.partnerIcon}>{route.icon}</div>
+                      <div className={styles.partnerText}>
+                        <div className={styles.partnerTitle}>{route.title}</div>
+                        {route.subtitle ? <div className={styles.partnerSubtitle}>{route.subtitle}</div> : null}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </aside>

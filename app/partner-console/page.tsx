@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
@@ -7,7 +7,10 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-console.module.css";
 
 const supabase = createClient();
-
+type ProfileRow = {
+  id: string;
+  role?: string | null;
+};
 type CustomerResponse = {
   id: string;
   customer_code: string;
@@ -119,6 +122,7 @@ function formatDateTime(value?: string | null) {
 }
 
 export default function PartnerConsolePage() {
+  const router = useRouter();
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [partnerId, setPartnerId] = useState<number | null>(null);
@@ -136,7 +140,7 @@ export default function PartnerConsolePage() {
 
   const [result, setResult] = useState<PaymentApiResponse | null>(null);
   const [error, setError] = useState("");
-
+const [authChecked, setAuthChecked] = useState(false);
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
       `${API_URL}/partner/me?user_id=${encodeURIComponent(userId)}`
@@ -183,29 +187,49 @@ export default function PartnerConsolePage() {
   }
 
   useEffect(() => {
-    async function init() {
-      try {
-        setLoadingPartner(true);
-        setError("");
+  async function init() {
+    try {
+      setLoadingPartner(true);
+      setError("");
 
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-        if (!user) {
-          throw new Error("Utente partner non autenticato");
-        }
-
-        await loadPartnerMe(user.id);
-      } catch (err: any) {
-        setError(err?.message || "Errore caricamento partner");
-      } finally {
-        setLoadingPartner(false);
+      if (!user) {
+        router.push("/login");
+        return;
       }
-    }
 
-    init();
-  }, []);
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, role")
+        .eq("id", user.id)
+        .maybeSingle<ProfileRow>();
+
+      if (profileError) {
+        throw new Error(profileError.message || "Errore controllo profilo");
+      }
+
+      const role = String(profile?.role || "user").toLowerCase();
+
+      if (role !== "partner") {
+        router.push("/dashboard");
+        return;
+      }
+
+      await loadPartnerMe(user.id);
+      setAuthChecked(true);
+    } catch (err: any) {
+      setError(err?.message || "Errore caricamento partner");
+      setAuthChecked(true);
+    } finally {
+      setLoadingPartner(false);
+    }
+  }
+
+  init();
+}, [router]);
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();

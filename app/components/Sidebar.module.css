@@ -708,3 +708,20 @@
     font-size: 16px;
   }
 }
+.menuSubtitle {
+  font-size: 12px;
+  opacity: 0.68;
+  margin-top: 2px;
+}
+
+.partnerText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.partnerSubtitle {
+  font-size: 12px;
+  opacity: 0.68;
+  margin-top: 2px;
+}
