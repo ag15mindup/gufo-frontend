@@ -133,11 +133,14 @@ export default function Sidebar() {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 1140) setDrawerOpen(false);
+      if (window.innerWidth >= 1140) {
+        setDrawerOpen(false);
+      }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -161,6 +164,7 @@ export default function Sidebar() {
           .maybeSingle<ProfileRow>();
 
         if (error) {
+          console.error("Errore lettura profilo sidebar:", error);
           setRole("user");
           setLoadingRole(false);
           return;
@@ -168,7 +172,8 @@ export default function Sidebar() {
 
         const resolvedRole = String(data?.role || "user").toLowerCase();
         setRole(resolvedRole === "partner" ? "partner" : "user");
-      } catch {
+      } catch (error) {
+        console.error("Errore loadRole sidebar:", error);
         setRole("user");
       } finally {
         setLoadingRole(false);
@@ -183,7 +188,7 @@ export default function Sidebar() {
     router.push("/login");
   }
 
-  const mainRoutes = useMemo<HudRoute[]>(
+  const userRoutes = useMemo<HudRoute[]>(
     () => [
       { href: "/dashboard", title: "Dashboard", subtitle: "Control center", icon: <PrismGlyph /> },
       { href: "/wallet", title: "Wallet", subtitle: "Saldo e movimenti", icon: <OrbitGlyph /> },
@@ -204,22 +209,16 @@ export default function Sidebar() {
     []
   );
 
-  const visibleRoutes = role === "partner" ? [...mainRoutes, ...partnerRoutes] : mainRoutes;
+  const visibleRoutes = useMemo<HudRoute[]>(() => {
+    return role === "partner" ? partnerRoutes : userRoutes;
+  }, [role, partnerRoutes, userRoutes]);
 
   const activeRoute =
     visibleRoutes.find((route) => pathname === route.href || pathname.startsWith(`${route.href}/`)) ??
-    visibleRoutes[0];
+    visibleRoutes[0] ??
+    null;
 
-  const visibleMainRoutes =
-    role === "partner"
-      ? mainRoutes
-      : mainRoutes;
-
-  const secondaryMain = visibleMainRoutes.filter((route) => route.href !== activeRoute?.href);
-  const secondaryPartners =
-    role === "partner"
-      ? partnerRoutes.filter((route) => route.href !== activeRoute?.href)
-      : [];
+  const secondaryRoutes = visibleRoutes.filter((route) => route.href !== activeRoute?.href);
 
   return (
     <>
@@ -339,11 +338,13 @@ export default function Sidebar() {
               </div>
             )}
 
-            <div className={styles.sectionLabel}>MAIN MODULES</div>
+            <div className={styles.sectionLabel}>
+              {role === "partner" ? "PARTNER MODULES" : "MAIN MODULES"}
+            </div>
 
             <div className={styles.menuList}>
               {!loadingRole &&
-                secondaryMain.map((route) => (
+                secondaryRoutes.map((route) => (
                   <Link key={route.href} href={route.href} className={styles.menuRow}>
                     <div className={styles.menuRowGlow} />
                     <div className={styles.menuIcon}>{route.icon}</div>
@@ -354,24 +355,6 @@ export default function Sidebar() {
                   </Link>
                 ))}
             </div>
-
-            {role === "partner" && !loadingRole && (
-              <div className={styles.partnerBlock}>
-                <div className={styles.sectionLabel}>PARTNER LAYER</div>
-
-                <div className={styles.partnerList}>
-                  {secondaryPartners.map((route) => (
-                    <Link key={route.href} href={route.href} className={styles.partnerRow}>
-                      <div className={styles.partnerIcon}>{route.icon}</div>
-                      <div className={styles.partnerText}>
-                        <div className={styles.partnerTitle}>{route.title}</div>
-                        {route.subtitle ? <div className={styles.partnerSubtitle}>{route.subtitle}</div> : null}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </aside>
