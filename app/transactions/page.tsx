@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./transactions.module.css";
 
@@ -54,6 +53,10 @@ function formatTransactionType(type?: string) {
       return "Acquisto";
     case "withdraw":
       return "Prelievo";
+    case "convert":
+      return "Conversione";
+    case "giftcard":
+      return "Gift Card";
     default:
       return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -131,8 +134,29 @@ function getTypeTone(type: string) {
   if (normalized.includes("withdraw")) return styles.orangeBadge;
   if (normalized.includes("buy") || normalized.includes("acquisto"))
     return styles.cyanBadge;
+  if (normalized.includes("convert")) return styles.orangeBadge;
+  if (normalized.includes("gift")) return styles.purpleBadge;
 
   return "";
+}
+
+async function fetchJsonWithAuth<T>(url: string, token: string): Promise<T> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload?.error || `Errore richiesta: ${response.status}`);
+  }
+
+  return payload as T;
 }
 
 export default function TransactionsPage() {
@@ -163,13 +187,22 @@ export default function TransactionsPage() {
           throw new Error("Utente non autenticato");
         }
 
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/transactions/${user.id}`
-        );
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel caricamento transazioni");
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore recupero sessione");
         }
+
+        const token = session?.access_token;
+
+        if (!token) {
+          throw new Error("Token non disponibile");
+        }
+
+        const data = await fetchJsonWithAuth<any>(`${API_URL}/transactions`, token);
 
         const rawTransactions = extractTransactions(data);
 

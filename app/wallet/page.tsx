@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import MissionCard from "@/app/components/Missioncard";
 import styles from "./wallet.module.css";
@@ -129,6 +128,10 @@ function formatTransactionType(type?: string) {
       return "Acquisto";
     case "acquisto":
       return "Acquisto";
+    case "convert":
+      return "Conversione";
+    case "giftcard":
+      return "Gift Card";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -153,6 +156,25 @@ function extractTransactions(payload: any): any[] {
   if (Array.isArray(payload?.transactions)) return payload.transactions;
   if (Array.isArray(payload?.data?.transactions)) return payload.data.transactions;
   return [];
+}
+
+async function fetchJsonWithAuth<T>(url: string, token: string): Promise<T> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload?.error || `Errore richiesta: ${response.status}`);
+  }
+
+  return payload as T;
 }
 
 export default function WalletPage() {
@@ -194,6 +216,21 @@ export default function WalletPage() {
         throw new Error("Utente non autenticato");
       }
 
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        throw new Error(sessionError.message || "Errore recupero sessione");
+      }
+
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error("Token non disponibile");
+      }
+
       const fallbackName =
         user.user_metadata?.username ||
         user.user_metadata?.full_name ||
@@ -204,23 +241,10 @@ export default function WalletPage() {
       setUserName(fallbackName);
       setUserInitial(fallbackName.trim().charAt(0).toUpperCase() || "U");
 
-      const [walletRes, transactionsRes] = await Promise.all([
-        safeJsonFetch(`${API_URL}/wallet/${user.id}`),
-        safeJsonFetch(`${API_URL}/transactions/${user.id}`),
+      const [walletPayload, transactionsPayload] = await Promise.all([
+        fetchJsonWithAuth<any>(`${API_URL}/wallet`, token),
+        fetchJsonWithAuth<any>(`${API_URL}/transactions`, token),
       ]);
-
-      if (!walletRes.response.ok || walletRes.data?.success === false) {
-        throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
-      }
-
-      if (!transactionsRes.response.ok || transactionsRes.data?.success === false) {
-        throw new Error(
-          transactionsRes.data?.error || "Errore nel recupero transazioni"
-        );
-      }
-
-      const walletPayload = walletRes.data ?? {};
-      const transactionsPayload = transactionsRes.data ?? {};
 
       const wallet: WalletResponse = extractWallet(walletPayload);
       const rawTransactions = extractTransactions(transactionsPayload);

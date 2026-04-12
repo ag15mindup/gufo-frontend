@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./profile.module.css";
 
@@ -21,8 +20,54 @@ type Transaction = {
   gufo?: number | string | null;
   gufo_earned?: number | string | null;
   cashback?: number | string | null;
+  cashback_percent?: number | string | null;
   created_at?: string | null;
   raw?: unknown;
+};
+
+type ProfileResponse = {
+  success?: boolean;
+  error?: string;
+  profile?: {
+    full_name?: string | null;
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+  };
+  wallet?: {
+    balance_gufo?: number | string | null;
+    season_spent?: number | string | null;
+    cashback_percent?: number | string | null;
+    current_level?: string | null;
+  };
+  stats?: {
+    balance_gufo?: number | string | null;
+    season_spent?: number | string | null;
+    cashback_percent?: number | string | null;
+    level?: string | null;
+  };
+  transactions?: Transaction[];
+  data?: {
+    profile?: {
+      full_name?: string | null;
+      name?: string | null;
+      username?: string | null;
+      email?: string | null;
+    };
+    wallet?: {
+      balance_gufo?: number | string | null;
+      season_spent?: number | string | null;
+      cashback_percent?: number | string | null;
+      current_level?: string | null;
+    };
+    stats?: {
+      balance_gufo?: number | string | null;
+      season_spent?: number | string | null;
+      cashback_percent?: number | string | null;
+      level?: string | null;
+    };
+    transactions?: Transaction[];
+  };
 };
 
 type ProfileData = {
@@ -71,6 +116,10 @@ function formatTransactionType(type?: string) {
       return "Acquisto";
     case "withdraw":
       return "Prelievo";
+    case "convert":
+      return "Conversione";
+    case "giftcard":
+      return "Gift Card";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -88,12 +137,28 @@ function getTransactionAmount(tx: any) {
 }
 
 function getTransactionGufo(tx: any) {
-  return toNumberSafe(
+  const direct = toNumberSafe(
     tx?.gufo_earned ??
       tx?.gufo ??
       tx?.raw?.gufo_earned ??
       tx?.raw?.gufo
   );
+
+  if (direct > 0) return direct;
+
+  const amount = getTransactionAmount(tx);
+  const cashback = toNumberSafe(
+    tx?.cashback_percent ??
+      tx?.cashback ??
+      tx?.raw?.cashback_percent ??
+      tx?.raw?.cashback
+  );
+
+  if (amount > 0 && cashback > 0) {
+    return Number(((amount * cashback) / 100).toFixed(2));
+  }
+
+  return 0;
 }
 
 function getTransactionMerchant(tx: any) {
@@ -138,8 +203,40 @@ function getTypeTone(type: string) {
   if (normalized.includes("withdraw")) return styles.orangeBadge;
   if (normalized.includes("buy") || normalized.includes("acquisto"))
     return styles.cyanBadge;
+  if (normalized.includes("convert")) return styles.orangeBadge;
+  if (normalized.includes("gift")) return styles.purpleBadge;
 
   return "";
+}
+
+function normalizeProfilePayload(payload: ProfileResponse) {
+  const root = payload?.data && typeof payload.data === "object" ? payload.data : payload;
+
+  return {
+    profile: root?.profile ?? {},
+    wallet: root?.wallet ?? {},
+    stats: root?.stats ?? {},
+    transactions: Array.isArray(root?.transactions) ? root.transactions : [],
+  };
+}
+
+async function fetchJsonWithAuth<T>(url: string, token: string): Promise<T> {
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(payload?.error || `Errore richiesta: ${response.status}`);
+  }
+
+  return payload as T;
 }
 
 export default function ProfilePage() {
@@ -177,25 +274,34 @@ export default function ProfilePage() {
           throw new Error("Utente non autenticato");
         }
 
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/profile/${user.id}`
-        );
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel recupero profilo");
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore recupero sessione");
         }
 
-        const profile = data?.profile ?? {};
-        const wallet = data?.wallet ?? {};
-        const stats = data?.stats ?? {};
-        const rawTransactions: Transaction[] = Array.isArray(data?.transactions)
-          ? data.transactions
-          : [];
+        const token = session?.access_token;
+
+        if (!token) {
+          throw new Error("Token non disponibile");
+        }
+
+        const payload = await fetchJsonWithAuth<ProfileResponse>(
+          `${API_URL}/profile`,
+          token
+        );
+
+        const { profile, wallet, stats, transactions: rawTransactions } =
+          normalizeProfilePayload(payload);
 
         const transactions = sortTransactions(
           rawTransactions.map((tx: any) => ({
             id: tx?.id ?? tx?.transaction_id ?? tx?.raw?.id,
-            transaction_id: tx?.transaction_id ?? tx?.id,
+            transaction_id:
+              tx?.transaction_id ?? tx?.id ?? tx?.raw?.transaction_id,
             type: getTransactionType(tx),
             tipo: tx?.tipo ?? tx?.raw?.tipo,
             merchant_name: getTransactionMerchant(tx),
@@ -206,7 +312,16 @@ export default function ProfilePage() {
             importo: tx?.importo ?? tx?.raw?.importo,
             gufo_earned: getTransactionGufo(tx),
             gufo: getTransactionGufo(tx),
-            cashback: tx?.cashback ?? tx?.raw?.cashback,
+            cashback:
+              tx?.cashback ??
+              tx?.cashback_percent ??
+              tx?.raw?.cashback ??
+              tx?.raw?.cashback_percent,
+            cashback_percent:
+              tx?.cashback_percent ??
+              tx?.cashback ??
+              tx?.raw?.cashback_percent ??
+              tx?.raw?.cashback,
             created_at: tx?.created_at ?? tx?.raw?.created_at,
             raw: tx?.raw ?? tx,
           }))
@@ -229,13 +344,13 @@ export default function ProfilePage() {
         );
 
         const name =
-          profile?.full_name ??
-          profile?.name ??
-          profile?.username ??
+          profile?.full_name?.trim() ??
+          profile?.name?.trim() ??
+          profile?.username?.trim() ??
           user.email?.split("@")[0] ??
           "Utente GUFO";
 
-        const email = profile?.email ?? user.email ?? "";
+        const email = profile?.email?.trim() ?? user.email ?? "";
 
         if (!isMounted) return;
 

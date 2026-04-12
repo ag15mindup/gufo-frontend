@@ -172,10 +172,13 @@ function buildInviteLink(name: string): string {
   return `https://invita.gufo.app/${slug || "utente"}`;
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
+async function fetchJsonWithAuth<T>(url: string, token: string): Promise<T> {
   const response = await fetch(url, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     cache: "no-store",
   });
 
@@ -225,9 +228,24 @@ export default function DashboardPage() {
           throw new Error("Utente non autenticato");
         }
 
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore recupero sessione");
+        }
+
+        const token = session?.access_token;
+
+        if (!token) {
+          throw new Error("Token non disponibile");
+        }
+
         const [dashboard, profilePayload] = await Promise.all([
-          fetchJson<DashboardApiResponse>(`${API_URL}/dashboard/${user.id}`),
-          fetchJson<ProfileApiResponse>(`${API_URL}/profile/${user.id}`),
+          fetchJsonWithAuth<DashboardApiResponse>(`${API_URL}/dashboard`, token),
+          fetchJsonWithAuth<ProfileApiResponse>(`${API_URL}/profile`, token),
         ]);
 
         const wallet = dashboard?.wallet ?? {};
