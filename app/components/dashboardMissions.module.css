@@ -157,6 +157,11 @@
   color: #04101d;
   font-weight: 800;
   cursor: pointer;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.retryButton:hover {
+  transform: translateY(-1px);
 }
 
 .emptyBox {
@@ -197,6 +202,11 @@
   box-shadow:
     0 18px 44px rgba(0, 0, 0, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
 }
 
 .cardGlow {
@@ -285,7 +295,7 @@
 .cardBody {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 58px);
+  flex: 1;
   padding: 14px 18px 18px;
 }
 
@@ -402,6 +412,13 @@
   transform: translateY(-1px);
 }
 
+.claimButton:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .disabledButton {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(219, 230, 255, 0.62);
@@ -499,7 +516,8 @@
   }
 
   .claimButton,
-  .disabledButton {
+  .disabledButton,
+  .retryButton {
     width: 100%;
   }
 

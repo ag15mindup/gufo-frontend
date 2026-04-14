@@ -166,11 +166,14 @@ export default function DashboardMissions() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [claimingId, setClaimingId] = useState<string | number | null>(null);
 
   async function loadMissions() {
     try {
       setLoading(true);
       setError("");
+      setSuccessMessage("");
 
       const {
         data: { user },
@@ -224,6 +227,67 @@ export default function DashboardMissions() {
     }
   }
 
+  async function handleClaimReward(missionId: string | number) {
+    try {
+      setClaimingId(missionId);
+      setError("");
+      setSuccessMessage("");
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError) {
+        throw new Error("Errore nel recupero utente");
+      }
+
+      if (!user?.id) {
+        throw new Error("Utente non autenticato");
+      }
+
+      const apiBaseUrl = getApiBaseUrl();
+
+      const response = await fetch(`${apiBaseUrl}/missions/reward`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          missionId,
+        }),
+      });
+
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          payload?.error || payload?.message || "Impossibile riscattare il reward"
+        );
+      }
+
+      const rewardValue = toNumberSafe(payload?.reward_gufo ?? 0);
+
+      setSuccessMessage(
+        rewardValue > 0
+          ? `Reward riscattato con successo: +${rewardValue} GUFO`
+          : "Reward riscattato con successo"
+      );
+
+      await loadMissions();
+    } catch (err) {
+      console.error("Errore riscatto reward:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Errore durante il riscatto reward"
+      );
+    } finally {
+      setClaimingId(null);
+    }
+  }
+
   useEffect(() => {
     loadMissions();
   }, []);
@@ -260,6 +324,10 @@ export default function DashboardMissions() {
         </div>
       </div>
 
+      {successMessage ? (
+        <div className={styles.successBox}>{successMessage}</div>
+      ) : null}
+
       {error ? (
         <div className={styles.errorBox}>
           <span>{error}</span>
@@ -295,6 +363,9 @@ export default function DashboardMissions() {
             const completed = Boolean(mission.completed);
             const rewardGiven = getMissionRewardGiven(mission);
             const rewardChipText = getRewardChipText(mission);
+            const claimed = Boolean(mission.reward_claimed);
+            const missionId = mission.mission_id ?? mission.id;
+            const canClaim = completed && !claimed;
 
             return (
               <article key={String(mission.id)} className={styles.card}>
@@ -341,7 +412,11 @@ export default function DashboardMissions() {
 
                   <div className={styles.footerRow}>
                     <div className={styles.statusArea}>
-                      {completed ? (
+                      {claimed ? (
+                        <span className={`${styles.statusBadge} ${styles.claimed}`}>
+                          Reward riscattata
+                        </span>
+                      ) : completed ? (
                         <span className={`${styles.statusBadge} ${styles.completed}`}>
                           {rewardGiven > 0
                             ? `Completata · +${rewardGiven} GUFO`
@@ -354,9 +429,25 @@ export default function DashboardMissions() {
                       )}
                     </div>
 
-                    <button className={styles.disabledButton} disabled>
-                      {completed ? "Completata" : "Continua"}
-                    </button>
+                    {canClaim ? (
+                      <button
+                        className={styles.claimButton}
+                        onClick={() => handleClaimReward(missionId)}
+                        disabled={claimingId === missionId}
+                      >
+                        {claimingId === missionId
+                          ? "Riscatto..."
+                          : "Riscatta reward"}
+                      </button>
+                    ) : (
+                      <button className={styles.disabledButton} disabled>
+                        {claimed
+                          ? "Già riscattata"
+                          : completed
+                          ? "Pronta"
+                          : "Continua"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </article>
