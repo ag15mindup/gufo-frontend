@@ -14,13 +14,17 @@ type Mission = {
   code?: string;
   title: string;
   description?: string | null;
-  reward_gufo?: number | string | null;
   type: MissionType;
   progress?: number | string | null;
   target?: number | string | null;
   completed?: boolean | null;
   reward_claimed?: boolean | null;
-  expires_at?: string | null;
+  reward_given?: number | string | null;
+  reward_tx_id?: string | number | null;
+  reward_percent?: number | string | null;
+  reward_cap?: number | string | null;
+  min_spend?: number | string | null;
+  period_key?: string | null;
 };
 
 type ApiMission = Record<string, any>;
@@ -42,20 +46,32 @@ function normalizeMissionType(value: unknown): MissionType {
   return "monthly";
 }
 
+function getRewardCapByType(type: MissionType) {
+  if (type === "daily") return 1;
+  if (type === "weekly") return 3;
+  return 5;
+}
+
 function normalizeMission(raw: ApiMission): Mission {
+  const type = normalizeMissionType(raw.type);
+
   return {
     id: raw.id ?? raw.mission_id ?? crypto.randomUUID(),
     mission_id: raw.mission_id ?? raw.id ?? null,
     code: raw.code ?? "",
     title: raw.title ?? raw.name ?? "Missione GUFO",
     description: raw.description ?? "",
-    reward_gufo: raw.reward_gufo ?? 0,
-    type: normalizeMissionType(raw.type),
+    type,
     progress: raw.progress ?? 0,
-    target: raw.target ?? 1,
+    target: raw.target ?? raw.condition_value ?? 1,
     completed: raw.completed ?? false,
     reward_claimed: raw.reward_claimed ?? false,
-    expires_at: raw.expires_at ?? null,
+    reward_given: raw.reward_given ?? raw.reward_gufo ?? 0,
+    reward_tx_id: raw.reward_tx_id ?? null,
+    reward_percent: raw.reward_percent ?? 10,
+    reward_cap: raw.reward_cap ?? getRewardCapByType(type),
+    min_spend: raw.min_spend ?? 1,
+    period_key: raw.period_key ?? null,
   };
 }
 
@@ -83,8 +99,63 @@ function getMissionProgress(mission: Mission) {
   };
 }
 
-function getMissionReward(mission: Mission) {
-  return toNumberSafe(mission.reward_gufo ?? 0);
+function getMissionRewardCap(mission: Mission) {
+  const fallback = getRewardCapByType(mission.type);
+  return toNumberSafe(mission.reward_cap ?? fallback, fallback);
+}
+
+function getMissionRewardGiven(mission: Mission) {
+  return toNumberSafe(mission.reward_given ?? 0);
+}
+
+function getMissionMinSpend(mission: Mission) {
+  return toNumberSafe(mission.min_spend ?? 1, 1);
+}
+
+function getMissionSmartDescription(mission: Mission) {
+  const minSpend = getMissionMinSpend(mission);
+  const cap = getMissionRewardCap(mission);
+
+  const code = String(mission.code || "").toLowerCase();
+
+  if (mission.type === "daily") {
+    return `Fai almeno una spesa valida da ${minSpend}€ oggi. La ricompensa viene calcolata sulla spesa più alta della giornata, fino a un massimo di ${cap} GUFO.`;
+  }
+
+  if (mission.type === "weekly" && code.includes("active")) {
+    return `Completa ${toNumberSafe(
+      mission.target,
+      3
+    )} transazioni valide nella settimana. Reward massima fino a ${cap} GUFO.`;
+  }
+
+  if (mission.type === "monthly" && code.includes("explorer")) {
+    return `Visita ${toNumberSafe(
+      mission.target,
+      5
+    )} partner diversi nel mese. Reward massima fino a ${cap} GUFO.`;
+  }
+
+  if (mission.description && mission.description.trim()) {
+    return mission.description;
+  }
+
+  if (mission.type === "weekly") {
+    return `Completa la missione settimanale. Reward massima fino a ${cap} GUFO.`;
+  }
+
+  return `Completa la missione mensile. Reward massima fino a ${cap} GUFO.`;
+}
+
+function getRewardChipText(mission: Mission) {
+  const given = getMissionRewardGiven(mission);
+  const cap = getMissionRewardCap(mission);
+
+  if (given > 0) {
+    return `+${given} GUFO`;
+  }
+
+  return `Fino a ${cap} GUFO`;
 }
 
 function getApiBaseUrl() {
@@ -94,15 +165,12 @@ function getApiBaseUrl() {
 export default function DashboardMissions() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
-  const [claimingId, setClaimingId] = useState<string | number | null>(null);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   async function loadMissions() {
     try {
       setLoading(true);
       setError("");
-      setSuccessMessage("");
 
       const {
         data: { user },
@@ -156,61 +224,6 @@ export default function DashboardMissions() {
     }
   }
 
-  async function handleClaimReward(missionId: string | number) {
-    try {
-      setClaimingId(missionId);
-      setError("");
-      setSuccessMessage("");
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user?.id) {
-        throw new Error("Utente non autenticato");
-      }
-
-      const apiBaseUrl = getApiBaseUrl();
-
-      const response = await fetch(`${apiBaseUrl}/missions/reward`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          missionId,
-        }),
-      });
-
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          payload?.error || payload?.message || "Impossibile riscattare il reward"
-        );
-      }
-
-      const rewardValue = toNumberSafe(payload?.reward_gufo ?? 0);
-      setSuccessMessage(
-        rewardValue > 0
-          ? `Reward riscattato con successo: +${rewardValue} GUFO`
-          : "Reward riscattato con successo"
-      );
-
-      await loadMissions();
-    } catch (err) {
-      console.error("Errore riscatto reward:", err);
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Errore durante il riscatto reward"
-      );
-    } finally {
-      setClaimingId(null);
-    }
-  }
-
   useEffect(() => {
     loadMissions();
   }, []);
@@ -247,10 +260,6 @@ export default function DashboardMissions() {
         </div>
       </div>
 
-      {successMessage ? (
-        <div className={styles.successBox}>{successMessage}</div>
-      ) : null}
-
       {error ? (
         <div className={styles.errorBox}>
           <span>{error}</span>
@@ -283,11 +292,9 @@ export default function DashboardMissions() {
         <div className={styles.grid}>
           {missions.map((mission) => {
             const { current, target, percentage } = getMissionProgress(mission);
-            const reward = getMissionReward(mission);
             const completed = Boolean(mission.completed);
-            const claimed = Boolean(mission.reward_claimed);
-            const canClaim = completed && !claimed;
-            const missionId = mission.mission_id ?? mission.id;
+            const rewardGiven = getMissionRewardGiven(mission);
+            const rewardChipText = getRewardChipText(mission);
 
             return (
               <article key={String(mission.id)} className={styles.card}>
@@ -308,14 +315,14 @@ export default function DashboardMissions() {
                     ) : null}
                   </div>
 
-                  <div className={styles.rewardChip}>+{reward} GUFO</div>
+                  <div className={styles.rewardChip}>{rewardChipText}</div>
                 </div>
 
                 <div className={styles.cardBody}>
                   <h3 className={styles.cardTitle}>{mission.title}</h3>
 
                   <p className={styles.cardDescription}>
-                    {mission.description || "Missione pronta da completare."}
+                    {getMissionSmartDescription(mission)}
                   </p>
 
                   <div className={styles.progressMeta}>
@@ -334,13 +341,11 @@ export default function DashboardMissions() {
 
                   <div className={styles.footerRow}>
                     <div className={styles.statusArea}>
-                      {claimed ? (
-                        <span className={`${styles.statusBadge} ${styles.claimed}`}>
-                          Reward riscattato
-                        </span>
-                      ) : completed ? (
+                      {completed ? (
                         <span className={`${styles.statusBadge} ${styles.completed}`}>
-                          Completata
+                          {rewardGiven > 0
+                            ? `Completata · +${rewardGiven} GUFO`
+                            : "Completata"}
                         </span>
                       ) : (
                         <span className={`${styles.statusBadge} ${styles.active}`}>
@@ -349,25 +354,9 @@ export default function DashboardMissions() {
                       )}
                     </div>
 
-                    {canClaim ? (
-                      <button
-                        className={styles.claimButton}
-                        onClick={() => handleClaimReward(missionId)}
-                        disabled={claimingId === missionId}
-                      >
-                        {claimingId === missionId
-                          ? "Riscatto..."
-                          : "Riscatta reward"}
-                      </button>
-                    ) : (
-                      <button className={styles.disabledButton} disabled>
-                        {claimed
-                          ? "Già riscattata"
-                          : completed
-                          ? "Pronta"
-                          : "Continua"}
-                      </button>
-                    )}
+                    <button className={styles.disabledButton} disabled>
+                      {completed ? "Completata" : "Continua"}
+                    </button>
                   </div>
                 </div>
               </article>
