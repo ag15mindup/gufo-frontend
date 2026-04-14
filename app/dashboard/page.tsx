@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./dashboard.module.css";
 import { createClient } from "@/lib/supabase/client";
-import MissionCard from "@/app/components/Missioncard";
 
+import DashboardMissions from "@/app/components/DashboardMissions";
 const supabase = createClient();
 
 type Transaction = {
@@ -459,9 +459,9 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className={styles.missionSection}>
-          <MissionCard transactions={dashboardData.transactions} />
-        </section>
+       <section className={styles.missionSection}>
+  <DashboardMissions />
+</section>
 
         <section className={styles.contentGrid}>
           <div className={styles.transactionsPanel}>
