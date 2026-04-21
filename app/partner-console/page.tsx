@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -7,10 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-console.module.css";
 
 const supabase = createClient();
+
 type ProfileRow = {
   id: string;
   role?: string | null;
 };
+
 type CustomerResponse = {
   id: string;
   customer_code: string;
@@ -123,6 +126,7 @@ function formatDateTime(value?: string | null) {
 
 export default function PartnerConsolePage() {
   const router = useRouter();
+
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [partnerId, setPartnerId] = useState<number | null>(null);
@@ -140,7 +144,8 @@ export default function PartnerConsolePage() {
 
   const [result, setResult] = useState<PaymentApiResponse | null>(null);
   const [error, setError] = useState("");
-const [authChecked, setAuthChecked] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
       `${API_URL}/partner/me?user_id=${encodeURIComponent(userId)}`
@@ -151,12 +156,17 @@ const [authChecked, setAuthChecked] = useState(false);
     }
 
     const payload = data as PartnerMeResponse;
+    const partner = payload?.partner ?? null;
+
+    if (!partner) {
+      throw new Error("Partner non trovato");
+    }
 
     setPartnerUserId(userId);
-    setPartnerId(payload.partner?.id ?? null);
-    setPartnerName(String(payload.partner?.name || ""));
-    setPartnerCategory(String(payload.partner?.category || ""));
-    setCashbackPercent(String(toNumberSafe(payload.partner?.cashback_percent) || 0));
+    setPartnerId(partner.id ?? null);
+    setPartnerName(String(partner.name || ""));
+    setPartnerCategory(String(partner.category || ""));
+    setCashbackPercent(String(toNumberSafe(partner.cashback_percent) || 0));
   }
 
   async function refreshCustomer(code: string) {
@@ -187,49 +197,49 @@ const [authChecked, setAuthChecked] = useState(false);
   }
 
   useEffect(() => {
-  async function init() {
-    try {
-      setLoadingPartner(true);
-      setError("");
+    async function init() {
+      try {
+        setLoadingPartner(true);
+        setError("");
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.push("/login");
-        return;
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, role")
+          .eq("id", user.id)
+          .maybeSingle<ProfileRow>();
+
+        if (profileError) {
+          throw new Error(profileError.message || "Errore controllo profilo");
+        }
+
+        const role = String(profile?.role || "user").toLowerCase();
+
+        if (role !== "partner") {
+          router.push("/dashboard");
+          return;
+        }
+
+        await loadPartnerMe(user.id);
+        setAuthChecked(true);
+      } catch (err: any) {
+        setError(err?.message || "Errore caricamento partner");
+        setAuthChecked(true);
+      } finally {
+        setLoadingPartner(false);
       }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, role")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>();
-
-      if (profileError) {
-        throw new Error(profileError.message || "Errore controllo profilo");
-      }
-
-      const role = String(profile?.role || "user").toLowerCase();
-
-      if (role !== "partner") {
-        router.push("/dashboard");
-        return;
-      }
-
-      await loadPartnerMe(user.id);
-      setAuthChecked(true);
-    } catch (err: any) {
-      setError(err?.message || "Errore caricamento partner");
-      setAuthChecked(true);
-    } finally {
-      setLoadingPartner(false);
     }
-  }
 
-  init();
-}, [router]);
+    init();
+  }, [router]);
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();
@@ -361,7 +371,7 @@ const [authChecked, setAuthChecked] = useState(false);
   const paymentTx = result?.payment_transaction || null;
   const cashbackTx = result?.cashback_transaction || null;
 
-  if (loadingPartner) {
+  if (loadingPartner || !authChecked) {
     return (
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
@@ -672,7 +682,10 @@ const [authChecked, setAuthChecked] = useState(false);
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Nuovo saldo</p>
               <p className={styles.infoMiniValue}>
-                {toNumberSafe(result.new_balance ?? result.wallet?.balance_gufo).toFixed(2)} GUFO
+                {toNumberSafe(
+                  result.new_balance ?? result.wallet?.balance_gufo
+                ).toFixed(2)}{" "}
+                GUFO
               </p>
             </div>
 

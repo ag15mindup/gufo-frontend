@@ -275,7 +275,19 @@ export default function DashboardMissions() {
           : "Reward riscattato con successo"
       );
 
-      await loadMissions();
+      setMissions((prev) =>
+  prev.map((m) => {
+    if ((m.mission_id ?? m.id) === missionId) {
+      return {
+        ...m,
+        reward_claimed: true,
+        reward_given: toNumberSafe(payload?.reward_gufo ?? 0),
+      };
+    }
+    window.dispatchEvent(new Event("wallet-update"));
+    return m;
+  })
+);
     } catch (err) {
       console.error("Errore riscatto reward:", err);
       setError(

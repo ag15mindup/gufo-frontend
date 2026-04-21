@@ -1,9 +1,10 @@
+const API_URL = "http://localhost:3001";
 export async function safeJsonFetch(
   url: string,
   options?: RequestInit
 ) {
   try {
-    const response = await fetch(url, {
+    const response = await fetch(`${API_URL}${url}`, {
       method: options?.method || "GET",
       headers: {
         "Content-Type": "application/json",

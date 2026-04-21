@@ -90,6 +90,7 @@ export default function MembershipPage() {
   const [cashbackPercent, setCashbackPercent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState({});
 
   const levels = useMemo(
     () => [
@@ -106,56 +107,70 @@ export default function MembershipPage() {
     let isMounted = true;
 
     async function fetchDashboard() {
-      try {
-        setLoading(true);
-        setError("");
+  try {
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-
-        if (userError) {
-          throw new Error(userError.message || "Errore recupero utente");
-        }
-
-        if (!user) {
-          throw new Error("Utente non autenticato");
-        }
-
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/dashboard/${user.id}`
-        );
-
-        if (!response.ok || data?.success === false) {
-          throw new Error(data?.error || "Errore nel caricamento membership");
-        }
-
-        const dashboard: DashboardResponse = data ?? {};
-        const walletData = dashboard?.wallet ?? null;
-        const stats = dashboard?.stats ?? {};
-        const txs = Array.isArray(dashboard?.transactions)
-          ? dashboard.transactions
-          : [];
-
-        if (!isMounted) return;
-
-        setWallet(walletData);
-        setTransactions(txs);
-        setCashbackPercent(
-          toNumberSafe(
-            stats?.cashback_percent ?? walletData?.cashback_percent ?? 0
-          )
-        );
-      } catch (err: any) {
-        if (!isMounted) return;
-        setError(err?.message || "Errore sconosciuto");
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
+    if (userError) {
+      throw new Error(userError.message || "Errore utente");
     }
+
+    if (!user) {
+      throw new Error("Utente non autenticato");
+    }
+
+    // 🔐 prendi sessione per token
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      throw new Error(sessionError.message || "Errore sessione");
+    }
+
+    if (!session?.access_token) {
+      throw new Error("Sessione non valida");
+    }
+
+    // ✅ CHIAMATA CORRETTA (senza user.id)
+    const { response, data } = await safeJsonFetch(
+      `${API_URL}/dashboard`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    );
+
+    if (!response.ok || data?.success === false) {
+      throw new Error(data?.error || "Errore nel fetch dashboard");
+    }
+
+    const dashboard = data;
+
+    const walletData = dashboard?.wallet ?? null;
+    const stats = dashboard?.stats ?? {};
+    const txs = Array.isArray(dashboard?.transactions)
+      ? dashboard.transactions
+      : [];
+
+    setWallet(walletData);
+    setStats(stats);
+    setTransactions(txs);
+  } catch (err) {
+    console.error("Errore fetchDashboard:", err);
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Errore nel caricamento dashboard"
+    );
+  } finally {
+    setLoading(false);
+  }
+}
 
     fetchDashboard();
 

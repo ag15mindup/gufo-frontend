@@ -131,6 +131,7 @@ export default function RewardsPage() {
 
   const [userId, setUserId] = useState("");
   const [userName, setUserName] = useState("Utente GUFO");
+  const [accessToken, setAccessToken] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -164,14 +165,33 @@ export default function RewardsPage() {
           throw new Error("Utente non autenticato");
         }
 
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore recupero sessione");
+        }
+
+        const token = session?.access_token;
+
+        if (!token) {
+          throw new Error("Sessione non valida: token mancante");
+        }
+
         const fallbackName =
           user.user_metadata?.username ||
           user.user_metadata?.full_name ||
           user.email?.split("@")[0] ||
           "Utente GUFO";
 
+        const headers = {
+          Authorization: `Bearer ${token}`,
+        };
+
         const [walletRes, giftCardsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+          safeJsonFetch(`${API_URL}/wallet`, { headers }),
           safeJsonFetch(`${API_URL}/gift-cards`),
         ]);
 
@@ -190,6 +210,7 @@ export default function RewardsPage() {
 
         setUserId(user.id);
         setUserName(fallbackName);
+        setAccessToken(token);
 
         setRewardData({
           balanceGufo: toNumberSafe(wallet?.balance_gufo),
@@ -238,8 +259,12 @@ export default function RewardsPage() {
     [giftCards, selectedGiftCard]
   );
 
-  async function refreshWallet(currentUserId: string) {
-    const walletRes = await safeJsonFetch(`${API_URL}/wallet/${currentUserId}`);
+  async function refreshWallet(token: string) {
+    const walletRes = await safeJsonFetch(`${API_URL}/wallet`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!walletRes.response.ok || walletRes.data?.success === false) {
       throw new Error(walletRes.data?.error || "Errore aggiornamento wallet");
@@ -267,6 +292,10 @@ export default function RewardsPage() {
         throw new Error("Utente non disponibile");
       }
 
+      if (!accessToken) {
+        throw new Error("Token sessione mancante");
+      }
+
       if (convertGufoAmount <= 0) {
         throw new Error("Inserisci una quantità GUFO valida");
       }
@@ -275,6 +304,7 @@ export default function RewardsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           user_id: userId,
@@ -288,7 +318,7 @@ export default function RewardsPage() {
         throw new Error(data.error || "Errore durante la conversione");
       }
 
-      await refreshWallet(userId);
+      await refreshWallet(accessToken);
       setActionMessage(
         `Conversione completata: ${formatMoney(convertGufoAmount)} GUFO → € ${formatMoney(
           toNumberSafe(data.conversion?.net_amount)
@@ -311,6 +341,10 @@ export default function RewardsPage() {
         throw new Error("Utente non disponibile");
       }
 
+      if (!accessToken) {
+        throw new Error("Token sessione mancante");
+      }
+
       if (!selectedGiftCardData) {
         throw new Error("Seleziona una gift card");
       }
@@ -319,6 +353,7 @@ export default function RewardsPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           user_id: userId,
@@ -332,7 +367,7 @@ export default function RewardsPage() {
         throw new Error(data.error || "Errore durante il riscatto gift card");
       }
 
-      await refreshWallet(userId);
+      await refreshWallet(accessToken);
       setActionMessage(
         `Gift card riscattata: ${selectedGiftCardData.brand} € ${formatMoney(
           selectedGiftCardData.value_eur

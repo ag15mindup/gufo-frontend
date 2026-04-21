@@ -68,9 +68,28 @@ export default function CustomerCodePage() {
           throw new Error("Utente non autenticato");
         }
 
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
+
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore recupero sessione");
+        }
+
+        const accessToken = session?.access_token;
+
+        if (!accessToken) {
+          throw new Error("Sessione non valida: token mancante");
+        }
+
+        const headers = {
+          Authorization: `Bearer ${accessToken}`,
+        };
+
         const [profileRes, walletRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/profile/${user.id}`),
-          safeJsonFetch(`${API_URL}/wallet/${user.id}`),
+          safeJsonFetch(`${API_URL}/profile`, { headers }),
+          safeJsonFetch(`${API_URL}/wallet`, { headers }),
         ]);
 
         if (!profileRes.response.ok || profileRes.data?.success === false) {
@@ -80,7 +99,9 @@ export default function CustomerCodePage() {
         }
 
         if (!walletRes.response.ok || walletRes.data?.success === false) {
-          throw new Error(walletRes.data?.error || "Errore nel recupero wallet");
+          throw new Error(
+            walletRes.data?.error || "Errore nel recupero wallet"
+          );
         }
 
         const profilePayload = profileRes.data ?? {};
@@ -104,18 +125,21 @@ export default function CustomerCodePage() {
         }
 
         const customerData: CustomerData = {
-          id: profile?.id ?? wallet?.id,
+          id: profile?.id ?? wallet?.id ?? user.id,
           user_id: user.id,
           customer_code: resolvedCustomerCode,
-          balance_gufo: wallet?.balance_gufo ?? profile?.balance_gufo ?? 0,
-          balance_eur: wallet?.balance_eur ?? profile?.balance_eur ?? 0,
+          balance_gufo: wallet?.balance_gufo ?? 0,
+          balance_eur: wallet?.balance_eur ?? 0,
           level:
             wallet?.current_level ??
             wallet?.level ??
             profile?.level ??
             "Bronze",
           current_level:
-            wallet?.current_level ?? wallet?.level ?? profile?.level ?? "Bronze",
+            wallet?.current_level ??
+            wallet?.level ??
+            profile?.level ??
+            "Bronze",
           cashback_percent:
             wallet?.cashback_percent ?? profile?.cashback_percent ?? 0,
           season_spent: wallet?.season_spent ?? profile?.season_spent ?? 0,
@@ -191,7 +215,7 @@ export default function CustomerCodePage() {
         <div className={styles.heroCopy}>
           <div className={styles.heroBadge}>GUFO DIGITAL PASS</div>
           <p className={styles.eyebrow}>GUFO Customer Pass</p>
-          <h1 className={styles.title}>Scan & earn</h1>
+          <h1 className={styles.title}>Scan &amp; earn</h1>
           <p className={styles.subtitle}>
             Mostra questo pass al partner per identificarti e registrare
             correttamente la transazione.
@@ -270,7 +294,7 @@ export default function CustomerCodePage() {
                     size={220}
                     bgColor="#ffffff"
                     fgColor="#0f172a"
-                    includeMargin={true}
+                    includeMargin
                   />
                 </div>
               </div>
@@ -342,13 +366,19 @@ export default function CustomerCodePage() {
             <div className={styles.stepCard}>
               <div className={styles.stepNumber}>2</div>
               <h4>Scansione o codice</h4>
-              <p>Il partner può leggere il QR oppure inserire manualmente il customer code.</p>
+              <p>
+                Il partner può leggere il QR oppure inserire manualmente il
+                customer code.
+              </p>
             </div>
 
             <div className={styles.stepCard}>
               <div className={styles.stepNumber}>3</div>
               <h4>Transazione registrata</h4>
-              <p>Il movimento viene associato al tuo profilo e aggiorna GUFO, livello e storico.</p>
+              <p>
+                Il movimento viene associato al tuo profilo e aggiorna GUFO,
+                livello e storico.
+              </p>
             </div>
           </div>
         </div>

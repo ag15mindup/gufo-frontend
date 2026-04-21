@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -7,10 +8,12 @@ import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-dashboard.module.css";
 
 const supabase = createClient();
+
 type ProfileRow = {
   id: string;
   role?: string | null;
 };
+
 type Transaction = {
   id?: string | null;
   transaction_id?: string | null;
@@ -27,6 +30,8 @@ type Transaction = {
   gufo?: number | string | null;
   created_at?: string | null;
   partner_id?: number | string | null;
+  user_id?: string | null;
+  customer_id?: string | null;
   raw?: any;
 };
 
@@ -44,7 +49,9 @@ type PartnerStatsResponse = {
 };
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
+  typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:3001"
+    : "https://gufo-backend1.onrender.com";
 
 function toNumberSafe(value: unknown) {
   const n = Number(value);
@@ -172,28 +179,41 @@ export default function PartnerDashboardPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-const [authChecked, setAuthChecked] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
   async function loadPartnerStats(userId: string) {
     try {
       setLoading(true);
       setError("");
 
-      const { response, data } = await safeJsonFetch(
+      const result = await safeJsonFetch(
         `${API_URL}/partner/stats/me?user_id=${encodeURIComponent(userId)}`
       );
 
-      if (!response.ok || data?.success === false) {
-        throw new Error(data?.error || "Errore nel caricamento statistiche partner");
+      console.log("API_URL:", API_URL);
+      console.log("RESULT:", result);
+
+      const response = result?.response;
+      const payload = result?.data as PartnerStatsResponse | undefined;
+
+      if (!response || !response.ok || !payload || payload.success === false) {
+        throw new Error(payload?.error || "Errore nel caricamento statistiche partner");
       }
 
-      const rawTransactions = Array.isArray(data?.recent_transactions)
-        ? data.recent_transactions
+      const rawTransactions = Array.isArray(payload.recent_transactions)
+        ? payload.recent_transactions
         : [];
 
-      setData(data);
+      setData(payload);
       setTransactions(rawTransactions);
     } catch (err: any) {
-      setError(err?.message || "Errore sconosciuto");
+      console.error("Partner stats error:", err);
+      setError(
+        err?.message ||
+          err?.error ||
+          err?.toString?.() ||
+          "Errore sconosciuto"
+      );
       setData(null);
       setTransactions([]);
     } finally {
@@ -201,53 +221,53 @@ const [authChecked, setAuthChecked] = useState(false);
     }
   }
 
- useEffect(() => {
-  async function init() {
-    try {
-      setLoading(true);
-      setError("");
+  useEffect(() => {
+    async function init() {
+      try {
+        setLoading(true);
+        setError("");
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.push("/login");
-        return;
+        if (!user) {
+          router.push("/login");
+          return;
+        }
+
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, role")
+          .eq("id", user.id)
+          .maybeSingle<ProfileRow>();
+
+        if (profileError) {
+          throw new Error(profileError.message || "Errore controllo profilo");
+        }
+
+        const role = String(profile?.role || "user").toLowerCase();
+
+        if (role !== "partner") {
+          router.push("/dashboard");
+          return;
+        }
+
+        setPartnerUserId(user.id);
+        await loadPartnerStats(user.id);
+        setAuthChecked(true);
+      } catch (err: any) {
+        setError(err?.message || "Errore sconosciuto");
+        setData(null);
+        setTransactions([]);
+        setAuthChecked(true);
+      } finally {
+        setLoading(false);
       }
-
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("id, role")
-        .eq("id", user.id)
-        .maybeSingle<ProfileRow>();
-
-      if (profileError) {
-        throw new Error(profileError.message || "Errore controllo profilo");
-      }
-
-      const role = String(profile?.role || "user").toLowerCase();
-
-      if (role !== "partner") {
-        router.push("/dashboard");
-        return;
-      }
-
-      setPartnerUserId(user.id);
-      await loadPartnerStats(user.id);
-      setAuthChecked(true);
-    } catch (err: any) {
-      setError(err?.message || "Errore sconosciuto");
-      setData(null);
-      setTransactions([]);
-      setAuthChecked(true);
-    } finally {
-      setLoading(false);
     }
-  }
 
-  init();
-}, [router]);
+    init();
+  }, [router]);
 
   const avgTicket = useMemo(() => {
     const totalTransactions = toNumberSafe(data?.total_transactions);
@@ -310,22 +330,22 @@ const [authChecked, setAuthChecked] = useState(false);
   }, [paymentTransactions]);
 
   if (loading || !authChecked) {
-  return (
-    <div className={styles.page}>
-      <div className={styles.bgOverlay} />
-      <div className={styles.rainbowLine} />
-      <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
-          <p className={styles.eyebrow}>GUFO Partner Analytics</p>
-          <h1 className={styles.title}>Partner dashboard</h1>
-          <p className={styles.subtitle}>Controllo accesso partner...</p>
-        </div>
-      </section>
-      <div className={styles.loadingBox}>Verifica autorizzazione...</div>
-    </div>
-  );
-}
+    return (
+      <div className={styles.page}>
+        <div className={styles.bgOverlay} />
+        <div className={styles.rainbowLine} />
+        <section className={styles.hero}>
+          <div className={styles.heroCopy}>
+            <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
+            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
+            <h1 className={styles.title}>Partner dashboard</h1>
+            <p className={styles.subtitle}>Controllo accesso partner...</p>
+          </div>
+        </section>
+        <div className={styles.loadingBox}>Verifica autorizzazione...</div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -360,8 +380,7 @@ const [authChecked, setAuthChecked] = useState(false);
             GUFO distribuiti e attività recente.
           </p>
           <p className={styles.heroDescription}>
-            Il partner viene riconosciuto direttamente dal login. Non serve più
-            selezionarlo manualmente.
+            Il partner viene collegato automaticamente all’utente autenticato.
           </p>
         </div>
       </section>
@@ -378,7 +397,7 @@ const [authChecked, setAuthChecked] = useState(false);
 
           <div className={styles.actionButtons}>
             <Link
-              href="/partner-demo"
+              href="/partner-console"
               className={`${styles.actionBtn} ${styles.primaryAction} ${styles.actionLink}`}
             >
               💳 Registra pagamento
@@ -398,8 +417,8 @@ const [authChecked, setAuthChecked] = useState(false);
       <section className={styles.operatorCard}>
         <div className={styles.operatorCardLeft}>
           <div className={styles.operatorTopRow}>
-            <span className={styles.operatorChip}>Partner attivo</span>
-            <span className={styles.operatorStatus}>Dati recenti</span>
+            <span className={styles.operatorChip}>Dati recenti</span>
+            <span className={styles.operatorStatus}>Partner attivo</span>
           </div>
 
           <p className={styles.operatorLabel}>Merchant riconosciuto</p>

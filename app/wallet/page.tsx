@@ -296,9 +296,18 @@ export default function WalletPage() {
   }, []);
 
   useEffect(() => {
-    loadWalletPage();
-  }, [loadWalletPage]);
+  loadWalletPage();
 
+  const handler = () => {
+    loadWalletPage();
+  };
+
+  window.addEventListener("wallet-update", handler);
+
+  return () => {
+    window.removeEventListener("wallet-update", handler);
+  };
+}, [loadWalletPage]);
   const recentTransactions = useMemo(() => {
     return walletData.transactions.slice(0, 8);
   }, [walletData.transactions]);
