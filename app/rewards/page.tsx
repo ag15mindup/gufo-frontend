@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { safeJsonFetch } from "@/lib/api";
+
 import { createClient } from "@/lib/supabase/client";
 import styles from "./rewards.module.css";
 
@@ -85,7 +85,30 @@ type RedeemGiftCardResponse = {
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
+async function fetchJson(url: string, options: RequestInit = {}) {
+  let response: Response;
 
+  try {
+    response = await fetch(url, options);
+  } catch (error: any) {
+    throw new Error(`Errore di rete verso ${url}: ${error?.message || "fetch fallita"}`);
+  }
+
+  let data: any = null;
+  const text = await response.text();
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error(`Risposta non JSON da ${url}: ${text || "vuota"}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Errore HTTP ${response.status} su ${url}`);
+  }
+
+  return data;
+}
 function toNumberSafe(value: unknown) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
@@ -188,26 +211,12 @@ export default function RewardsPage() {
           Authorization: `Bearer ${token}`,
         };
 
-        const [rewardsRes, giftCardsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/rewards`, { headers }),
-          safeJsonFetch(`${API_URL}/gift-cards`),
-        ]);
+        const [rewardsData, giftPayload] = await Promise.all([
+  fetchJson(`${API_URL}/rewards`, { headers }),
+  fetchJson(`${API_URL}/gift-cards`),
+]);
 
-        if (!rewardsRes.response.ok || rewardsRes.data?.success === false) {
-          throw new Error(
-            rewardsRes.data?.error || "Errore nel recupero rewards"
-          );
-        }
-
-        if (!giftCardsRes.response.ok || giftCardsRes.data?.success === false) {
-          throw new Error(
-            giftCardsRes.data?.error || "Errore nel recupero gift card"
-          );
-        }
-
-        const rewards = (rewardsRes.data?.rewards ?? {}) as RewardPayload;
-        const giftPayload = (giftCardsRes.data ?? {}) as GiftCardsResponse;
-
+const rewards = (rewardsData?.rewards ?? {}) as RewardPayload;
         if (!isMounted) return;
 
         setUserId(user.id);
@@ -262,27 +271,23 @@ export default function RewardsPage() {
   );
 
   async function refreshRewards(token: string) {
-    const rewardsRes = await safeJsonFetch(`${API_URL}/rewards`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const rewardsData = await fetchJson(`${API_URL}/rewards`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    if (!rewardsRes.response.ok || rewardsRes.data?.success === false) {
-      throw new Error(rewardsRes.data?.error || "Errore aggiornamento rewards");
-    }
+  const rewards = (rewardsData?.rewards ?? {}) as RewardPayload;
 
-    const rewards = (rewardsRes.data?.rewards ?? {}) as RewardPayload;
-
-    setRewardData({
-      balanceGufo: toNumberSafe(rewards.balance_gufo),
-      balanceEuro: toNumberSafe(rewards.balance_eur),
-      seasonSpent: toNumberSafe(rewards.season_spent),
-      currentLevel: String(rewards.current_level ?? "Bronze"),
-      cashbackPercent: toNumberSafe(rewards.cashback_percent ?? 0),
-      lastSeasonReset: String(rewards.last_season_reset ?? ""),
-    });
-  }
+  setRewardData({
+    balanceGufo: toNumberSafe(rewards.balance_gufo),
+    balanceEuro: toNumberSafe(rewards.balance_eur),
+    seasonSpent: toNumberSafe(rewards.season_spent),
+    currentLevel: String(rewards.current_level ?? "Bronze"),
+    cashbackPercent: toNumberSafe(rewards.cashback_percent ?? 0),
+    lastSeasonReset: String(rewards.last_season_reset ?? ""),
+  });
+}
 
   async function handleConvertGufo() {
     try {

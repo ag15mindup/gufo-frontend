@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
-import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./customer-code.module.css";
 
@@ -39,6 +38,33 @@ function formatLevel(level: string) {
   if (normalized === "millionaire") return "Millionaire";
 
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
+async function fetchJson(url: string, options: RequestInit = {}) {
+  let response: Response;
+
+  try {
+    response = await fetch(url, options);
+  } catch (error: any) {
+    throw new Error(
+      `Errore di rete verso ${url}: ${error?.message || "fetch fallita"}`
+    );
+  }
+
+  const text = await response.text();
+  let data: any = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error(`Risposta non JSON da ${url}: ${text || "vuota"}`);
+  }
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Errore HTTP ${response.status} su ${url}`);
+  }
+
+  return data;
 }
 
 export default function CustomerCodePage() {
@@ -87,15 +113,8 @@ export default function CustomerCodePage() {
           Authorization: `Bearer ${accessToken}`,
         };
 
-        const profileRes = await safeJsonFetch(`${API_URL}/profile`, { headers });
+        const profilePayload = await fetchJson(`${API_URL}/profile`, { headers });
 
-        if (!profileRes.response.ok || profileRes.data?.success === false) {
-          throw new Error(
-            profileRes.data?.error || "Errore nel recupero profilo"
-          );
-        }
-
-        const profilePayload = profileRes.data ?? {};
         const profile = profilePayload?.profile ?? {};
         const wallet = profilePayload?.wallet ?? {};
 
