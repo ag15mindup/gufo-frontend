@@ -87,10 +87,7 @@ export default function CustomerCodePage() {
           Authorization: `Bearer ${accessToken}`,
         };
 
-        const [profileRes, walletRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/profile`, { headers }),
-          safeJsonFetch(`${API_URL}/wallet`, { headers }),
-        ]);
+        const profileRes = await safeJsonFetch(`${API_URL}/profile`, { headers });
 
         if (!profileRes.response.ok || profileRes.data?.success === false) {
           throw new Error(
@@ -98,26 +95,14 @@ export default function CustomerCodePage() {
           );
         }
 
-        if (!walletRes.response.ok || walletRes.data?.success === false) {
-          throw new Error(
-            walletRes.data?.error || "Errore nel recupero wallet"
-          );
-        }
-
         const profilePayload = profileRes.data ?? {};
-        const walletPayload = walletRes.data ?? {};
-
         const profile = profilePayload?.profile ?? {};
-        const wallet =
-          walletPayload?.data && typeof walletPayload.data === "object"
-            ? walletPayload.data
-            : walletPayload ?? {};
+        const wallet = profilePayload?.wallet ?? {};
 
         const resolvedCustomerCode =
           profile?.customer_code ??
           wallet?.customer_code ??
           profilePayload?.customer_code ??
-          walletPayload?.customer_code ??
           "";
 
         if (!resolvedCustomerCode) {
@@ -125,7 +110,7 @@ export default function CustomerCodePage() {
         }
 
         const customerData: CustomerData = {
-          id: profile?.id ?? wallet?.id ?? user.id,
+          id: profile?.id ?? user.id,
           user_id: user.id,
           customer_code: resolvedCustomerCode,
           balance_gufo: wallet?.balance_gufo ?? 0,
@@ -141,8 +126,13 @@ export default function CustomerCodePage() {
             profile?.level ??
             "Bronze",
           cashback_percent:
-            wallet?.cashback_percent ?? profile?.cashback_percent ?? 0,
-          season_spent: wallet?.season_spent ?? profile?.season_spent ?? 0,
+            wallet?.cashback_percent ??
+            profilePayload?.stats?.cashback_percent ??
+            0,
+          season_spent:
+            wallet?.season_spent ??
+            profilePayload?.stats?.season_spent ??
+            0,
         };
 
         if (!isMounted) return;

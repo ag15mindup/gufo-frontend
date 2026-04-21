@@ -7,16 +7,20 @@ import styles from "./rewards.module.css";
 
 const supabase = createClient();
 
-type WalletResponse = {
+type RewardPayload = {
+  user_id?: string;
+  customer_code?: string;
   balance_gufo?: number | string | null;
   balance_eur?: number | string | null;
   season_spent?: number | string | null;
+  total_spent?: number | string | null;
   current_level?: string | null;
+  membership_id?: number | string | null;
   cashback_percent?: number | string | null;
+  total_gufo_earned?: number | string | null;
   last_season_reset?: string | null;
-  success?: boolean;
-  error?: string;
-  data?: unknown;
+  region?: string | null;
+  reference_currency?: string | null;
 };
 
 type RewardData = {
@@ -94,12 +98,6 @@ function formatLevel(level?: string) {
 
   if (normalized === "vip") return "VIP";
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
-}
-
-function extractWallet(payload: any): WalletResponse {
-  if (!payload) return {};
-  if (payload.data && typeof payload.data === "object") return payload.data;
-  return payload;
 }
 
 function formatMoney(value: number) {
@@ -190,20 +188,24 @@ export default function RewardsPage() {
           Authorization: `Bearer ${token}`,
         };
 
-        const [walletRes, giftCardsRes] = await Promise.all([
-          safeJsonFetch(`${API_URL}/wallet`, { headers }),
+        const [rewardsRes, giftCardsRes] = await Promise.all([
+          safeJsonFetch(`${API_URL}/rewards`, { headers }),
           safeJsonFetch(`${API_URL}/gift-cards`),
         ]);
 
-        if (!walletRes.response.ok || walletRes.data?.success === false) {
-          throw new Error(walletRes.data?.error || "Errore nel recupero rewards");
+        if (!rewardsRes.response.ok || rewardsRes.data?.success === false) {
+          throw new Error(
+            rewardsRes.data?.error || "Errore nel recupero rewards"
+          );
         }
 
         if (!giftCardsRes.response.ok || giftCardsRes.data?.success === false) {
-          throw new Error(giftCardsRes.data?.error || "Errore nel recupero gift card");
+          throw new Error(
+            giftCardsRes.data?.error || "Errore nel recupero gift card"
+          );
         }
 
-        const wallet = extractWallet(walletRes.data ?? {});
+        const rewards = (rewardsRes.data?.rewards ?? {}) as RewardPayload;
         const giftPayload = (giftCardsRes.data ?? {}) as GiftCardsResponse;
 
         if (!isMounted) return;
@@ -213,12 +215,12 @@ export default function RewardsPage() {
         setAccessToken(token);
 
         setRewardData({
-          balanceGufo: toNumberSafe(wallet?.balance_gufo),
-          balanceEuro: toNumberSafe(wallet?.balance_eur),
-          seasonSpent: toNumberSafe(wallet?.season_spent),
-          currentLevel: String(wallet?.current_level ?? "Bronze"),
-          cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
-          lastSeasonReset: String(wallet?.last_season_reset ?? ""),
+          balanceGufo: toNumberSafe(rewards.balance_gufo),
+          balanceEuro: toNumberSafe(rewards.balance_eur),
+          seasonSpent: toNumberSafe(rewards.season_spent),
+          currentLevel: String(rewards.current_level ?? "Bronze"),
+          cashbackPercent: toNumberSafe(rewards.cashback_percent ?? 0),
+          lastSeasonReset: String(rewards.last_season_reset ?? ""),
         });
 
         setGiftCards(Array.isArray(giftPayload.cards) ? giftPayload.cards : []);
@@ -259,26 +261,26 @@ export default function RewardsPage() {
     [giftCards, selectedGiftCard]
   );
 
-  async function refreshWallet(token: string) {
-    const walletRes = await safeJsonFetch(`${API_URL}/wallet`, {
+  async function refreshRewards(token: string) {
+    const rewardsRes = await safeJsonFetch(`${API_URL}/rewards`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     });
 
-    if (!walletRes.response.ok || walletRes.data?.success === false) {
-      throw new Error(walletRes.data?.error || "Errore aggiornamento wallet");
+    if (!rewardsRes.response.ok || rewardsRes.data?.success === false) {
+      throw new Error(rewardsRes.data?.error || "Errore aggiornamento rewards");
     }
 
-    const wallet = extractWallet(walletRes.data ?? {});
+    const rewards = (rewardsRes.data?.rewards ?? {}) as RewardPayload;
 
     setRewardData({
-      balanceGufo: toNumberSafe(wallet?.balance_gufo),
-      balanceEuro: toNumberSafe(wallet?.balance_eur),
-      seasonSpent: toNumberSafe(wallet?.season_spent),
-      currentLevel: String(wallet?.current_level ?? "Bronze"),
-      cashbackPercent: toNumberSafe(wallet?.cashback_percent ?? 0),
-      lastSeasonReset: String(wallet?.last_season_reset ?? ""),
+      balanceGufo: toNumberSafe(rewards.balance_gufo),
+      balanceEuro: toNumberSafe(rewards.balance_eur),
+      seasonSpent: toNumberSafe(rewards.season_spent),
+      currentLevel: String(rewards.current_level ?? "Bronze"),
+      cashbackPercent: toNumberSafe(rewards.cashback_percent ?? 0),
+      lastSeasonReset: String(rewards.last_season_reset ?? ""),
     });
   }
 
@@ -318,7 +320,7 @@ export default function RewardsPage() {
         throw new Error(data.error || "Errore durante la conversione");
       }
 
-      await refreshWallet(accessToken);
+      await refreshRewards(accessToken);
       setActionMessage(
         `Conversione completata: ${formatMoney(convertGufoAmount)} GUFO → € ${formatMoney(
           toNumberSafe(data.conversion?.net_amount)
@@ -367,7 +369,7 @@ export default function RewardsPage() {
         throw new Error(data.error || "Errore durante il riscatto gift card");
       }
 
-      await refreshWallet(accessToken);
+      await refreshRewards(accessToken);
       setActionMessage(
         `Gift card riscattata: ${selectedGiftCardData.brand} € ${formatMoney(
           selectedGiftCardData.value_eur
