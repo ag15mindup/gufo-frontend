@@ -1,10 +1,19 @@
-const API_URL = "http://localhost:3001";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
+
+type SafeJsonFetchOptions = RequestInit & {
+  headers?: Record<string, string>;
+};
+
 export async function safeJsonFetch(
-  url: string,
-  options?: RequestInit
+  endpoint: string,
+  options?: SafeJsonFetchOptions
 ) {
   try {
-    const response = await fetch(`${API_URL}${url}`, {
+    const isAbsoluteUrl = /^https?:\/\//i.test(endpoint);
+    const url = isAbsoluteUrl ? endpoint : `${API_URL}${endpoint}`;
+
+    const response = await fetch(url, {
       method: options?.method || "GET",
       headers: {
         "Content-Type": "application/json",
@@ -15,8 +24,7 @@ export async function safeJsonFetch(
     });
 
     const text = await response.text();
-
-    let data: any = null;
+    let data = null;
 
     try {
       data = text ? JSON.parse(text) : null;
@@ -29,8 +37,13 @@ export async function safeJsonFetch(
     return { response, data };
   } catch (error) {
     return {
-      response: { ok: false } as Response,
-      data: { error: "Errore di rete" },
+      response: {
+        ok: false,
+        status: 500,
+      } as Response,
+      data: {
+        error: "Errore di rete",
+      },
     };
   }
 }
