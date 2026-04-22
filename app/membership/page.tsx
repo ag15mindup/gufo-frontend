@@ -90,7 +90,7 @@ export default function MembershipPage() {
   const [cashbackPercent, setCashbackPercent] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState<DashboardResponse["stats"]>({});
 
   const levels = useMemo(
     () => [
@@ -107,70 +107,80 @@ export default function MembershipPage() {
     let isMounted = true;
 
     async function fetchDashboard() {
-  try {
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      try {
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
 
-    if (userError) {
-      throw new Error(userError.message || "Errore utente");
-    }
+        if (userError) {
+          throw new Error(userError.message || "Errore utente");
+        }
 
-    if (!user) {
-      throw new Error("Utente non autenticato");
-    }
+        if (!user) {
+          throw new Error("Utente non autenticato");
+        }
 
-    // 🔐 prendi sessione per token
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
-    if (sessionError) {
-      throw new Error(sessionError.message || "Errore sessione");
-    }
+        if (sessionError) {
+          throw new Error(sessionError.message || "Errore sessione");
+        }
 
-    if (!session?.access_token) {
-      throw new Error("Sessione non valida");
-    }
+        if (!session?.access_token) {
+          throw new Error("Sessione non valida");
+        }
 
-    // ✅ CHIAMATA CORRETTA (senza user.id)
-    const { response, data } = await safeJsonFetch(
-      `${API_URL}/dashboard`,
-      {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        const { response, data } = await safeJsonFetch(
+          `${API_URL}/dashboard/${user.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+
+        if (!response.ok || data?.success === false) {
+          throw new Error(data?.error || "Errore nel fetch dashboard");
+        }
+
+        const dashboard = data as DashboardResponse;
+        const walletData = dashboard?.wallet ?? null;
+        const statsData = dashboard?.stats ?? {};
+        const txs = Array.isArray(dashboard?.transactions)
+          ? dashboard.transactions
+          : [];
+
+        if (!isMounted) return;
+
+        setWallet(walletData);
+        setStats(statsData);
+        setTransactions(txs);
+        setCashbackPercent(
+          toNumberSafe(
+            walletData?.cashback_percent ?? statsData?.cashback_percent
+          )
+        );
+        setError("");
+      } catch (err) {
+        console.error("Errore fetchDashboard:", err);
+
+        if (!isMounted) return;
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Errore nel caricamento dashboard"
+        );
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    );
-
-    if (!response.ok || data?.success === false) {
-      throw new Error(data?.error || "Errore nel fetch dashboard");
     }
-
-    const dashboard = data;
-
-    const walletData = dashboard?.wallet ?? null;
-    const stats = dashboard?.stats ?? {};
-    const txs = Array.isArray(dashboard?.transactions)
-      ? dashboard.transactions
-      : [];
-
-    setWallet(walletData);
-    setStats(stats);
-    setTransactions(txs);
-  } catch (err) {
-    console.error("Errore fetchDashboard:", err);
-    setError(
-      err instanceof Error
-        ? err.message
-        : "Errore nel caricamento dashboard"
-    );
-  } finally {
-    setLoading(false);
-  }
-}
 
     fetchDashboard();
 
@@ -185,13 +195,21 @@ export default function MembershipPage() {
   );
 
   const seasonSpent = toNumberSafe(
-    wallet?.season_spent ?? totalSpentFromTransactions
+    wallet?.season_spent ?? stats?.season_spent ?? totalSpentFromTransactions
   );
 
-  const balanceGufo = toNumberSafe(wallet?.balance_gufo ?? wallet?.balance);
+  const balanceGufo = toNumberSafe(
+    wallet?.balance_gufo ?? wallet?.balance ?? stats?.balance_gufo
+  );
 
   const currentLevelRaw = String(
-    wallet?.level_name ?? wallet?.current_level ?? wallet?.level ?? "Bronze"
+    wallet?.level_name ??
+      wallet?.current_level ??
+      wallet?.level ??
+      stats?.level_name ??
+      stats?.current_level ??
+      stats?.level ??
+      "Bronze"
   );
 
   const currentLevel = formatLevel(currentLevelRaw);
@@ -225,7 +243,9 @@ export default function MembershipPage() {
         )
       : 100;
 
-  const completedLevels = levels.filter((level) => seasonSpent >= level.min).length;
+  const completedLevels = levels.filter(
+    (level) => seasonSpent >= level.min
+  ).length;
 
   if (loading) {
     return (
@@ -238,11 +258,15 @@ export default function MembershipPage() {
             <div className={styles.heroBadge}>GUFO PREMIUM MEMBERSHIP</div>
             <p className={styles.eyebrow}>GUFO Membership</p>
             <h1 className={styles.title}>Status e progressione</h1>
-            <p className={styles.subtitle}>Caricamento progressi membership...</p>
+            <p className={styles.subtitle}>
+              Caricamento progressi membership...
+            </p>
           </div>
         </section>
 
-        <div className={styles.loadingBox}>Recupero percorso membership...</div>
+        <div className={styles.loadingBox}>
+          Recupero percorso membership...
+        </div>
       </div>
     );
   }
@@ -288,7 +312,9 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      <section className={`${styles.statusHeroCard} ${getLevelTone(currentLevel)}`}>
+      <section
+        className={`${styles.statusHeroCard} ${getLevelTone(currentLevel)}`}
+      >
         <div className={styles.levelChip}>{currentLevel}</div>
 
         <div className={styles.statusGrid}>
@@ -357,13 +383,17 @@ export default function MembershipPage() {
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Spesa stagione</p>
           <h3 className={styles.metricValue}>€ {seasonSpent.toFixed(2)}</h3>
-          <span className={styles.metricHint}>Volume valido per la progressione</span>
+          <span className={styles.metricHint}>
+            Volume valido per la progressione
+          </span>
         </div>
 
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Livelli raggiunti</p>
           <h3 className={styles.metricValue}>{completedLevels}</h3>
-          <span className={styles.metricHint}>Step già sbloccati nel percorso</span>
+          <span className={styles.metricHint}>
+            Step già sbloccati nel percorso
+          </span>
         </div>
 
         <div className={styles.metricCard}>
@@ -400,7 +430,9 @@ export default function MembershipPage() {
                 >
                   <div className={styles.levelTop}>
                     <h4 className={styles.levelName}>{level.name}</h4>
-                    {isCurrent && <span className={styles.levelBadge}>Attuale</span>}
+                    {isCurrent && (
+                      <span className={styles.levelBadge}>Attuale</span>
+                    )}
                   </div>
 
                   <p className={styles.levelThreshold}>
@@ -410,7 +442,9 @@ export default function MembershipPage() {
                   <p className={styles.levelNext}>
                     Prossimo step:{" "}
                     <strong>
-                      {level.next !== null ? `€ ${level.next}` : "Livello massimo"}
+                      {level.next !== null
+                        ? `€ ${level.next}`
+                        : "Livello massimo"}
                     </strong>
                   </p>
 
