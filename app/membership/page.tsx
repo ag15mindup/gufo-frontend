@@ -134,14 +134,11 @@ export default function MembershipPage() {
           throw new Error("Sessione non valida");
         }
 
-        const { response, data } = await safeJsonFetch(
-          `${API_URL}/dashboard/${user.id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.access_token}`,
-            },
-          }
-        );
+        const { response, data } = await safeJsonFetch(`${API_URL}/dashboard`, {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
 
         if (!response.ok || data?.success === false) {
           throw new Error(data?.error || "Errore nel fetch dashboard");
