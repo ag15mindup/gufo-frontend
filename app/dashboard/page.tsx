@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./dashboard.module.css";
 import { createClient } from "@/lib/supabase/client";
-
 import DashboardMissions from "@/app/components/DashboardMissions";
+
 const supabase = createClient();
 
 type Transaction = {
@@ -28,19 +28,34 @@ type Transaction = {
 type DashboardApiResponse = {
   wallet?: {
     balance_gufo?: number | string | null;
+    balance_eur?: number | string | null;
     cashback_percent?: number | string | null;
     current_level?: string | null;
     season_spent?: number | string | null;
+    total_spent?: number | string | null;
+    total_gufo_earned?: number | string | null;
+    membership_id?: number | string | null;
   };
   stats?: {
     balance_gufo?: number | string | null;
+    balance_eur?: number | string | null;
     total_transactions?: number | string | null;
     season_spent?: number | string | null;
+    total_spent?: number | string | null;
     gufo_earned?: number | string | null;
     level?: string | null;
     cashback_percent?: number | string | null;
+    monthly_expenses?: number[];
+    membership_id?: number | string | null;
   };
   transactions?: Transaction[];
+  profile?: {
+    full_name?: string | null;
+    name?: string | null;
+    username?: string | null;
+    email?: string | null;
+    customer_code?: string | null;
+  };
   profileName?: string;
   profileEmail?: string;
 };
@@ -51,19 +66,24 @@ type ProfileApiResponse = {
     name?: string | null;
     username?: string | null;
     email?: string | null;
+    customer_code?: string | null;
   };
 };
 
 type DashboardData = {
   balanceGufo: number;
+  balanceEur: number;
   totalTransactions: number;
+  seasonSpent: number;
   totalSpent: number;
   totalGufoEarned: number;
   level: string;
+  membershipId: number;
   transactions: Transaction[];
   profileName: string;
   profileEmail: string;
   profileInitial: string;
+  customerCode: string;
 };
 
 const API_URL =
@@ -138,6 +158,8 @@ function formatTransactionType(type?: string): string {
       return "Conversione";
     case "giftcard":
       return "Gift Card";
+    case "mission_reward":
+      return "Reward missione";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -162,7 +184,10 @@ function formatDate(value?: string | null): string {
   });
 }
 
-function buildInviteLink(name: string): string {
+function buildInviteLink(customerCode: string, name: string): string {
+  const base = customerCode?.trim();
+  if (base) return `https://invita.gufo.app/${base.toLowerCase()}`;
+
   const slug = name
     .toLowerCase()
     .replace(/\s+/g, "")
@@ -191,17 +216,43 @@ async function fetchJsonWithAuth<T>(url: string, token: string): Promise<T> {
   return payload as T;
 }
 
+function getSignedAmountLabel(tx: Transaction): string {
+  const type = String(getTransactionType(tx)).toLowerCase();
+  const amount = getTransactionAmount(tx);
+
+  if (type === "payment" || type === "giftcard" || type === "convert") {
+    return `€ ${amount.toFixed(2)}`;
+  }
+
+  return `€ ${amount.toFixed(2)}`;
+}
+
+function getSignedGufoLabel(tx: Transaction): string {
+  const type = String(getTransactionType(tx)).toLowerCase();
+  const gufo = getTransactionGufo(tx);
+
+  if (type === "cashback" || type === "bonus" || type === "mission_reward") {
+    return `+${gufo.toFixed(2)}`;
+  }
+
+  return gufo.toFixed(2);
+}
+
 export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData>({
     balanceGufo: 0,
+    balanceEur: 0,
     totalTransactions: 0,
+    seasonSpent: 0,
     totalSpent: 0,
     totalGufoEarned: 0,
     level: "Bronze",
+    membershipId: 1,
     transactions: [],
     profileName: "Utente GUFO",
     profileEmail: "",
     profileInitial: "U",
+    customerCode: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -250,6 +301,7 @@ export default function DashboardPage() {
 
         const wallet = dashboard?.wallet ?? {};
         const stats = dashboard?.stats ?? {};
+        const dashboardProfile = dashboard?.profile ?? {};
         const profile = profilePayload?.profile ?? {};
         const rawTransactions = Array.isArray(dashboard?.transactions)
           ? dashboard.transactions
@@ -269,32 +321,51 @@ export default function DashboardPage() {
           profile?.full_name?.trim() ||
           profile?.name?.trim() ||
           profile?.username?.trim() ||
+          dashboardProfile?.full_name?.trim() ||
+          dashboardProfile?.name?.trim() ||
+          dashboardProfile?.username?.trim() ||
           dashboard?.profileName?.trim() ||
           user.email?.split("@")[0] ||
           "Utente GUFO";
 
         const profileEmail =
           profile?.email?.trim() ||
+          dashboardProfile?.email?.trim() ||
           dashboard?.profileEmail?.trim() ||
           user.email ||
+          "";
+
+        const customerCode =
+          profile?.customer_code?.trim() ||
+          dashboardProfile?.customer_code?.trim() ||
           "";
 
         if (!active) return;
 
         setDashboardData({
           balanceGufo: toNumberSafe(wallet?.balance_gufo ?? stats?.balance_gufo ?? 0),
+          balanceEur: toNumberSafe(wallet?.balance_eur ?? stats?.balance_eur ?? 0),
           totalTransactions: toNumberSafe(
             stats?.total_transactions ?? normalizedTransactions.length
           ),
-          totalSpent: toNumberSafe(wallet?.season_spent ?? stats?.season_spent ?? 0),
+          seasonSpent: toNumberSafe(
+            wallet?.season_spent ?? stats?.season_spent ?? 0
+          ),
+          totalSpent: toNumberSafe(
+            wallet?.total_spent ?? stats?.total_spent ?? 0
+          ),
           totalGufoEarned: toNumberSafe(
-            stats?.gufo_earned ?? wallet?.balance_gufo ?? 0
+            wallet?.total_gufo_earned ?? stats?.gufo_earned ?? 0
           ),
           level: formatLevel(wallet?.current_level ?? stats?.level ?? "Bronze"),
+          membershipId: toNumberSafe(
+            wallet?.membership_id ?? stats?.membership_id ?? 1
+          ),
           transactions: normalizedTransactions,
           profileName,
           profileEmail,
           profileInitial: profileName.charAt(0).toUpperCase() || "U",
+          customerCode,
         });
       } catch (err: any) {
         if (!active) return;
@@ -316,8 +387,8 @@ export default function DashboardPage() {
   }, [dashboardData.transactions]);
 
   const inviteLink = useMemo(() => {
-    return buildInviteLink(dashboardData.profileName);
-  }, [dashboardData.profileName]);
+    return buildInviteLink(dashboardData.customerCode, dashboardData.profileName);
+  }, [dashboardData.customerCode, dashboardData.profileName]);
 
   if (loading) {
     return (
@@ -358,6 +429,7 @@ export default function DashboardPage() {
       <div className={styles.bgGlowC} />
       <div className={styles.bgGlowD} />
       <div className={styles.rainbowBeam} />
+
       <div className={styles.topPill}>
         <span className={styles.topPillPlus}>+</span>
         <span>{dashboardData.balanceGufo.toFixed(2)} GUFO</span>
@@ -399,6 +471,21 @@ export default function DashboardPage() {
                 <strong>{inviteLink}</strong>
               </div>
             </div>
+
+            <div className={styles.balanceActions}>
+              <Link href="/customer-code" className={styles.primaryBtn}>
+                Il mio codice
+              </Link>
+              <Link href="/wallet" className={styles.secondaryBtn}>
+                Wallet
+              </Link>
+              <Link href="/rewards" className={styles.secondaryBtn}>
+                Rewards
+              </Link>
+              <Link href="/membership" className={styles.secondaryBtn}>
+                Membership
+              </Link>
+            </div>
           </div>
 
           <div className={styles.balancePanel}>
@@ -409,13 +496,24 @@ export default function DashboardPage() {
                 {dashboardData.balanceGufo.toFixed(2)} GUFO
               </h2>
 
-              <div className={styles.balanceActions}>
-                <Link href="/customer-code" className={styles.primaryBtn}>
-                  Il mio codice
-                </Link>
-                <Link href="/wallet" className={styles.secondaryBtn}>
-                  Wallet
-                </Link>
+              <div className={styles.summaryCards}>
+                <div className={styles.summaryItem}>
+                  <div className={styles.summaryItemIcon}>€</div>
+                  <div className={styles.summaryItemText}>
+                    <strong>{formatCurrency(dashboardData.balanceEur)}</strong>
+                    <span>Saldo EUR</span>
+                  </div>
+                  <div className={styles.summaryItemTag}>EUR</div>
+                </div>
+
+                <div className={styles.summaryItem}>
+                  <div className={styles.summaryItemIcon}>#</div>
+                  <div className={styles.summaryItemText}>
+                    <strong>{dashboardData.customerCode || "Non disponibile"}</strong>
+                    <span>Customer code</span>
+                  </div>
+                  <div className={styles.summaryItemTag}>ID</div>
+                </div>
               </div>
             </div>
           </div>
@@ -442,26 +540,28 @@ export default function DashboardPage() {
 
             <div className={styles.statMeta}>
               <div className={styles.statIcon}>⬒</div>
-              <div className={styles.statHint}>Stagionale</div>
+              <div className={styles.statHint}>Membership #{dashboardData.membershipId}</div>
             </div>
           </div>
 
           <div className={`${styles.statCard} ${styles.statPink}`}>
             <div className={styles.statContent}>
-              <div className={styles.statValue}>Variabile</div>
-              <div className={styles.statLabel}>Cashback</div>
+              <div className={styles.statValue}>
+                +{dashboardData.totalGufoEarned.toFixed(2)}
+              </div>
+              <div className={styles.statLabel}>GUFO guadagnati</div>
             </div>
 
             <div className={styles.statMeta}>
-              <div className={styles.statIcon}>%</div>
-              <div className={styles.statHint}>Deciso dai partner</div>
+              <div className={styles.statIcon}>✦</div>
+              <div className={styles.statHint}>Totale reward</div>
             </div>
           </div>
         </section>
 
-       <section className={styles.missionSection}>
-  <DashboardMissions />
-</section>
+        <section className={styles.missionSection}>
+          <DashboardMissions />
+        </section>
 
         <section className={styles.contentGrid}>
           <div className={styles.transactionsPanel}>
@@ -497,8 +597,8 @@ export default function DashboardPage() {
                             {formatTransactionType(getTransactionType(tx))}
                           </span>
                         </td>
-                        <td>{formatCurrency(getTransactionAmount(tx))}</td>
-                        <td>{getTransactionGufo(tx).toFixed(2)}</td>
+                        <td>{getSignedAmountLabel(tx)}</td>
+                        <td>{getSignedGufoLabel(tx)}</td>
                       </tr>
                     ))
                   )}
@@ -532,12 +632,12 @@ export default function DashboardPage() {
 
                     <div className={styles.mobileMetaItem}>
                       <span>Importo</span>
-                      <strong>{formatCurrency(getTransactionAmount(tx))}</strong>
+                      <strong>{getSignedAmountLabel(tx)}</strong>
                     </div>
 
                     <div className={styles.mobileMetaItem}>
                       <span>GUFO</span>
-                      <strong>{getTransactionGufo(tx).toFixed(2)}</strong>
+                      <strong>{getSignedGufoLabel(tx)}</strong>
                     </div>
                   </div>
                 ))
@@ -587,10 +687,19 @@ export default function DashboardPage() {
               <div className={styles.summaryItem}>
                 <div className={styles.summaryItemIcon}>◌</div>
                 <div className={styles.summaryItemText}>
-                  <strong>{formatCurrency(dashboardData.totalSpent)}</strong>
+                  <strong>{formatCurrency(dashboardData.seasonSpent)}</strong>
                   <span>Spesa stagione</span>
                 </div>
-                <div className={styles.summaryItemTag}>SPESA</div>
+                <div className={styles.summaryItemTag}>SEASON</div>
+              </div>
+
+              <div className={styles.summaryItem}>
+                <div className={styles.summaryItemIcon}>◎</div>
+                <div className={styles.summaryItemText}>
+                  <strong>{formatCurrency(dashboardData.totalSpent)}</strong>
+                  <span>Spesa totale</span>
+                </div>
+                <div className={styles.summaryItemTag}>TOTAL</div>
               </div>
             </div>
 
