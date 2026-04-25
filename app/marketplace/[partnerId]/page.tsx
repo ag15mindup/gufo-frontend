@@ -1,0 +1,264 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import styles from "./partner-detail.module.css";
+
+const supabase = createClient();
+
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
+
+type Partner = {
+  id: number;
+  name: string;
+  category: string;
+  cashback_percent: number;
+  rating_average: number;
+  reviews_count: number;
+  location: string;
+};
+
+type Review = {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  user_name: string;
+  verified: boolean;
+};
+
+export default function PartnerDetailPage() {
+  const params = useParams();
+  const partnerId = String(params?.partnerId || "");
+
+  const [partner, setPartner] = useState<Partner | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [reviewMessage, setReviewMessage] = useState("");
+
+  async function loadData() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const [partnerRes, reviewsRes] = await Promise.all([
+        fetch(`${API_URL}/partners/${partnerId}`, { cache: "no-store" }),
+        fetch(`${API_URL}/partners/${partnerId}/reviews`, { cache: "no-store" }),
+      ]);
+
+      const partnerData = await partnerRes.json();
+      const reviewsData = await reviewsRes.json();
+
+      if (!partnerRes.ok || !partnerData.success) {
+        throw new Error(partnerData.error || "Errore caricamento partner");
+      }
+
+      if (!reviewsRes.ok || !reviewsData.success) {
+        throw new Error(reviewsData.error || "Errore caricamento recensioni");
+      }
+
+      setPartner(partnerData.partner);
+      setReviews(Array.isArray(reviewsData.reviews) ? reviewsData.reviews : []);
+    } catch (err: any) {
+      setError(err.message || "Errore sconosciuto");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (partnerId) {
+      loadData();
+    }
+  }, [partnerId]);
+
+  async function submitReview() {
+    try {
+      setReviewLoading(true);
+      setReviewMessage("");
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error("Devi essere loggato per lasciare una recensione");
+      }
+
+      const res = await fetch(`${API_URL}/partners/${partnerId}/reviews`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          rating,
+          comment,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Errore salvataggio recensione");
+      }
+
+      setReviewMessage("Recensione verificata salvata con successo ✅");
+      setComment("");
+      setRating(5);
+      await loadData();
+    } catch (err: any) {
+      setReviewMessage(err.message || "Errore recensione");
+    } finally {
+      setReviewLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.stateBox}>Caricamento locale...</div>
+      </main>
+    );
+  }
+
+  if (error || !partner) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.errorBox}>{error || "Partner non trovato"}</div>
+        <Link href="/marketplace" className={styles.backButton}>
+          ← Torna al marketplace
+        </Link>
+      </main>
+    );
+  }
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.bgGlowA} />
+      <div className={styles.bgGlowB} />
+
+      <section className={styles.hero}>
+        <Link href="/marketplace" className={styles.backLink}>
+          ← Marketplace
+        </Link>
+
+        <div className={styles.category}>{partner.category}</div>
+
+        <h1>{partner.name}</h1>
+
+        <p>
+          Locale partner GUFO con cashback attivo, recensioni verificate e
+          missioni collegabili alle abitudini reali degli utenti.
+        </p>
+
+        <div className={styles.heroStats}>
+          <div>
+            <strong>{partner.cashback_percent || 0}%</strong>
+            <span>Cashback</span>
+          </div>
+
+          <div>
+            <strong>
+              {partner.rating_average > 0
+                ? partner.rating_average.toFixed(1)
+                : "N/D"}
+            </strong>
+            <span>Rating medio</span>
+          </div>
+
+          <div>
+            <strong>{partner.reviews_count}</strong>
+            <span>Recensioni</span>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.contentGrid}>
+        <div className={styles.reviewsPanel}>
+          <div className={styles.panelHeader}>
+            <h2>Recensioni verificate</h2>
+            <span>Solo utenti che hanno frequentato il locale</span>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className={styles.emptyBox}>
+              Nessuna recensione disponibile per ora.
+            </div>
+          ) : (
+            <div className={styles.reviewList}>
+              {reviews.map((review) => (
+                <article key={review.id} className={styles.reviewCard}>
+                  <div className={styles.reviewTop}>
+                    <strong>{review.user_name}</strong>
+                    <span>{"⭐".repeat(review.rating)}</span>
+                  </div>
+
+                  <p>{review.comment || "Nessun commento scritto."}</p>
+
+                  <div className={styles.verifiedBadge}>
+                    ✅ Recensione verificata
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className={styles.reviewForm}>
+          <h2>Lascia una recensione</h2>
+
+          <p>
+            Puoi recensire questo locale solo se hai davvero effettuato almeno
+            un pagamento GUFO presso questo partner.
+          </p>
+
+          <label>
+            Valutazione
+            <select
+              value={rating}
+              onChange={(event) => setRating(Number(event.target.value))}
+            >
+              <option value={5}>5 stelle</option>
+              <option value={4}>4 stelle</option>
+              <option value={3}>3 stelle</option>
+              <option value={2}>2 stelle</option>
+              <option value={1}>1 stella</option>
+            </select>
+          </label>
+
+          <label>
+            Commento
+            <textarea
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              placeholder="Com'è stata la tua esperienza?"
+              rows={5}
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={submitReview}
+            disabled={reviewLoading}
+          >
+            {reviewLoading ? "Salvataggio..." : "Invia recensione"}
+          </button>
+
+          {reviewMessage ? (
+            <div className={styles.reviewMessage}>{reviewMessage}</div>
+          ) : null}
+        </aside>
+      </section>
+    </main>
+  );
+}

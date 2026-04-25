@@ -1,0 +1,259 @@
+.page {
+  min-height: 100vh;
+  padding: 30px;
+  color: white;
+  position: relative;
+  background: linear-gradient(180deg, #050816, #0b1025);
+  overflow: hidden;
+}
+
+.bgGlowA {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #7c3aed;
+  filter: blur(180px);
+  opacity: 0.25;
+  top: 0;
+  left: -100px;
+}
+
+.bgGlowB {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: #06b6d4;
+  filter: blur(180px);
+  opacity: 0.25;
+  bottom: 0;
+  right: -100px;
+}
+
+.hero {
+  position: relative;
+  z-index: 2;
+  padding: 30px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  margin-bottom: 25px;
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.category {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #8b5cf6, #ec4899);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  color: rgba(255,255,255,0.75);
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.heroStats div {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+}
+
+.heroStats strong {
+  display: block;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.heroStats span {
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.reviewsPanel,
+.reviewForm {
+  padding: 25px;
+  border-radius: 25px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+}
+
+.panelHeader {
+  margin-bottom: 20px;
+}
+
+.panelHeader h2 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.panelHeader span {
+  color: rgba(255,255,255,0.65);
+}
+
+.reviewList {
+  display: grid;
+  gap: 15px;
+}
+
+.reviewCard {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.reviewTop {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.reviewTop strong {
+  font-size: 16px;
+}
+
+.reviewTop span {
+  color: #facc15;
+}
+
+.reviewCard p {
+  color: rgba(255,255,255,0.8);
+  line-height: 1.5;
+}
+
+.verifiedBadge {
+  margin-top: 14px;
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(34,197,94,0.2);
+  color: #4ade80;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.emptyBox {
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  text-align: center;
+  color: rgba(255,255,255,0.7);
+}
+
+.reviewForm h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.reviewForm p {
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.reviewForm label {
+  display: block;
+  margin-bottom: 18px;
+  font-weight: 700;
+}
+
+.reviewForm select,
+.reviewForm textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+}
+
+.reviewForm textarea {
+  resize: none;
+}
+
+.reviewForm button {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 800;
+  color: white;
+  cursor: pointer;
+  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+}
+
+.reviewMessage {
+  margin-top: 16px;
+  text-align: center;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+.stateBox,
+.errorBox {
+  padding: 30px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.05);
+  text-align: center;
+}
+
+.errorBox {
+  color: #ff7b7b;
+}
+
+.backButton {
+  display: inline-block;
+  margin-top: 20px;
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+@media (max-width: 900px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .heroStats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+  }
+}
