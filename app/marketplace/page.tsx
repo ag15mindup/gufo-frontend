@@ -21,12 +21,31 @@ export default function MarketplacePage() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+const [selectedCategory, setSelectedCategory] = useState("all");
+const [minCashback, setMinCashback] = useState(0);
 
   useEffect(() => {
     async function loadPartners() {
       try {
         setLoading(true);
         setError("");
+        const filteredPartners = partners.filter((partner) => {
+  const matchesSearch =
+    partner.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+  const matchesCategory =
+    selectedCategory === "all"
+      ? true
+      : partner.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+  const matchesCashback =
+    Number(partner.cashback_percent || 0) >= minCashback;
+
+  return matchesSearch && matchesCategory && matchesCashback;
+});
 
         const res = await fetch(`${API_URL}/partners`, {
           method: "GET",
@@ -50,6 +69,17 @@ export default function MarketplacePage() {
     loadPartners();
   }, []);
 
+const filteredPartners = partners.filter((partner: Partner) => {
+  const categoryMatch =
+    selectedCategory === "all" ||
+    partner.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+  const cashbackMatch =
+    Number(partner.cashback_percent || 0) >= minCashback;
+
+  return categoryMatch && cashbackMatch;
+});
+
   return (
     <main className={styles.page}>
       <div className={styles.bgGlowA} />
@@ -70,6 +100,39 @@ export default function MarketplacePage() {
         </p>
       </section>
 
+<section className={styles.filters}>
+  <input
+    type="text"
+    placeholder="Cerca locale..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className={styles.searchInput}
+  />
+
+  <select
+    value={selectedCategory}
+    onChange={(e) => setSelectedCategory(e.target.value)}
+    className={styles.filterSelect}
+  >
+    <option value="all">Tutte categorie</option>
+    <option value="bar">Bar</option>
+    <option value="ristorante">Ristorante</option>
+    <option value="pub">Pub</option>
+    <option value="caffetteria">Caffetteria</option>
+  </select>
+
+  <select
+    value={minCashback}
+    onChange={(e) => setMinCashback(Number(e.target.value))}
+    className={styles.filterSelect}
+  >
+    <option value={0}>Tutti cashback</option>
+    <option value={2}>Min 2%</option>
+    <option value={5}>Min 5%</option>
+    <option value={10}>Min 10%</option>
+  </select>
+</section>
+
       {loading ? (
         <div className={styles.stateBox}>Caricamento partner...</div>
       ) : error ? (
@@ -80,7 +143,7 @@ export default function MarketplacePage() {
         </div>
       ) : (
         <section className={styles.grid}>
-          {partners.map((partner) => (
+      {filteredPartners.map((partner) => (
             <article key={partner.id} className={styles.card}>
               <div className={styles.cardTop}>
                 <div>
