@@ -21,31 +21,16 @@ export default function MarketplacePage() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
-const [selectedCategory, setSelectedCategory] = useState("all");
-const [minCashback, setMinCashback] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [minCashback, setMinCashback] = useState(0);
 
   useEffect(() => {
     async function loadPartners() {
       try {
         setLoading(true);
         setError("");
-        const filteredPartners = partners.filter((partner) => {
-  const matchesSearch =
-    partner.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-  const matchesCategory =
-    selectedCategory === "all"
-      ? true
-      : partner.category?.toLowerCase() === selectedCategory.toLowerCase();
-
-  const matchesCashback =
-    Number(partner.cashback_percent || 0) >= minCashback;
-
-  return matchesSearch && matchesCategory && matchesCashback;
-});
 
         const res = await fetch(`${API_URL}/partners`, {
           method: "GET",
@@ -69,16 +54,20 @@ const [minCashback, setMinCashback] = useState(0);
     loadPartners();
   }, []);
 
-const filteredPartners = partners.filter((partner: Partner) => {
-  const categoryMatch =
-    selectedCategory === "all" ||
-    partner.category?.toLowerCase() === selectedCategory.toLowerCase();
+  const filteredPartners = partners.filter((partner: Partner) => {
+    const searchMatch = partner.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-  const cashbackMatch =
-    Number(partner.cashback_percent || 0) >= minCashback;
+    const categoryMatch =
+      selectedCategory === "all" ||
+      partner.category?.toLowerCase() === selectedCategory.toLowerCase();
 
-  return categoryMatch && cashbackMatch;
-});
+    const cashbackMatch =
+      Number(partner.cashback_percent || 0) >= minCashback;
+
+    return searchMatch && categoryMatch && cashbackMatch;
+  });
 
   return (
     <main className={styles.page}>
@@ -95,59 +84,67 @@ const filteredPartners = partners.filter((partner: Partner) => {
         <h1>Scopri dove guadagnare GUFO</h1>
 
         <p>
-          Trova locali partner, controlla cashback, recensioni verificate e scegli
-          dove completare le tue missioni.
+          Trova locali partner, controlla cashback, recensioni verificate
+          e scegli dove completare le tue missioni.
         </p>
       </section>
 
-<section className={styles.filters}>
-  <input
-    type="text"
-    placeholder="Cerca locale..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className={styles.searchInput}
-  />
+      {/* FILTRI */}
+      <section className={styles.filters}>
+        <input
+          type="text"
+          placeholder="Cerca locale..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className={styles.searchInput}
+        />
 
-  <select
-    value={selectedCategory}
-    onChange={(e) => setSelectedCategory(e.target.value)}
-    className={styles.filterSelect}
-  >
-    <option value="all">Tutte categorie</option>
-    <option value="bar">Bar</option>
-    <option value="ristorante">Ristorante</option>
-    <option value="pub">Pub</option>
-    <option value="caffetteria">Caffetteria</option>
-  </select>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">Tutte categorie</option>
+          <option value="bar">Bar</option>
+          <option value="ristorante">Ristorante</option>
+          <option value="pub">Pub</option>
+          <option value="caffetteria">Caffetteria</option>
+        </select>
 
-  <select
-    value={minCashback}
-    onChange={(e) => setMinCashback(Number(e.target.value))}
-    className={styles.filterSelect}
-  >
-    <option value={0}>Tutti cashback</option>
-    <option value={2}>Min 2%</option>
-    <option value={5}>Min 5%</option>
-    <option value={10}>Min 10%</option>
-  </select>
-</section>
+        <select
+          value={minCashback}
+          onChange={(e) => setMinCashback(Number(e.target.value))}
+          className={styles.filterSelect}
+        >
+          <option value={0}>Tutti cashback</option>
+          <option value={2}>Min 2%</option>
+          <option value={5}>Min 5%</option>
+          <option value={10}>Min 10%</option>
+        </select>
+      </section>
 
       {loading ? (
-        <div className={styles.stateBox}>Caricamento partner...</div>
-      ) : error ? (
-        <div className={styles.errorBox}>{error}</div>
-      ) : partners.length === 0 ? (
         <div className={styles.stateBox}>
-          Nessun partner disponibile al momento.
+          Caricamento partner...
+        </div>
+      ) : error ? (
+        <div className={styles.errorBox}>
+          {error}
+        </div>
+      ) : filteredPartners.length === 0 ? (
+        <div className={styles.stateBox}>
+          Nessun partner trovato con questi filtri.
         </div>
       ) : (
         <section className={styles.grid}>
-      {filteredPartners.map((partner) => (
+          {filteredPartners.map((partner) => (
             <article key={partner.id} className={styles.card}>
               <div className={styles.cardTop}>
                 <div>
-                  <span className={styles.category}>{partner.category}</span>
+                  <span className={styles.category}>
+                    {partner.category}
+                  </span>
+
                   <h2>{partner.name}</h2>
                 </div>
 
@@ -158,7 +155,10 @@ const filteredPartners = partners.filter((partner: Partner) => {
               </div>
 
               <div className={styles.meta}>
-                <span>📍 {partner.location || "Zona partner"}</span>
+                <span>
+                  📍 {partner.location || "Zona partner"}
+                </span>
+
                 <span>
                   ⭐{" "}
                   {partner.rating_average > 0
@@ -175,7 +175,10 @@ const filteredPartners = partners.filter((partner: Partner) => {
                 </span>
               </div>
 
-              <Link href={`/marketplace/${partner.id}`} className={styles.cta}>
+              <Link
+                href={`/marketplace/${partner.id}`}
+                className={styles.cta}
+              >
                 Vedi locale →
               </Link>
             </article>

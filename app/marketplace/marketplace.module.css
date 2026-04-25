@@ -79,6 +79,36 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
+.filters {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 22px auto 32px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchInput,
+.filterSelect {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  outline: none;
+}
+
+.searchInput {
+  min-width: 240px;
+  flex: 1;
+}
+
+.filterSelect {
+  min-width: 170px;
+}
+
 .grid {
   max-width: 1180px;
   margin: 0 auto;
