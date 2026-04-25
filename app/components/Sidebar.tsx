@@ -191,12 +191,15 @@ export default function Sidebar() {
   const userRoutes = useMemo<HudRoute[]>(
     () => [
       { href: "/dashboard", title: "Dashboard", subtitle: "Control center", icon: <PrismGlyph /> },
+      { href: "/marketplace", title: "Marketplace", subtitle: "Scopri partner", icon: <NovaGlyph /> },
       { href: "/wallet", title: "Wallet", subtitle: "Saldo e movimenti", icon: <OrbitGlyph /> },
       { href: "/transactions", title: "Transazioni", subtitle: "Storico attività", icon: <LedgerGlyph /> },
       { href: "/membership", title: "Membership", subtitle: "Livello stagionale", icon: <CrystalGlyph /> },
       { href: "/rewards", title: "Rewards", subtitle: "Bonus e premi", icon: <NovaGlyph /> },
       { href: "/profile", title: "Profilo", subtitle: "Identità account", icon: <PersonaGlyph /> },
       { href: "/customer-code", title: "QR Code", subtitle: "Codice cliente", icon: <MatrixGlyph /> },
+      
+    
     ],
     []
   );
