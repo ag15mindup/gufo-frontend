@@ -488,7 +488,7 @@ export default function DashboardPage() {
                 Membership
               </Link>
             </div>
-          </div>
+          
 <div className={styles.quickActions}>
   <Link href="/customer-code" className={styles.quickActionBlue}>
     Scansiona QR
@@ -502,6 +502,8 @@ export default function DashboardPage() {
     Usa GUFO
   </Link>
 </div>
+</div>
+
           <div className={styles.balancePanel}>
             <div className={styles.balanceCard}>
               <div className={styles.balanceCardGlow} />

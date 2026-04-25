@@ -1081,10 +1081,13 @@
     text-align: left;
   }
 
-  .badge {
+    .badge {
     min-width: 0;
     width: fit-content;
   }
+}
+
+/* DASHBOARD UX ADDITIONS */
 .dashboardSubtitle {
   margin-top: 10px;
   max-width: 620px;
@@ -1122,5 +1125,4 @@
 
 .quickActionGreen {
   background: linear-gradient(135deg, #22c55e, #0ea5e9);
-}
 }
