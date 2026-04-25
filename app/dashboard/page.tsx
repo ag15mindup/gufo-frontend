@@ -153,13 +153,13 @@ function formatTransactionType(type?: string): string {
     case "bonus":
       return "Bonus";
     case "buy":
-      return "Acquisto";
+      return "Acquisto GUFO";
     case "convert":
       return "Conversione";
     case "giftcard":
       return "Gift Card";
     case "mission_reward":
-      return "Reward missione";
+      return "Bonus missione";
     default:
       return value.charAt(0).toUpperCase() + value.slice(1);
   }
@@ -456,7 +456,9 @@ export default function DashboardPage() {
             </div>
 
             <h1 className={styles.userName}>{dashboardData.profileName}</h1>
-
+<p className={styles.dashboardSubtitle}>
+  Guadagna GUFO pagando nei negozi e completando missioni. Usali nei partner o converti in €.
+</p>
             <div className={styles.userSubline}>
               <span className={styles.userSubIcon}>⦿</span>
               <span className={styles.userSubText}>
@@ -487,11 +489,23 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
+<div className={styles.quickActions}>
+  <Link href="/customer-code" className={styles.quickActionBlue}>
+    Scansiona QR
+  </Link>
 
+  <Link href="#missions" className={styles.quickActionPurple}>
+    Completa missioni
+  </Link>
+
+  <Link href="/rewards" className={styles.quickActionGreen}>
+    Usa GUFO
+  </Link>
+</div>
           <div className={styles.balancePanel}>
             <div className={styles.balanceCard}>
               <div className={styles.balanceCardGlow} />
-              <span className={styles.balanceLabel}>Saldo disponibile</span>
+              <span className={styles.balanceLabel}>Saldo GUFO convertibile</span>
               <h2 className={styles.balanceValue}>
                 {dashboardData.balanceGufo.toFixed(2)} GUFO
               </h2>
@@ -559,7 +573,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className={styles.missionSection}>
+       <section id="missions" className={styles.missionSection}>
           <DashboardMissions />
         </section>
 
