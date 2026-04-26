@@ -403,15 +403,10 @@ export default function PartnerDashboardPage() {
               💳 Registra pagamento
             </Link>
 
-<Link
-  href="/partner-console"
-  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
->
-  📷 Scansiona QR
-</Link>
+
 
            <Link
-  href="/partner-console"
+  href="/partner-scan"
   className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
 >
   ⚡ Imposta cashback
