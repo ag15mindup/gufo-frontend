@@ -1,79 +1,80 @@
 "use client";
 
-import { useEffect } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function PartnerScanPage() {
   const router = useRouter();
+  const scannerRef = useRef<any>(null);
 
-  useEffect(() => {
-    let scanner: any = null;
-    let stopped = false;
+  const [status, setStatus] = useState("Premi il bottone per avviare la fotocamera.");
+  const [scanning, setScanning] = useState(false);
 
-    async function startScanner() {
-      try {
-        const { Html5Qrcode } = await import("html5-qrcode");
+  async function startScanner() {
+    try {
+      setStatus("Richiesta accesso fotocamera...");
+      setScanning(true);
 
-        scanner = new Html5Qrcode("reader");
+      const { Html5Qrcode } = await import("html5-qrcode");
 
-        const devices = await Html5Qrcode.getCameras();
+      const cameras = await Html5Qrcode.getCameras();
 
-        if (!devices || devices.length === 0) {
-          alert("Nessuna fotocamera trovata. Collega una webcam o prova da telefono.");
-          return;
-        }
-
-        const backCamera =
-          devices.find((device: any) =>
-            String(device.label || "").toLowerCase().includes("back")
-          ) || devices[0];
-
-        await scanner.start(
-          backCamera.id,
-          {
-            fps: 10,
-            qrbox: { width: 260, height: 260 },
-          },
-          async (decodedText: string) => {
-            if (stopped) return;
-            stopped = true;
-
-            const raw = decodedText.trim();
-            const match = raw.match(/GUFO-[A-Z0-9]+/i);
-            const customerCode = match ? match[0].toUpperCase() : raw.toUpperCase();
-
-            try {
-              await scanner.stop();
-              await scanner.clear();
-            } catch {}
-
-            router.push(
-              `/partner-console?customerCode=${encodeURIComponent(customerCode)}`
-            );
-          },
-          () => {}
-        );
-      } catch (error) {
-        console.error("QR scanner error:", error);
-        alert(
-          "Errore apertura fotocamera. Controlla permessi browser, webcam collegata e HTTPS."
-        );
+      if (!cameras || cameras.length === 0) {
+        setStatus("Nessuna fotocamera trovata. Prova da telefono o collega una webcam.");
+        setScanning(false);
+        return;
       }
+
+      const backCamera =
+        cameras.find((camera: any) =>
+          String(camera.label || "").toLowerCase().includes("back")
+        ) || cameras[0];
+
+      const scanner = new Html5Qrcode("reader");
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        backCamera.id,
+        {
+          fps: 10,
+          qrbox: { width: 260, height: 260 },
+        },
+        async (decodedText: string) => {
+          const raw = decodedText.trim();
+          const match = raw.match(/GUFO-[A-Z0-9]+/i);
+          const customerCode = match ? match[0].toUpperCase() : raw.toUpperCase();
+
+          setStatus(`Codice letto: ${customerCode}`);
+
+          try {
+            await scanner.stop();
+            await scanner.clear();
+          } catch {}
+
+          router.push(`/partner-console?customerCode=${encodeURIComponent(customerCode)}`);
+        },
+        () => {}
+      );
+
+      setStatus("Scanner attivo. Inquadra il QR cliente.");
+    } catch (err) {
+      console.error("Scanner error:", err);
+      setStatus("Errore fotocamera: controlla permessi browser, HTTPS e webcam.");
+      setScanning(false);
     }
+  }
 
-    startScanner();
-
-    return () => {
-      stopped = true;
-
-      if (scanner) {
-        scanner
-          .stop()
-          .then(() => scanner.clear())
-          .catch(() => {});
+  async function stopScanner() {
+    try {
+      if (scannerRef.current) {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
       }
-    };
-  }, [router]);
+    } catch {}
+
+    setScanning(false);
+    setStatus("Scanner fermato.");
+  }
 
   return (
     <main
@@ -84,14 +85,7 @@ export default function PartnerScanPage() {
         padding: "28px",
       }}
     >
-      <a
-        href="/partner-dashboard"
-        style={{
-          color: "rgba(255,255,255,0.75)",
-          textDecoration: "none",
-          fontWeight: 800,
-        }}
-      >
+      <a href="/partner-dashboard" style={{ color: "white", textDecoration: "none" }}>
         ← Torna alla dashboard partner
       </a>
 
@@ -105,40 +99,47 @@ export default function PartnerScanPage() {
           border: "1px solid rgba(255,255,255,0.12)",
         }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            padding: "8px 14px",
-            borderRadius: "999px",
-            background: "rgba(124,58,237,0.24)",
-            fontWeight: 900,
-            marginBottom: "16px",
-          }}
-        >
-          GUFO QR SCANNER
-        </div>
+        <h1>Scansiona QR cliente</h1>
 
-        <h1
-          style={{
-            margin: 0,
-            fontSize: "42px",
-            lineHeight: 1,
-            letterSpacing: "-0.04em",
-          }}
-        >
-          Scansiona QR cliente
-        </h1>
+        <p style={{ color: "rgba(255,255,255,0.75)" }}>{status}</p>
 
-        <p
-          style={{
-            marginTop: "14px",
-            color: "rgba(255,255,255,0.72)",
-            lineHeight: 1.5,
-          }}
-        >
-          Inquadra il QR del cliente GUFO. Dopo la scansione verrai portato alla
-          Partner Console con il codice cliente già compilato.
-        </p>
+        {!scanning ? (
+          <button
+            type="button"
+            onClick={startScanner}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "0",
+              color: "white",
+              fontWeight: 900,
+              cursor: "pointer",
+              background: "linear-gradient(135deg, #06b6d4, #7c3aed)",
+              marginTop: "16px",
+            }}
+          >
+            📷 Avvia scanner
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={stopScanner}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "0",
+              color: "white",
+              fontWeight: 900,
+              cursor: "pointer",
+              background: "linear-gradient(135deg, #ef4444, #7c2d12)",
+              marginTop: "16px",
+            }}
+          >
+            Ferma scanner
+          </button>
+        )}
 
         <div
           id="reader"

@@ -476,115 +476,125 @@ function handleApplyScannedCode() {
 
       <section className={styles.formsGrid}>
         <form onSubmit={handleSearchCustomer} className={styles.panel}>
-          <div className={styles.panelHeader}>
-            <div>
-              <p className={styles.sectionEyebrow}>Customer Lookup</p>
-              <h3>Cerca cliente</h3>
-            </div>
-            <span className={styles.panelBadge}>Lookup</span>
-          </div>
+  <div className={styles.panelHeader}>
+    <div>
+      <p className={styles.sectionEyebrow}>Customer Lookup</p>
+      <h3>Cerca cliente</h3>
+    </div>
+    <span className={styles.panelBadge}>Lookup</span>
+  </div>
 
-<button
-  type="button"
-  className={styles.scanButton}
-  onClick={() => setScannerOpen((value) => !value)}
->
-  📷 Scansiona QR cliente
-</button>
-
-{scannerOpen && (
-  <div className={styles.scanBox}>
-    <p>
-      Scanner QR temporaneo: inserisci il codice letto dal QR cliente.
-      Dopo collegheremo la camera reale.
-    </p>
-
+  {/* INPUT CODICE CLIENTE */}
+  <div className={styles.fieldGroup}>
+    <label className={styles.inputLabel}>Codice cliente</label>
     <input
       type="text"
-      value={scannedCode}
-      onChange={(e) => setScannedCode(e.target.value)}
+      value={customerCode}
+      onChange={(e) => setCustomerCode(e.target.value)}
       className={styles.inputControl}
       placeholder="Es. GUFO-915728"
     />
-
-    <button
-      type="button"
-      className={styles.primaryBtnWide}
-      onClick={handleApplyScannedCode}
-    >
-      Usa codice scansionato
-    </button>
   </div>
-)}
 
-          <div className={styles.fieldGroup}>
-            <label className={styles.inputLabel}>Codice cliente</label>
-            <input
-              type="text"
-              value={customerCode}
-              onChange={(e) => setCustomerCode(e.target.value)}
-              className={styles.inputControl}
-              placeholder="Es. GUFO-915728"
-            />
-          </div>
+  {/* BOTTONE SCANSIONE */}
+  <button
+    type="button"
+    className={styles.scanButton}
+    onClick={() => setScannerOpen((value) => !value)}
+  >
+    📷 Scansiona QR cliente
+  </button>
 
-          <button
-            type="submit"
-            disabled={loadingCustomer}
-            className={styles.primaryBtnWide}
-          >
-            {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
-          </button>
+  {/* BOX SCANNER */}
+  {scannerOpen && (
+    <div className={styles.scanBox}>
+      <p>
+        Scanner QR temporaneo: inserisci il codice letto dal QR cliente.
+        Dopo collegheremo la camera reale.
+      </p>
 
-          {customer && (
-            <div className={styles.infoBox}>
-              <div className={styles.infoHeader}>
-                <h4>Cliente trovato</h4>
-                <span>Ready</span>
-              </div>
+      <input
+        type="text"
+        value={scannedCode}
+        onChange={(e) => setScannedCode(e.target.value)}
+        className={styles.inputControl}
+        placeholder="Es. GUFO-915728"
+      />
 
-              <div className={styles.infoGrid}>
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Customer code</p>
-                  <p className={styles.infoMiniValue}>{customer.customer_code}</p>
-                </div>
+      <button
+        type="button"
+        className={styles.primaryBtnWide}
+        onClick={handleApplyScannedCode}
+      >
+        Usa codice scansionato
+      </button>
+    </div>
+  )}
 
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Livello</p>
-                  <p className={styles.infoMiniValue}>{formatLevel(customer.level)}</p>
-                </div>
+  {/* BOTTONE CERCA */}
+  <button
+    type="submit"
+    disabled={loadingCustomer}
+    className={styles.primaryBtnWide}
+  >
+    {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
+  </button>
 
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Saldo GUFO</p>
-                  <p className={styles.infoMiniValue}>
-                    {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
-                  </p>
-                </div>
+  {customer && (
+    <div className={styles.infoBox}>
+      <div className={styles.infoHeader}>
+        <h4>Cliente trovato</h4>
+        <span>Ready</span>
+      </div>
 
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Saldo €</p>
-                  <p className={styles.infoMiniValue}>
-                    € {toNumberSafe(customer.balance_eur).toFixed(2)}
-                  </p>
-                </div>
+      <div className={styles.infoGrid}>
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Customer code</p>
+          <p className={styles.infoMiniValue}>
+            {customer.customer_code}
+          </p>
+        </div>
 
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Spesa stagione</p>
-                  <p className={styles.infoMiniValue}>
-                    € {toNumberSafe(customer.season_spent).toFixed(2)}
-                  </p>
-                </div>
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Livello</p>
+          <p className={styles.infoMiniValue}>
+            {formatLevel(customer.level)}
+          </p>
+        </div>
 
-                <div className={styles.infoMiniCard}>
-                  <p className={styles.infoMiniLabel}>Area</p>
-                  <p className={styles.infoMiniValue}>
-                    {customer.region || customer.reference_currency || "--"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </form>
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Saldo GUFO</p>
+          <p className={styles.infoMiniValue}>
+            {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
+          </p>
+        </div>
+
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Saldo €</p>
+          <p className={styles.infoMiniValue}>
+            € {toNumberSafe(customer.balance_eur).toFixed(2)}
+          </p>
+        </div>
+
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Spesa stagione</p>
+          <p className={styles.infoMiniValue}>
+            € {toNumberSafe(customer.season_spent).toFixed(2)}
+          </p>
+        </div>
+
+        <div className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Area</p>
+          <p className={styles.infoMiniValue}>
+            {customer.region ||
+              customer.reference_currency ||
+              "--"}
+          </p>
+        </div>
+      </div>
+    </div>
+  )}
+</form>
 
         <form onSubmit={handlePayment} className={styles.panel}>
           <div className={styles.panelHeader}>
