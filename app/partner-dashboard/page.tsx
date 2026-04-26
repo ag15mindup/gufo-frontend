@@ -403,13 +403,19 @@ export default function PartnerDashboardPage() {
               💳 Registra pagamento
             </Link>
 
-            <button className={`${styles.actionBtn} ${styles.secondaryAction}`} type="button">
-              📷 Scansiona QR
-            </button>
+<Link
+  href="/partner-console"
+  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
+>
+  📷 Scansiona QR
+</Link>
 
-            <button className={`${styles.actionBtn} ${styles.tertiaryAction}`} type="button">
-              ⚡ Imposta cashback
-            </button>
+           <Link
+  href="/partner-console"
+  className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
+>
+  ⚡ Imposta cashback
+</Link>
           </div>
         </div>
       </section>
