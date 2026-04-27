@@ -414,12 +414,12 @@ export default function PartnerDashboardPage() {
               📷 Scansiona cliente
             </Link>
 
-            <Link
-              href="/partner-setting"
-              className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
-            >
-              ⚡ Imposta cashback
-            </Link>
+          <Link
+  href="/partner-settings"
+  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
+>
+  ⚙️ Impostazioni partner
+</Link>
           </div>
         </div>
       </section>
