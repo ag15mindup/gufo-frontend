@@ -6,14 +6,30 @@ import { useRouter } from "next/navigation";
 export default function PartnerScanPage() {
   const router = useRouter();
   const scannerRef = useRef<any>(null);
+  const hasScannedRef = useRef(false);
 
-  const [status, setStatus] = useState("Premi il bottone per avviare la fotocamera.");
+  const [status, setStatus] = useState(
+    "Premi il bottone per avviare la fotocamera."
+  );
   const [scanning, setScanning] = useState(false);
+  const [scannedCode, setScannedCode] = useState("");
+
+  async function stopScannerOnly() {
+    try {
+      if (scannerRef.current) {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+        scannerRef.current = null;
+      }
+    } catch {}
+  }
 
   async function startScanner() {
     try {
       setStatus("Richiesta accesso fotocamera...");
       setScanning(true);
+      hasScannedRef.current = false;
+      setScannedCode("");
 
       const { Html5Qrcode } = await import("html5-qrcode");
 
@@ -40,18 +56,22 @@ export default function PartnerScanPage() {
           qrbox: { width: 260, height: 260 },
         },
         async (decodedText: string) => {
-          const raw = decodedText.trim();
+          if (hasScannedRef.current) return;
+          hasScannedRef.current = true;
+
+          const raw = String(decodedText || "").trim();
           const match = raw.match(/GUFO-[A-Z0-9]+/i);
           const customerCode = match ? match[0].toUpperCase() : raw.toUpperCase();
 
-          setStatus(`Codice letto: ${customerCode}`);
+          setScannedCode(customerCode);
+          setStatus(`Codice cliente letto: ${customerCode}`);
 
           try {
-            await scanner.stop();
-            await scanner.clear();
+            localStorage.setItem("gufo_scanned_customer_code", customerCode);
           } catch {}
 
-          router.push(`/partner-console?customerCode=${encodeURIComponent(customerCode)}`);
+          await stopScannerOnly();
+          setScanning(false);
         },
         () => {}
       );
@@ -65,15 +85,20 @@ export default function PartnerScanPage() {
   }
 
   async function stopScanner() {
-    try {
-      if (scannerRef.current) {
-        await scannerRef.current.stop();
-        await scannerRef.current.clear();
-      }
-    } catch {}
-
+    await stopScannerOnly();
     setScanning(false);
     setStatus("Scanner fermato.");
+  }
+
+  function goToPayment() {
+    if (!scannedCode) {
+      setStatus("Prima scansiona un codice cliente.");
+      return;
+    }
+
+    router.push(
+      `/partner-console?customerCode=${encodeURIComponent(scannedCode)}`
+    );
   }
 
   return (
@@ -102,6 +127,23 @@ export default function PartnerScanPage() {
         <h1>Scansiona QR cliente</h1>
 
         <p style={{ color: "rgba(255,255,255,0.75)" }}>{status}</p>
+
+        {scannedCode && (
+          <div
+            style={{
+              marginTop: "18px",
+              padding: "16px",
+              borderRadius: "18px",
+              background: "rgba(34,197,94,0.14)",
+              border: "1px solid rgba(34,197,94,0.35)",
+            }}
+          >
+            <p style={{ margin: 0, color: "rgba(255,255,255,0.72)" }}>
+              Codice cliente scansionato
+            </p>
+            <h2 style={{ margin: "8px 0 0", fontSize: "28px" }}>{scannedCode}</h2>
+          </div>
+        )}
 
         {!scanning ? (
           <button
@@ -138,6 +180,26 @@ export default function PartnerScanPage() {
             }}
           >
             Ferma scanner
+          </button>
+        )}
+
+        {scannedCode && (
+          <button
+            type="button"
+            onClick={goToPayment}
+            style={{
+              width: "100%",
+              padding: "16px",
+              borderRadius: "16px",
+              border: "0",
+              color: "white",
+              fontWeight: 900,
+              cursor: "pointer",
+              background: "linear-gradient(135deg, #22c55e, #16a34a)",
+              marginTop: "14px",
+            }}
+          >
+            Continua al pagamento
           </button>
         )}
 
