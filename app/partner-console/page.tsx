@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
@@ -126,6 +126,7 @@ function formatDateTime(value?: string | null) {
 
 export default function PartnerConsolePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("");
@@ -232,6 +233,18 @@ const [scannedCode, setScannedCode] = useState("");
         }
 
         await loadPartnerMe(user.id);
+
+const scannedCode = searchParams.get("customerCode");
+
+if (scannedCode) {
+  const cleanCode = scannedCode.trim().toUpperCase();
+
+  setCustomerCode(cleanCode);
+
+  await refreshCustomer(cleanCode);
+}
+
+setAuthChecked(true);
         setAuthChecked(true);
       } catch (err: any) {
         setError(err?.message || "Errore caricamento partner");
