@@ -415,7 +415,7 @@ export default function PartnerDashboardPage() {
             </Link>
 
             <Link
-              href="/partner-cashback"
+              href="/partner-setting"
               className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
             >
               ⚡ Imposta cashback

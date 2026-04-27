@@ -705,5 +705,25 @@
   font-size: 14px;
   line-height: 1.5;
 }
+.cashbackSettingsBtn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f59e0b, #ec4899, #7c3aed);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 16px 38px rgba(236, 72, 153, 0.24);
 }
+
+.cashbackSettingsBtn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+}
+
 

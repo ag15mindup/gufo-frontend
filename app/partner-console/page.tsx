@@ -631,18 +631,25 @@ function handleApplyScannedCode() {
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.inputLabel}>Cashback (%)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              max="30"
-              value={cashbackPercent}
-              onChange={(e) => setCashbackPercent(e.target.value)}
-              className={styles.inputControl}
-              placeholder="Es. 5"
-            />
-          </div>
+  <label className={styles.inputLabel}>Cashback (%)</label>
+  <input
+    type="number"
+    step="0.01"
+    min="0"
+    max="30"
+    value={cashbackPercent}
+    onChange={(e) => setCashbackPercent(e.target.value)}
+    className={styles.inputControl}
+    placeholder="Es. 5"
+  />
+
+  <Link
+    href="/partner-setting"
+    className={styles.cashbackSettingsBtn}
+  >
+    ⚡ Imposta cashback predefinito
+  </Link>
+</div>
 
           <div className={styles.fieldGroup}>
             <label className={styles.inputLabel}>Importo (€)</label>
