@@ -120,10 +120,7 @@ function getTransactionAmount(tx: any) {
 
 function getTransactionGufo(tx: any) {
   return toNumberSafe(
-    tx?.gufo_earned ??
-      tx?.gufo ??
-      tx?.raw?.gufo_earned ??
-      tx?.raw?.gufo
+    tx?.gufo_earned ?? tx?.gufo ?? tx?.raw?.gufo_earned ?? tx?.raw?.gufo
   );
 }
 
@@ -150,6 +147,7 @@ function getTypeTone(type: string, stylesObj: any) {
 
 function isToday(dateValue?: string | null) {
   if (!dateValue) return false;
+
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return false;
 
@@ -174,6 +172,7 @@ function getCustomerId(tx: any) {
 
 export default function PartnerDashboardPage() {
   const router = useRouter();
+
   const [partnerUserId, setPartnerUserId] = useState<string>("");
   const [data, setData] = useState<PartnerStatsResponse | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -208,12 +207,11 @@ export default function PartnerDashboardPage() {
       setTransactions(rawTransactions);
     } catch (err: any) {
       console.error("Partner stats error:", err);
+
       setError(
-        err?.message ||
-          err?.error ||
-          err?.toString?.() ||
-          "Errore sconosciuto"
+        err?.message || err?.error || err?.toString?.() || "Errore sconosciuto"
       );
+
       setData(null);
       setTransactions([]);
     } finally {
@@ -311,6 +309,7 @@ export default function PartnerDashboardPage() {
     });
 
     let returned = 0;
+
     counts.forEach((count) => {
       if (count >= 2) returned += 1;
     });
@@ -334,6 +333,7 @@ export default function PartnerDashboardPage() {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
+
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
@@ -342,6 +342,7 @@ export default function PartnerDashboardPage() {
             <p className={styles.subtitle}>Controllo accesso partner...</p>
           </div>
         </section>
+
         <div className={styles.loadingBox}>Verifica autorizzazione...</div>
       </div>
     );
@@ -352,6 +353,7 @@ export default function PartnerDashboardPage() {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
+
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
@@ -360,6 +362,7 @@ export default function PartnerDashboardPage() {
             <p className={styles.subtitle}>Si è verificato un problema.</p>
           </div>
         </section>
+
         <div className={styles.errorBox}>{error}</div>
       </div>
     );
@@ -391,7 +394,8 @@ export default function PartnerDashboardPage() {
             <span className={styles.actionBadge}>Azioni rapide</span>
             <h3 className={styles.actionTitle}>Controllo operativo partner</h3>
             <p className={styles.actionSubtitle}>
-              Registra pagamenti, scansiona clienti e gestisci cashback in tempo reale.
+              Registra pagamenti, scansiona clienti e gestisci cashback in tempo
+              reale.
             </p>
           </div>
 
@@ -403,14 +407,19 @@ export default function PartnerDashboardPage() {
               💳 Registra pagamento
             </Link>
 
+            <Link
+              href="/partner-scan"
+              className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
+            >
+              📷 Scansiona cliente
+            </Link>
 
-
-           <Link
-  href="/partner-scan"
-  className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
->
-  ⚡ Imposta cashback
-</Link>
+            <Link
+              href="/partner-cashback"
+              className={`${styles.actionBtn} ${styles.tertiaryAction} ${styles.actionLink}`}
+            >
+              ⚡ Imposta cashback
+            </Link>
           </div>
         </div>
       </section>
@@ -520,6 +529,7 @@ export default function PartnerDashboardPage() {
               <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Ultime operazioni</h3>
             </div>
+
             <span className={styles.panelBadge}>{transactions.length} record</span>
           </div>
 
@@ -544,11 +554,16 @@ export default function PartnerDashboardPage() {
                       <th>Data</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {transactions.map((tx, index) => (
                       <tr key={tx.id || tx.transaction_id || tx.Transaction_id || index}>
                         <td>{getTransactionId(tx) || "-"}</td>
-                        <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
+
+                        <td className={styles.partnerCell}>
+                          {getTransactionMerchant(tx)}
+                        </td>
+
                         <td>
                           <span
                             className={`${styles.badge} ${getTypeTone(
@@ -559,6 +574,7 @@ export default function PartnerDashboardPage() {
                             {formatTransactionType(getTransactionType(tx))}
                           </span>
                         </td>
+
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
                         <td>{getTransactionGufo(tx).toFixed(2)}</td>
                         <td>{formatDateTime(tx.created_at)}</td>
@@ -576,6 +592,7 @@ export default function PartnerDashboardPage() {
                   >
                     <div className={styles.mobileTxTop}>
                       <strong>{getTransactionMerchant(tx)}</strong>
+
                       <span
                         className={`${styles.badge} ${getTypeTone(
                           getTransactionType(tx),
@@ -621,7 +638,9 @@ export default function PartnerDashboardPage() {
 
           <div className={styles.sideCard}>
             <p className={styles.sideLabel}>Cashback base</p>
-            <h4>{toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%</h4>
+            <h4>
+              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
+            </h4>
             <span>Valore di riferimento del partner</span>
           </div>
 
