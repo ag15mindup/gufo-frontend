@@ -989,4 +989,32 @@
 
 .actionLink:hover {
   opacity: 0.96;
+.cancelTxBtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ef4444, #7c2d12);
+}
+
+.cancelTxBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.cancelUnavailable {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.cancelMessage {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 800;
+}
+
 }
