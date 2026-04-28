@@ -12,6 +12,9 @@ type Partner = {
   rating_average: number;
   reviews_count: number;
   location: string;
+  address?: string;
+  city?: string;
+  logo_url?: string;
 };
 
 const API_URL =
@@ -54,17 +57,21 @@ export default function MarketplacePage() {
     loadPartners();
   }, []);
 
-  const filteredPartners = partners.filter((partner: Partner) => {
-    const searchMatch = partner.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
+  const filteredPartners = partners.filter((partner) => {
+    const search = searchTerm.toLowerCase();
+
+    const searchMatch =
+      partner.name.toLowerCase().includes(search) ||
+      String(partner.category || "").toLowerCase().includes(search) ||
+      String(partner.city || "").toLowerCase().includes(search) ||
+      String(partner.address || "").toLowerCase().includes(search);
 
     const categoryMatch =
       selectedCategory === "all" ||
-      partner.category?.toLowerCase() === selectedCategory.toLowerCase();
+      String(partner.category || "").toLowerCase() ===
+        selectedCategory.toLowerCase();
 
-    const cashbackMatch =
-      Number(partner.cashback_percent || 0) >= minCashback;
+    const cashbackMatch = Number(partner.cashback_percent || 0) >= minCashback;
 
     return searchMatch && categoryMatch && cashbackMatch;
   });
@@ -84,16 +91,15 @@ export default function MarketplacePage() {
         <h1>Scopri dove guadagnare GUFO</h1>
 
         <p>
-          Trova locali partner, controlla cashback, recensioni verificate
-          e scegli dove completare le tue missioni.
+          Trova locali partner, controlla cashback, recensioni verificate e scegli
+          dove completare le tue missioni.
         </p>
       </section>
 
-      {/* FILTRI */}
       <section className={styles.filters}>
         <input
           type="text"
-          placeholder="Cerca locale..."
+          placeholder="Cerca locale, categoria o città..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className={styles.searchInput}
@@ -109,6 +115,7 @@ export default function MarketplacePage() {
           <option value="ristorante">Ristorante</option>
           <option value="pub">Pub</option>
           <option value="caffetteria">Caffetteria</option>
+          <option value="pizzeria">Pizzeria</option>
         </select>
 
         <select
@@ -124,65 +131,66 @@ export default function MarketplacePage() {
       </section>
 
       {loading ? (
-        <div className={styles.stateBox}>
-          Caricamento partner...
-        </div>
+        <div className={styles.stateBox}>Caricamento partner...</div>
       ) : error ? (
-        <div className={styles.errorBox}>
-          {error}
-        </div>
+        <div className={styles.errorBox}>{error}</div>
       ) : filteredPartners.length === 0 ? (
         <div className={styles.stateBox}>
           Nessun partner trovato con questi filtri.
         </div>
       ) : (
         <section className={styles.grid}>
-          {filteredPartners.map((partner) => (
-            <article key={partner.id} className={styles.card}>
-              <div className={styles.cardTop}>
-                <div>
-                  <span className={styles.category}>
-                    {partner.category}
+          {filteredPartners.map((partner) => {
+            const location =
+              partner.address || partner.city || partner.location || "Zona partner";
+
+            return (
+              <article key={partner.id} className={styles.card}>
+                <div className={styles.logoBox}>
+                  {partner.logo_url ? (
+                    <img
+                      src={partner.logo_url}
+                      alt={partner.name}
+                      className={styles.logoImg}
+                    />
+                  ) : (
+                    <div className={styles.logoFallback}>🦉</div>
+                  )}
+                </div>
+
+                <div className={styles.cardTop}>
+                  <div>
+                    <span className={styles.category}>
+                      {partner.category || "Partner GUFO"}
+                    </span>
+
+                    <h2>{partner.name}</h2>
+                  </div>
+
+                  <div className={styles.cashback}>
+                    {Number(partner.cashback_percent || 0).toFixed(0)}%
+                    <span>cashback</span>
+                  </div>
+                </div>
+
+                <div className={styles.meta}>
+                  <span>📍 {location}</span>
+
+                  <span>
+                    ⭐{" "}
+                    {partner.rating_average > 0
+                      ? partner.rating_average.toFixed(1)
+                      : "N/D"}{" "}
+                    ({partner.reviews_count} recensioni)
                   </span>
-
-                  <h2>{partner.name}</h2>
                 </div>
 
-                <div className={styles.cashback}>
-                  {partner.cashback_percent || 0}%
-                  <span>cashback</span>
-                </div>
-              </div>
-
-              <div className={styles.meta}>
-                <span>
-                  📍 {partner.location || "Zona partner"}
-                </span>
-
-                <span>
-                  ⭐{" "}
-                  {partner.rating_average > 0
-                    ? partner.rating_average.toFixed(1)
-                    : "N/D"}{" "}
-                  ({partner.reviews_count} recensioni)
-                </span>
-              </div>
-
-              <div className={styles.infoBox}>
-                <strong>Recensioni verificate</strong>
-                <span>
-                  Solo chi ha realmente frequentato questo locale può recensirlo.
-                </span>
-              </div>
-
-              <Link
-                href={`/marketplace/${partner.id}`}
-                className={styles.cta}
-              >
-                Vedi locale →
-              </Link>
-            </article>
-          ))}
+                <Link href={`/marketplace/${partner.id}`} className={styles.cta}>
+                  Vedi locale →
+                </Link>
+              </article>
+            );
+          })}
         </section>
       )}
     </main>

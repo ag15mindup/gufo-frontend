@@ -249,4 +249,29 @@
     width: 100%;
     min-height: 70px;
   }
+.logoBox {
+  width: 100%;
+  height: 150px;
+  border-radius: 22px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.logoFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 46px;
+  background: radial-gradient(circle at top, rgba(124, 58, 237, 0.35), rgba(6, 182, 212, 0.12));
+}
 }
