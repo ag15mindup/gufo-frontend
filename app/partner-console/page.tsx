@@ -144,6 +144,8 @@ export default function PartnerConsolePage() {
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [loadingPartner, setLoadingPartner] = useState(true);
+const [cancelLoading, setCancelLoading] = useState(false);
+const [cancelMessage, setCancelMessage] = useState("");
 
   const [result, setResult] = useState<PaymentApiResponse | null>(null);
   const [error, setError] = useState("");
@@ -374,6 +376,51 @@ setAuthChecked(true);
       setLoadingPayment(false);
     }
   }
+
+async function handleCancelPayment() {
+  if (!result?.payment_transaction) {
+    setCancelMessage("Nessun pagamento da annullare.");
+    return;
+  }
+
+  try {
+    setCancelLoading(true);
+    setCancelMessage("");
+    setError("");
+
+    const { response, data } = await safeJsonFetch(
+      `${API_URL}/partner/transaction/cancel`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          partner_user_id: partnerUserId,
+          payment_transaction_id: getTransactionId(result.payment_transaction),
+          cashback_transaction_id: getTransactionId(result.cashback_transaction),
+        }),
+      }
+    );
+
+    if (!response.ok || data?.success === false) {
+      throw new Error(data?.error || "Errore annullamento pagamento");
+    }
+
+    setCancelMessage("Pagamento annullato correttamente ✅");
+
+    if (customer?.customer_code) {
+      await refreshCustomer(customer.customer_code);
+    }
+
+    setResult(null);
+    setAmount("");
+  } catch (err: any) {
+    setCancelMessage(err?.message || "Errore durante annullamento");
+  } finally {
+    setCancelLoading(false);
+  }
+}
 
   const previewAmount = useMemo(() => toNumberSafe(amount), [amount]);
 
@@ -678,6 +725,8 @@ setAuthChecked(true);
             <span className={styles.panelBadge}>Success</span>
           </div>
 
+
+
           <div className={styles.infoGrid}>
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Partner</p>
@@ -746,17 +795,20 @@ setAuthChecked(true);
 
   <button
     type="button"
-    className={styles.newPaymentBtn}
-    onClick={() => {
-      setResult(null);
-      setAmount("");
-    }}
+    className={styles.cancelPaymentBtn}
+    onClick={handleCancelPayment}
+    disabled={cancelLoading}
   >
-    💳 Nuovo pagamento stesso cliente
+    {cancelLoading ? "Annullamento..." : "↩️ Annulla pagamento entro 5 min"}
   </button>
 </div>
         </section>
       )}
+      {cancelMessage && (
+  <div className={styles.cancelMessage}>
+    {cancelMessage}
+  </div>
+)}
     </div>
   );
 }
