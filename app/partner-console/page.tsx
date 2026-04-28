@@ -139,8 +139,7 @@ export default function PartnerConsolePage() {
   const [amount, setAmount] = useState("50");
   const [cashbackPercent, setCashbackPercent] = useState("5");
 
-const [scannerOpen, setScannerOpen] = useState(false);
-const [scannedCode, setScannedCode] = useState("");
+
 
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
@@ -259,18 +258,7 @@ setAuthChecked(true);
     init();
   }, [router]);
 
-function handleApplyScannedCode() {
-  const code = scannedCode.trim().toUpperCase();
 
-  if (!code) {
-    setError("Inserisci o scansiona un codice cliente valido");
-    return;
-  }
-
-  setCustomerCode(code);
-  setScannerOpen(false);
-  setError("");
-}
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();
@@ -511,40 +499,9 @@ function handleApplyScannedCode() {
     />
   </div>
 
-  {/* BOTTONE SCANSIONE */}
-  <button
-    type="button"
-    className={styles.scanButton}
-    onClick={() => setScannerOpen((value) => !value)}
-  >
-    📷 Scansiona QR cliente
-  </button>
 
   {/* BOX SCANNER */}
-  {scannerOpen && (
-    <div className={styles.scanBox}>
-      <p>
-        Scanner QR temporaneo: inserisci il codice letto dal QR cliente.
-        Dopo collegheremo la camera reale.
-      </p>
-
-      <input
-        type="text"
-        value={scannedCode}
-        onChange={(e) => setScannedCode(e.target.value)}
-        className={styles.inputControl}
-        placeholder="Es. GUFO-915728"
-      />
-
-      <button
-        type="button"
-        className={styles.primaryBtnWide}
-        onClick={handleApplyScannedCode}
-      >
-        Usa codice scansionato
-      </button>
-    </div>
-  )}
+  
 
   {/* BOTTONE CERCA */}
   <button
