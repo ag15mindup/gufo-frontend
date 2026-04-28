@@ -64,7 +64,7 @@ export default function PartnerScanPage() {
           const customerCode = match ? match[0].toUpperCase() : raw.toUpperCase();
 
           setScannedCode(customerCode);
-          setStatus(`Codice cliente letto: ${customerCode}`);
+          setStatus(`Codice cliente letto: ${customerCode}. Apertura console...`);
 
           try {
             localStorage.setItem("gufo_scanned_customer_code", customerCode);
@@ -72,6 +72,12 @@ export default function PartnerScanPage() {
 
           await stopScannerOnly();
           setScanning(false);
+
+          setTimeout(() => {
+            router.push(
+              `/partner-console?customerCode=${encodeURIComponent(customerCode)}`
+            );
+          }, 500);
         },
         () => {}
       );
@@ -88,17 +94,6 @@ export default function PartnerScanPage() {
     await stopScannerOnly();
     setScanning(false);
     setStatus("Scanner fermato.");
-  }
-
-  function goToPayment() {
-    if (!scannedCode) {
-      setStatus("Prima scansiona un codice cliente.");
-      return;
-    }
-
-    router.push(
-      `/partner-console?customerCode=${encodeURIComponent(scannedCode)}`
-    );
   }
 
   return (
@@ -180,26 +175,6 @@ export default function PartnerScanPage() {
             }}
           >
             Ferma scanner
-          </button>
-        )}
-
-        {scannedCode && (
-          <button
-            type="button"
-            onClick={goToPayment}
-            style={{
-              width: "100%",
-              padding: "16px",
-              borderRadius: "16px",
-              border: "0",
-              color: "white",
-              fontWeight: 900,
-              cursor: "pointer",
-              background: "linear-gradient(135deg, #22c55e, #16a34a)",
-              marginTop: "14px",
-            }}
-          >
-            Continua al pagamento
           </button>
         )}
 
