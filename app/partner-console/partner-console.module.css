@@ -724,6 +724,39 @@
   transform: translateY(-1px);
   filter: brightness(1.08);
 }
+.resultActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.newScanBtn,
+.newPaymentBtn {
+  width: 100%;
+  padding: 15px 16px;
+  border-radius: 16px;
+  border: 0;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.newScanBtn {
+  background: linear-gradient(135deg, #06b6d4, #7c3aed);
+}
+
+.newPaymentBtn {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+@media (max-width: 700px) {
+  .resultActions {
+    grid-template-columns: 1fr;
+  }
+}
 }
 
 

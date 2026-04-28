@@ -739,6 +739,22 @@ setAuthChecked(true);
               <p className={styles.infoMiniValue}>{formatDateTime(paymentTx?.created_at)}</p>
             </div>
           </div>
+          <div className={styles.resultActions}>
+  <Link href="/partner-scan" className={styles.newScanBtn}>
+    📷 Scansiona nuovo cliente
+  </Link>
+
+  <button
+    type="button"
+    className={styles.newPaymentBtn}
+    onClick={() => {
+      setResult(null);
+      setAmount("");
+    }}
+  >
+    💳 Nuovo pagamento stesso cliente
+  </button>
+</div>
         </section>
       )}
     </div>
