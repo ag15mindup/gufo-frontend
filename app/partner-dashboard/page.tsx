@@ -179,7 +179,8 @@ export default function PartnerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
-
+const [cancelLoadingId, setCancelLoadingId] = useState<string | null>(null);
+const [cancelMessage, setCancelMessage] = useState("");
   async function loadPartnerStats(userId: string) {
     try {
       setLoading(true);
@@ -266,6 +267,62 @@ export default function PartnerDashboardPage() {
 
     init();
   }, [router]);
+
+  function canCancelTransaction(tx: Transaction) {
+  const type = String(getTransactionType(tx)).toLowerCase();
+  const status = String(tx?.raw?.status || "").toLowerCase();
+
+  if (type !== "payment") return false;
+  if (status && status !== "completed") return false;
+  if (!tx.created_at) return false;
+
+  const createdAt = new Date(tx.created_at);
+  if (Number.isNaN(createdAt.getTime())) return false;
+
+  const diffMinutes = (Date.now() - createdAt.getTime()) / 1000 / 60;
+
+  return diffMinutes <= 5;
+}
+
+async function handleCancelTransaction(tx: Transaction) {
+  const paymentId = getTransactionId(tx);
+
+  if (!paymentId) {
+    setCancelMessage("ID pagamento non trovato.");
+    return;
+  }
+
+  try {
+    setCancelLoadingId(String(paymentId));
+    setCancelMessage("");
+    setError("");
+
+    const { response, data } = await safeJsonFetch(
+      `${API_URL}/partner/transaction/cancel`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          partner_user_id: partnerUserId,
+          payment_transaction_id: paymentId,
+        }),
+      }
+    );
+
+    if (!response.ok || data?.success === false) {
+      throw new Error(data?.error || "Errore annullamento pagamento");
+    }
+
+    setCancelMessage("Pagamento annullato correttamente ✅");
+    await loadPartnerStats(partnerUserId);
+  } catch (err: any) {
+    setCancelMessage(err?.message || "Errore durante annullamento");
+  } finally {
+    setCancelLoadingId(null);
+  }
+}
 
   const avgTicket = useMemo(() => {
     const totalTransactions = toNumberSafe(data?.total_transactions);
@@ -529,7 +586,9 @@ export default function PartnerDashboardPage() {
               <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Ultime operazioni</h3>
             </div>
-
+{cancelMessage && (
+  <div className={styles.cancelMessage}>{cancelMessage}</div>
+)}
             <span className={styles.panelBadge}>{transactions.length} record</span>
           </div>
 
@@ -552,6 +611,7 @@ export default function PartnerDashboardPage() {
                       <th>Importo</th>
                       <th>GUFO</th>
                       <th>Data</th>
+                      <th>Azione</th>
                     </tr>
                   </thead>
 
@@ -578,6 +638,22 @@ export default function PartnerDashboardPage() {
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
                         <td>{getTransactionGufo(tx).toFixed(2)}</td>
                         <td>{formatDateTime(tx.created_at)}</td>
+                        <td>
+  {canCancelTransaction(tx) ? (
+    <button
+      type="button"
+      className={styles.cancelTxBtn}
+      onClick={() => handleCancelTransaction(tx)}
+      disabled={cancelLoadingId === String(getTransactionId(tx))}
+    >
+      {cancelLoadingId === String(getTransactionId(tx))
+        ? "Annullamento..."
+        : "Annulla"}
+    </button>
+  ) : (
+    <span className={styles.cancelUnavailable}>-</span>
+  )}
+</td>
                       </tr>
                     ))}
                   </tbody>
@@ -621,6 +697,18 @@ export default function PartnerDashboardPage() {
                     <div className={styles.mobileTxRow}>
                       <span>Data</span>
                       <span>{formatDateTime(tx.created_at)}</span>
+                      {canCancelTransaction(tx) && (
+  <button
+    type="button"
+    className={styles.cancelTxBtn}
+    onClick={() => handleCancelTransaction(tx)}
+    disabled={cancelLoadingId === String(getTransactionId(tx))}
+  >
+    {cancelLoadingId === String(getTransactionId(tx))
+      ? "Annullamento..."
+      : "↩️ Annulla pagamento"}
+  </button>
+)}
                     </div>
                   </div>
                 ))}
