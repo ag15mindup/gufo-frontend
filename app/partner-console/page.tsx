@@ -601,10 +601,10 @@ setAuthChecked(true);
   />
 
   <Link
-    href="/partner-setting"
+    href="/partner-settings"
     className={styles.cashbackSettingsBtn}
   >
-    ⚡ Imposta cashback predefinito
+    ⚙️ Impostazioni partner
   </Link>
 </div>
 
