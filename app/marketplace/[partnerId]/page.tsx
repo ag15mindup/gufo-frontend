@@ -19,6 +19,13 @@ type Partner = {
   rating_average: number;
   reviews_count: number;
   location: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  phone?: string;
+  instagram_url?: string;
+  website_url?: string;
+  logo_url?: string;
 };
 
 type Review = {
@@ -74,9 +81,7 @@ export default function PartnerDetailPage() {
   }
 
   useEffect(() => {
-    if (partnerId) {
-      loadData();
-    }
+    if (partnerId) loadData();
   }, [partnerId]);
 
   async function submitReview() {
@@ -100,10 +105,7 @@ export default function PartnerDetailPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          rating,
-          comment,
-        }),
+        body: JSON.stringify({ rating, comment }),
       });
 
       const data = await res.json();
@@ -142,6 +144,8 @@ export default function PartnerDetailPage() {
     );
   }
 
+  const location = partner.address || partner.city || partner.location || "Zona partner";
+
   return (
     <main className={styles.page}>
       <div className={styles.bgGlowA} />
@@ -152,13 +156,21 @@ export default function PartnerDetailPage() {
           ← Marketplace
         </Link>
 
-        <div className={styles.category}>{partner.category}</div>
+        <div className={styles.logoHeroBox}>
+          {partner.logo_url ? (
+            <img src={partner.logo_url} alt={partner.name} className={styles.logoHeroImg} />
+          ) : (
+            <div className={styles.logoHeroFallback}>🦉</div>
+          )}
+        </div>
+
+        <div className={styles.category}>{partner.category || "Partner GUFO"}</div>
 
         <h1>{partner.name}</h1>
 
         <p>
-          Locale partner GUFO con cashback attivo, recensioni verificate e
-          missioni collegabili alle abitudini reali degli utenti.
+          {partner.description ||
+            "Locale partner GUFO con cashback attivo, recensioni verificate e missioni collegabili alle abitudini reali degli utenti."}
         </p>
 
         <div className={styles.heroStats}>
@@ -169,9 +181,7 @@ export default function PartnerDetailPage() {
 
           <div>
             <strong>
-              {partner.rating_average > 0
-                ? partner.rating_average.toFixed(1)
-                : "N/D"}
+              {partner.rating_average > 0 ? partner.rating_average.toFixed(1) : "N/D"}
             </strong>
             <span>Rating medio</span>
           </div>
@@ -183,6 +193,46 @@ export default function PartnerDetailPage() {
         </div>
       </section>
 
+      <section className={styles.infoPanel}>
+        <h2>Informazioni locale</h2>
+
+        <div className={styles.infoGrid}>
+          <div>
+            <span>📍 Indirizzo</span>
+            <strong>{location}</strong>
+          </div>
+
+          <div>
+            <span>🏙️ Città</span>
+            <strong>{partner.city || "--"}</strong>
+          </div>
+
+          <div>
+            <span>📞 Telefono</span>
+            <strong>{partner.phone || "--"}</strong>
+          </div>
+
+          <div>
+            <span>💸 Cashback</span>
+            <strong>{partner.cashback_percent || 0}%</strong>
+          </div>
+        </div>
+
+        <div className={styles.linkRow}>
+          {partner.instagram_url && (
+            <a href={partner.instagram_url} target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+          )}
+
+          {partner.website_url && (
+            <a href={partner.website_url} target="_blank" rel="noreferrer">
+              Sito web
+            </a>
+          )}
+        </div>
+      </section>
+
       <section className={styles.contentGrid}>
         <div className={styles.reviewsPanel}>
           <div className={styles.panelHeader}>
@@ -191,9 +241,7 @@ export default function PartnerDetailPage() {
           </div>
 
           {reviews.length === 0 ? (
-            <div className={styles.emptyBox}>
-              Nessuna recensione disponibile per ora.
-            </div>
+            <div className={styles.emptyBox}>Nessuna recensione disponibile per ora.</div>
           ) : (
             <div className={styles.reviewList}>
               {reviews.map((review) => (
@@ -205,9 +253,7 @@ export default function PartnerDetailPage() {
 
                   <p>{review.comment || "Nessun commento scritto."}</p>
 
-                  <div className={styles.verifiedBadge}>
-                    ✅ Recensione verificata
-                  </div>
+                  <div className={styles.verifiedBadge}>✅ Recensione verificata</div>
                 </article>
               ))}
             </div>
@@ -218,8 +264,8 @@ export default function PartnerDetailPage() {
           <h2>Lascia una recensione</h2>
 
           <p>
-            Puoi recensire questo locale solo se hai davvero effettuato almeno
-            un pagamento GUFO presso questo partner.
+            Puoi recensire questo locale solo se hai davvero effettuato almeno un
+            pagamento GUFO presso questo partner.
           </p>
 
           <label>
@@ -246,11 +292,7 @@ export default function PartnerDetailPage() {
             />
           </label>
 
-          <button
-            type="button"
-            onClick={submitReview}
-            disabled={reviewLoading}
-          >
+          <button type="button" onClick={submitReview} disabled={reviewLoading}>
             {reviewLoading ? "Salvataggio..." : "Invia recensione"}
           </button>
 
