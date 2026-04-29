@@ -379,40 +379,58 @@
   .infoPanel {
     padding: 20px;
   }
+}
+
 .voucherPanel {
-  margin: 24px auto;
-  max-width: 1100px;
-  padding: 24px;
-  border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  position: relative;
+  z-index: 2;
+  margin: 28px auto;
+  max-width: 1120px;
+  padding: 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(0, 245, 160, 0.28);
   background:
-    radial-gradient(circle at top left, rgba(0, 255, 180, 0.16), transparent 35%),
-    rgba(255, 255, 255, 0.06);
+    radial-gradient(circle at top left, rgba(0, 255, 180, 0.18), transparent 36%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.045));
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.30),
+    0 0 28px rgba(0, 245, 160, 0.12);
   display: grid;
   gap: 18px;
 }
 
+.voucherPanel h2 {
+  margin: 0 0 10px;
+  font-size: 28px;
+}
+
+.voucherPanel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.6;
+}
+
 .voucherEyebrow {
-  margin: 0 0 6px;
+  margin: 0 0 8px !important;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  opacity: 0.8;
+  letter-spacing: 0.14em;
+  color: #7dd3fc;
 }
 
 .voucherField {
   display: grid;
-  gap: 8px;
-  font-weight: 700;
+  gap: 10px;
+  font-weight: 800;
 }
 
 .voucherField input {
   width: 100%;
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 15px 16px;
+  border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.32);
   color: white;
   outline: none;
 }
@@ -420,9 +438,14 @@
 .voucherButton {
   border: none;
   border-radius: 18px;
-  padding: 14px 18px;
+  padding: 16px 18px;
   font-weight: 900;
   cursor: pointer;
+  color: white;
+  background: linear-gradient(90deg, #00c6ff, #00f5a0, #7c3aed);
+  box-shadow:
+    0 0 18px rgba(0, 198, 255, 0.25),
+    0 0 28px rgba(0, 245, 160, 0.18);
 }
 
 .voucherButton:disabled {
@@ -432,8 +455,16 @@
 
 .voucherMessage {
   padding: 14px 16px;
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(0, 255, 180, 0.12);
-  border: 1px solid rgba(0, 255, 180, 0.22);
+  border: 1px solid rgba(0, 255, 180, 0.24);
+  color: #dcfce7;
+  font-weight: 800;
 }
+
+@media (max-width: 640px) {
+  .voucherPanel {
+    padding: 20px;
+    border-radius: 22px;
+  }
 }
