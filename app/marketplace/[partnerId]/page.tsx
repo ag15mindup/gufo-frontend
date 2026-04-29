@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-detail.module.css";
@@ -37,7 +37,7 @@ type Review = {
   verified: boolean;
 };
 
-export default function PartnerDetailPage() {
+function PartnerDetailContent() {
   const params = useParams();
   const searchParams = useSearchParams();
 const isGiftCardMode = searchParams.get("mode") === "gift-card";
@@ -399,5 +399,12 @@ async function createPartnerVoucher() {
         </aside>
       </section>
     </main>
+  );
+}
+export default function PartnerDetailPage() {
+  return (
+    <Suspense fallback={<main className={styles.page}>Caricamento locale...</main>}>
+      <PartnerDetailContent />
+    </Suspense>
   );
 }
