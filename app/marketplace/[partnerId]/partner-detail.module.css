@@ -462,6 +462,43 @@
   font-weight: 800;
 }
 
+.voucherDownloadBox {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(0, 245, 160, 0.24);
+}
+
+.voucherDownloadBox span {
+  display: block;
+  font-size: 13px;
+  opacity: 0.75;
+  margin-bottom: 6px;
+}
+
+.voucherDownloadBox strong {
+  display: block;
+  font-size: 18px;
+  word-break: break-word;
+}
+
+.voucherDownloadBox button {
+  width: 100%;
+  padding: 13px 16px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 900;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.voucherDownloadBox button:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
 @media (max-width: 640px) {
   .voucherPanel {
     padding: 20px;

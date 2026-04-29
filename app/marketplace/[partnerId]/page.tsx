@@ -37,25 +37,34 @@ type Review = {
   verified: boolean;
 };
 
+type VoucherResult = {
+  code: string;
+  amount: number;
+  partnerName: string;
+};
+
 function PartnerDetailContent() {
   const params = useParams();
   const searchParams = useSearchParams();
-const isGiftCardMode = searchParams.get("mode") === "gift-card";
-  
-  
+
   const partnerId = String(params?.partnerId || "");
+  const isGiftCardMode = searchParams.get("mode") === "gift-card";
 
   const [partner, setPartner] = useState<Partner | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+
   const [error, setError] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
-const [voucherAmount, setVoucherAmount] = useState("10");
-const [voucherLoading, setVoucherLoading] = useState(false);
-const [voucherMessage, setVoucherMessage] = useState("");
+  const [voucherMessage, setVoucherMessage] = useState("");
+
+  const [voucherAmount, setVoucherAmount] = useState("10");
+  const [voucherResult, setVoucherResult] = useState<VoucherResult | null>(null);
 
   async function loadData() {
     try {
@@ -132,57 +141,95 @@ const [voucherMessage, setVoucherMessage] = useState("");
     }
   }
 
-async function createPartnerVoucher() {
-  try {
-    setVoucherLoading(true);
-    setVoucherMessage("");
-    setError("");
+  async function createPartnerVoucher() {
+    try {
+      setVoucherLoading(true);
+      setVoucherMessage("");
+      setVoucherResult(null);
+      setError("");
 
-    const amountGufo = Number(voucherAmount);
+      const amountGufo = Number(voucherAmount);
 
-    if (!Number.isFinite(amountGufo) || amountGufo <= 0) {
-      throw new Error("Inserisci un importo GUFO valido");
+      if (!Number.isFinite(amountGufo) || amountGufo <= 0) {
+        throw new Error("Inserisci un importo GUFO valido");
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const token = session?.access_token;
+
+      if (!token) {
+        throw new Error("Devi essere loggato per usare GUFO presso un partner");
+      }
+
+      const res = await fetch(`${API_URL}/partner-vouchers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          partner_id: Number(partnerId),
+          amount_gufo: amountGufo,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.success === false) {
+        throw new Error(data.error || "Errore creazione voucher partner");
+      }
+
+      const code = data.voucher?.code || "generato";
+
+      setVoucherResult({
+        code,
+        amount: amountGufo,
+        partnerName: partner?.name || "Partner GUFO",
+      });
+
+      setVoucherMessage("Voucher creato correttamente ✅");
+    } catch (err: any) {
+      setVoucherMessage(err.message || "Errore voucher partner");
+    } finally {
+      setVoucherLoading(false);
     }
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const token = session?.access_token;
-
-    if (!token) {
-      throw new Error("Devi essere loggato per usare GUFO presso un partner");
-    }
-
-    const res = await fetch(`${API_URL}/partner-vouchers`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        partner_id: Number(partnerId),
-        amount_gufo: amountGufo,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || data.success === false) {
-      throw new Error(data.error || "Errore creazione voucher partner");
-    }
-
-    setVoucherMessage(
-      `Voucher creato ✅ Codice: ${data.voucher?.code || "generato"} - ${amountGufo.toFixed(
-        2
-      )} GUFO senza commissioni`
-    );
-  } catch (err: any) {
-    setVoucherMessage(err.message || "Errore voucher partner");
-  } finally {
-    setVoucherLoading(false);
   }
-}
+
+  function copyVoucherCode() {
+    if (!voucherResult?.code) return;
+
+    navigator.clipboard.writeText(voucherResult.code);
+    setVoucherMessage("Codice voucher copiato ✅");
+  }
+
+  function downloadVoucher() {
+    if (!voucherResult) return;
+
+    const content = `GUFO - Voucher Partner
+
+Partner: ${voucherResult.partnerName}
+Importo: ${voucherResult.amount.toFixed(2)} GUFO
+Commissioni: 0%
+Codice voucher: ${voucherResult.code}
+
+Mostra questo codice al partner per utilizzare il voucher.
+`;
+
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `voucher-gufo-${voucherResult.code}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
+  }
 
   if (loading) {
     return (
@@ -211,7 +258,7 @@ async function createPartnerVoucher() {
       <div className={styles.bgGlowB} />
 
       <section className={styles.hero}>
-        <Link href="/marketplace" className={styles.backLink}>
+        <Link href={isGiftCardMode ? "/marketplace?mode=gift-card" : "/marketplace"} className={styles.backLink}>
           ← Marketplace
         </Link>
 
@@ -292,43 +339,60 @@ async function createPartnerVoucher() {
         </div>
       </section>
 
-{isGiftCardMode ? (
-  <section className={styles.voucherPanel}>
-    <div>
-      <p className={styles.voucherEyebrow}>Gift card partner</p>
-      <h2>Usa GUFO da {partner.name}</h2>
-      <p>
-        Crea un voucher utilizzabile presso questo partner con 0% commissioni.
-        L’importo verrà scalato dal tuo saldo GUFO.
-      </p>
-    </div>
+      {isGiftCardMode ? (
+        <section className={styles.voucherPanel}>
+          <div>
+            <p className={styles.voucherEyebrow}>Gift card partner</p>
+            <h2>Usa GUFO da {partner.name}</h2>
+            <p>
+              Crea un voucher utilizzabile presso questo partner con 0% commissioni.
+              L’importo verrà scalato dal tuo saldo GUFO.
+            </p>
+          </div>
 
-    <label className={styles.voucherField}>
-      Importo GUFO
-      <input
-        type="number"
-        min="1"
-        step="1"
-        value={voucherAmount}
-        onChange={(event) => setVoucherAmount(event.target.value)}
-        placeholder="Es. 10"
-      />
-    </label>
+          <label className={styles.voucherField}>
+            Importo GUFO
+            <input
+              type="number"
+              min="1"
+              step="1"
+              value={voucherAmount}
+              onChange={(event) => setVoucherAmount(event.target.value)}
+              placeholder="Es. 10"
+            />
+          </label>
 
-    <button
-      type="button"
-      className={styles.voucherButton}
-      onClick={createPartnerVoucher}
-      disabled={voucherLoading}
-    >
-      {voucherLoading ? "Creazione voucher..." : "Crea voucher 0% fee"}
-    </button>
+          <button
+            type="button"
+            className={styles.voucherButton}
+            onClick={createPartnerVoucher}
+            disabled={voucherLoading}
+          >
+            {voucherLoading ? "Creazione voucher..." : "Crea voucher 0% fee"}
+          </button>
 
-    {voucherMessage ? (
-      <div className={styles.voucherMessage}>{voucherMessage}</div>
-    ) : null}
-  </section>
-) : null}
+          {voucherMessage ? (
+            <div className={styles.voucherMessage}>{voucherMessage}</div>
+          ) : null}
+
+          {voucherResult ? (
+            <div className={styles.voucherDownloadBox}>
+              <div>
+                <span>Codice voucher</span>
+                <strong>{voucherResult.code}</strong>
+              </div>
+
+              <button type="button" onClick={copyVoucherCode}>
+                Copia codice
+              </button>
+
+              <button type="button" onClick={downloadVoucher}>
+                Scarica voucher
+              </button>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className={styles.contentGrid}>
         <div className={styles.reviewsPanel}>
@@ -401,6 +465,7 @@ async function createPartnerVoucher() {
     </main>
   );
 }
+
 export default function PartnerDetailPage() {
   return (
     <Suspense fallback={<main className={styles.page}>Caricamento locale...</main>}>
