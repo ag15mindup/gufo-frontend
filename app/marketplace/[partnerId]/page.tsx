@@ -292,6 +292,44 @@ async function createPartnerVoucher() {
         </div>
       </section>
 
+{isGiftCardMode ? (
+  <section className={styles.voucherPanel}>
+    <div>
+      <p className={styles.voucherEyebrow}>Gift card partner</p>
+      <h2>Usa GUFO da {partner.name}</h2>
+      <p>
+        Crea un voucher utilizzabile presso questo partner con 0% commissioni.
+        L’importo verrà scalato dal tuo saldo GUFO.
+      </p>
+    </div>
+
+    <label className={styles.voucherField}>
+      Importo GUFO
+      <input
+        type="number"
+        min="1"
+        step="1"
+        value={voucherAmount}
+        onChange={(event) => setVoucherAmount(event.target.value)}
+        placeholder="Es. 10"
+      />
+    </label>
+
+    <button
+      type="button"
+      className={styles.voucherButton}
+      onClick={createPartnerVoucher}
+      disabled={voucherLoading}
+    >
+      {voucherLoading ? "Creazione voucher..." : "Crea voucher 0% fee"}
+    </button>
+
+    {voucherMessage ? (
+      <div className={styles.voucherMessage}>{voucherMessage}</div>
+    ) : null}
+  </section>
+) : null}
+
       <section className={styles.contentGrid}>
         <div className={styles.reviewsPanel}>
           <div className={styles.panelHeader}>
