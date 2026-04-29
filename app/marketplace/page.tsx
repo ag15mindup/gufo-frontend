@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import styles from "./marketplace.module.css";
 
 type Partner = {
@@ -28,6 +29,9 @@ export default function MarketplacePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [minCashback, setMinCashback] = useState(0);
+
+const searchParams = useSearchParams();
+const isGiftCardMode = searchParams.get("mode") === "gift-card";
 
   useEffect(() => {
     async function loadPartners() {
@@ -81,20 +85,27 @@ export default function MarketplacePage() {
       <div className={styles.bgGlowA} />
       <div className={styles.bgGlowB} />
 
-      <section className={styles.hero}>
-        <Link href="/dashboard" className={styles.backLink}>
-          ← Torna alla dashboard
-        </Link>
+     <section className={styles.hero}>
+  <Link href="/dashboard" className={styles.backLink}>
+    ← Torna alla dashboard
+  </Link>
 
-        <div className={styles.badge}>Marketplace GUFO</div>
+  <div className={styles.badge}>Marketplace GUFO</div>
 
-        <h1>Scopri dove guadagnare GUFO</h1>
+  <h1>
+    {isGiftCardMode
+      ? "Scegli dove usare i tuoi GUFO"
+      : "Scopri dove guadagnare GUFO"}
+  </h1>
 
-        <p>
-          Trova locali partner, controlla cashback, recensioni verificate e scegli
-          dove completare le tue missioni.
-        </p>
-      </section>
+  <p>
+    {isGiftCardMode
+      ? "Seleziona un partner locale e usa i tuoi GUFO con 0% commissioni."
+      : "Trova locali partner, controlla cashback, recensioni verificate e scegli dove completare le tue missioni."}
+  </p>
+</section>
+
+<section className={styles.filters}></section>
 
       <section className={styles.filters}>
         <input
@@ -185,9 +196,16 @@ export default function MarketplacePage() {
                   </span>
                 </div>
 
-                <Link href={`/marketplace/${partner.id}`} className={styles.cta}>
-                  Vedi locale →
-                </Link>
+                <Link
+  href={
+    isGiftCardMode
+      ? `/marketplace/${partner.id}?mode=gift-card`
+      : `/marketplace/${partner.id}`
+  }
+  className={styles.cta}
+>
+  {isGiftCardMode ? "Usa GUFO →" : "Vedi locale →"}
+</Link>
               </article>
             );
           })}

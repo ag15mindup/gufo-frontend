@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
@@ -538,12 +539,34 @@ const rewards = (rewardsData?.rewards ?? {}) as RewardPayload;
 
           <div className={styles.panel}>
             <div className={styles.panelHeader}>
-              <div>
-                <p className={styles.sectionEyebrow}>Gift Cards</p>
-                <h3>Riscatta gift card</h3>
-              </div>
-              <span className={styles.panelBadge}>10% fee</span>
-            </div>
+  <div>
+    <p className={styles.sectionEyebrow}>Gift Cards</p>
+    <h3>Scegli come usare i tuoi GUFO</h3>
+  </div>
+  <span className={styles.panelBadge}>2 modalità</span>
+</div>
+
+<div className={styles.giftOptionsGrid}>
+  <div className={styles.giftOptionBox}>
+    <span className={styles.giftOptionBadge}>0% fee</span>
+    <h4>Gift card partner locali</h4>
+    <p className={styles.helperText}>
+      Scegli un negozio partner dal marketplace e usa i tuoi GUFO senza commissioni.
+    </p>
+
+    <Link href="/marketplace?mode=gift-card" className={styles.primaryBtnWide}>
+      Scegli partner
+    </Link>
+  </div>
+
+  <div className={styles.giftOptionBox}>
+    <span className={styles.giftOptionBadge}>10% fee</span>
+    <h4>Gift card esterne</h4>
+    <p className={styles.helperText}>
+      Riscatta gift card di brand esterni con commissione piattaforma.
+    </p>
+  </div>
+</div>
 
             <div className={styles.giftGrid}>
               {giftCards.map((item) => (

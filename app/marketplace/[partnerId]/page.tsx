@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-detail.module.css";
 
@@ -39,6 +39,10 @@ type Review = {
 
 export default function PartnerDetailPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
+const isGiftCardMode = searchParams.get("mode") === "gift-card";
+  
+  
   const partnerId = String(params?.partnerId || "");
 
   const [partner, setPartner] = useState<Partner | null>(null);
@@ -49,6 +53,9 @@ export default function PartnerDetailPage() {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [error, setError] = useState("");
   const [reviewMessage, setReviewMessage] = useState("");
+const [voucherAmount, setVoucherAmount] = useState("10");
+const [voucherLoading, setVoucherLoading] = useState(false);
+const [voucherMessage, setVoucherMessage] = useState("");
 
   async function loadData() {
     try {
@@ -124,6 +131,58 @@ export default function PartnerDetailPage() {
       setReviewLoading(false);
     }
   }
+
+async function createPartnerVoucher() {
+  try {
+    setVoucherLoading(true);
+    setVoucherMessage("");
+    setError("");
+
+    const amountGufo = Number(voucherAmount);
+
+    if (!Number.isFinite(amountGufo) || amountGufo <= 0) {
+      throw new Error("Inserisci un importo GUFO valido");
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    if (!token) {
+      throw new Error("Devi essere loggato per usare GUFO presso un partner");
+    }
+
+    const res = await fetch(`${API_URL}/partner-vouchers`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        partner_id: Number(partnerId),
+        amount_gufo: amountGufo,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Errore creazione voucher partner");
+    }
+
+    setVoucherMessage(
+      `Voucher creato ✅ Codice: ${data.voucher?.code || "generato"} - ${amountGufo.toFixed(
+        2
+      )} GUFO senza commissioni`
+    );
+  } catch (err: any) {
+    setVoucherMessage(err.message || "Errore voucher partner");
+  } finally {
+    setVoucherLoading(false);
+  }
+}
 
   if (loading) {
     return (
