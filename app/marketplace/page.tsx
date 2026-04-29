@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import styles from "./marketplace.module.css";
 
@@ -21,7 +21,7 @@ type Partner = {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
 
-export default function MarketplacePage() {
+function MarketplaceContent() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -105,7 +105,7 @@ const isGiftCardMode = searchParams.get("mode") === "gift-card";
   </p>
 </section>
 
-<section className={styles.filters}></section>
+
 
       <section className={styles.filters}>
         <input
@@ -212,5 +212,12 @@ const isGiftCardMode = searchParams.get("mode") === "gift-card";
         </section>
       )}
     </main>
+  );
+}
+export default function MarketplacePage() {
+  return (
+    <Suspense fallback={<main className={styles.page}>Caricamento marketplace...</main>}>
+      <MarketplaceContent />
+    </Suspense>
   );
 }
