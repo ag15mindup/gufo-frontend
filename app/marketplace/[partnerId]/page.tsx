@@ -209,15 +209,83 @@ function PartnerDetailContent() {
   function downloadVoucher() {
     if (!voucherResult) return;
 
-    const content = `GUFO - Voucher Partner
+   async function downloadVoucher() {
+  try {
+    if (!voucherResult) return;
 
-Partner: ${voucherResult.partnerName}
-Importo: ${voucherResult.amount.toFixed(2)} GUFO
-Commissioni: 0%
-Codice voucher: ${voucherResult.code}
+    const qrCanvas = document.querySelector("canvas");
 
-Mostra questo codice al partner per utilizzare il voucher.
-`;
+    if (!qrCanvas) {
+      alert("QR non trovato");
+      return;
+    }
+
+    const qrImage = qrCanvas.toDataURL("image/png");
+
+    const finalCanvas = document.createElement("canvas");
+    const ctx = finalCanvas.getContext("2d");
+
+    if (!ctx) return;
+
+    finalCanvas.width = 700;
+    finalCanvas.height = 900;
+
+    // background
+    ctx.fillStyle = "#081225";
+    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+    // titolo
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 40px Arial";
+    ctx.fillText("GUFO Voucher", 220, 80);
+
+    // partner
+    ctx.font = "28px Arial";
+    ctx.fillText(
+      `Partner: ${voucherResult.partnerName}`,
+      60,
+      160
+    );
+
+    // importo
+    ctx.fillText(
+      `Importo: ${voucherResult.amount} GUFO`,
+      60,
+      220
+    );
+
+    // codice
+    ctx.fillText(
+      `Codice: ${voucherResult.code}`,
+      60,
+      280
+    );
+
+    const qrImg = new Image();
+
+    qrImg.onload = () => {
+      ctx.drawImage(qrImg, 170, 340, 350, 350);
+
+      ctx.font = "24px Arial";
+      ctx.fillStyle = "#00f5a0";
+      ctx.fillText(
+        "Mostra questo voucher al partner",
+        170,
+        750
+      );
+
+      const link = document.createElement("a");
+      link.href = finalCanvas.toDataURL("image/png");
+      link.download = `voucher-gufo-${voucherResult.code}.png`;
+      link.click();
+    };
+
+    qrImg.src = qrImage;
+  } catch (error) {
+    console.error(error);
+    alert("Errore download voucher");
+  }
+}
 
     const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
