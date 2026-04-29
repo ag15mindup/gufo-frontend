@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { safeJsonFetch } from "@/lib/api";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-console.module.css";
+import VoucherQrScanner from "@/app/components/VoucherQrScanner";
 
 const supabase = createClient();
 
@@ -150,6 +151,11 @@ const [cancelMessage, setCancelMessage] = useState("");
   const [result, setResult] = useState<PaymentApiResponse | null>(null);
   const [error, setError] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
+
+  const [showVoucherScanner, setShowVoucherScanner] = useState(false);
+const [voucherData, setVoucherData] = useState<any>(null);
+const [voucherError, setVoucherError] = useState("");
+const [voucherAmountUsed, setVoucherAmountUsed] = useState("");
 
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
@@ -376,6 +382,93 @@ setAuthChecked(true);
       setLoadingPayment(false);
     }
   }
+
+const handleVoucherScan = async (decodedText: string) => {
+  try {
+    setVoucherError("");
+
+    const voucherId = decodedText.replace("GUFO_VOUCHER:", "").trim();
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+
+    if (!token) {
+      setVoucherError("Sessione scaduta. Fai di nuovo login.");
+      return;
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vouchers/scan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ voucherId }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      setVoucherError(data.error || "Voucher non valido");
+      return;
+    }
+
+    setVoucherData(data.voucher);
+    setShowVoucherScanner(false);
+  } catch (err: any) {
+    setVoucherError(err.message || "Errore scansione voucher");
+  }
+};
+
+const handleVoucherRedeem = async () => {
+  try {
+    setVoucherError("");
+
+    if (!voucherData?.id) {
+      setVoucherError("Nessun voucher selezionato");
+      return;
+    }
+
+    const amountUsed = Number(voucherAmountUsed);
+
+    if (!Number.isFinite(amountUsed) || amountUsed <= 0) {
+      setVoucherError("Importo non valido");
+      return;
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+
+    if (!token) {
+      setVoucherError("Sessione scaduta. Fai di nuovo login.");
+      return;
+    }
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vouchers/redeem`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        voucherId: voucherData.id,
+        amountUsed,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      setVoucherError(data.error || "Errore utilizzo voucher");
+      return;
+    }
+
+    setVoucherData(data.voucher);
+    setVoucherAmountUsed("");
+  } catch (err: any) {
+    setVoucherError(err.message || "Errore utilizzo voucher");
+  }
+};
 
 async function handleCancelPayment() {
   if (!result?.payment_transaction) {
@@ -802,6 +895,39 @@ async function handleCancelPayment() {
     {cancelLoading ? "Annullamento..." : "↩️ Annulla pagamento entro 5 min"}
   </button>
 </div>
+
+<button type="button" onClick={() => setShowVoucherScanner(true)}>
+  Scansiona voucher
+</button>
+
+{showVoucherScanner && (
+  <VoucherQrScanner
+    onScan={handleVoucherScan}
+    onError={() => {}}
+  />
+)}
+
+{voucherError && <p>{voucherError}</p>}
+
+{voucherData && (
+  <div>
+    <h3>Voucher trovato</h3>
+    <p>Valore: {voucherData.amount} GUFO</p>
+    <p>Residuo: {voucherData.remaining_amount} GUFO</p>
+    <p>Stato: {voucherData.status}</p>
+
+    <input
+      type="number"
+      value={voucherAmountUsed}
+      onChange={(e) => setVoucherAmountUsed(e.target.value)}
+      placeholder="Importo da scalare"
+    />
+
+    <button type="button" onClick={handleVoucherRedeem}>
+      Usa voucher
+    </button>
+  </div>
+)}
         </section>
       )}
       {cancelMessage && (
