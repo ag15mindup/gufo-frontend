@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import { QRCodeCanvas } from "qrcode.react";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-detail.module.css";
-import { QRCodeCanvas } from "qrcode.react";
 
 const supabase = createClient();
 
@@ -206,98 +206,59 @@ function PartnerDetailContent() {
     setVoucherMessage("Codice voucher copiato ✅");
   }
 
-  function downloadVoucher() {
-    if (!voucherResult) return;
+  async function downloadVoucher() {
+    try {
+      if (!voucherResult) return;
 
-   async function downloadVoucher() {
-  try {
-    if (!voucherResult) return;
+      const qrCanvas = document.querySelector("canvas");
 
-    const qrCanvas = document.querySelector("canvas");
+      if (!qrCanvas) {
+        alert("QR non trovato");
+        return;
+      }
 
-    if (!qrCanvas) {
-      alert("QR non trovato");
-      return;
+      const qrImage = qrCanvas.toDataURL("image/png");
+
+      const finalCanvas = document.createElement("canvas");
+      const ctx = finalCanvas.getContext("2d");
+
+      if (!ctx) return;
+
+      finalCanvas.width = 700;
+      finalCanvas.height = 900;
+
+      ctx.fillStyle = "#081225";
+      ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 40px Arial";
+      ctx.fillText("GUFO Voucher", 220, 80);
+
+      ctx.font = "28px Arial";
+      ctx.fillText(`Partner: ${voucherResult.partnerName}`, 60, 160);
+      ctx.fillText(`Importo: ${voucherResult.amount.toFixed(2)} GUFO`, 60, 220);
+      ctx.fillText(`Codice: ${voucherResult.code}`, 60, 280);
+
+      const qrImg = new Image();
+
+      qrImg.onload = () => {
+        ctx.drawImage(qrImg, 170, 340, 350, 350);
+
+        ctx.font = "24px Arial";
+        ctx.fillStyle = "#00f5a0";
+        ctx.fillText("Mostra questo voucher al partner", 170, 750);
+
+        const link = document.createElement("a");
+        link.href = finalCanvas.toDataURL("image/png");
+        link.download = `voucher-gufo-${voucherResult.code}.png`;
+        link.click();
+      };
+
+      qrImg.src = qrImage;
+    } catch (err) {
+      console.error(err);
+      alert("Errore download voucher");
     }
-
-    const qrImage = qrCanvas.toDataURL("image/png");
-
-    const finalCanvas = document.createElement("canvas");
-    const ctx = finalCanvas.getContext("2d");
-
-    if (!ctx) return;
-
-    finalCanvas.width = 700;
-    finalCanvas.height = 900;
-
-    // background
-    ctx.fillStyle = "#081225";
-    ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-
-    // titolo
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 40px Arial";
-    ctx.fillText("GUFO Voucher", 220, 80);
-
-    // partner
-    ctx.font = "28px Arial";
-    ctx.fillText(
-      `Partner: ${voucherResult.partnerName}`,
-      60,
-      160
-    );
-
-    // importo
-    ctx.fillText(
-      `Importo: ${voucherResult.amount} GUFO`,
-      60,
-      220
-    );
-
-    // codice
-    ctx.fillText(
-      `Codice: ${voucherResult.code}`,
-      60,
-      280
-    );
-
-    const qrImg = new Image();
-
-    qrImg.onload = () => {
-      ctx.drawImage(qrImg, 170, 340, 350, 350);
-
-      ctx.font = "24px Arial";
-      ctx.fillStyle = "#00f5a0";
-      ctx.fillText(
-        "Mostra questo voucher al partner",
-        170,
-        750
-      );
-
-      const link = document.createElement("a");
-      link.href = finalCanvas.toDataURL("image/png");
-      link.download = `voucher-gufo-${voucherResult.code}.png`;
-      link.click();
-    };
-
-    qrImg.src = qrImage;
-  } catch (error) {
-    console.error(error);
-    alert("Errore download voucher");
-  }
-}
-
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `voucher-gufo-${voucherResult.code}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-
-    URL.revokeObjectURL(url);
   }
 
   if (loading) {
@@ -327,7 +288,10 @@ function PartnerDetailContent() {
       <div className={styles.bgGlowB} />
 
       <section className={styles.hero}>
-        <Link href={isGiftCardMode ? "/marketplace?mode=gift-card" : "/marketplace"} className={styles.backLink}>
+        <Link
+          href={isGiftCardMode ? "/marketplace?mode=gift-card" : "/marketplace"}
+          className={styles.backLink}
+        >
           ← Marketplace
         </Link>
 
@@ -446,16 +410,17 @@ function PartnerDetailContent() {
 
           {voucherResult ? (
             <div className={styles.voucherDownloadBox}>
+              <div className={styles.voucherQrBox}>
+                <QRCodeCanvas
+                  value={`voucher:${voucherResult.code}`}
+                  size={180}
+                  level="H"
+                  includeMargin
+                />
+                <p>Mostra questo QR al partner</p>
+              </div>
+
               <div>
-                <div className={styles.voucherQrBox}>
-  <QRCodeCanvas
-    value={`voucher:${voucherResult.code}`}
-    size={180}
-    level="H"
-    includeMargin
-  />
-  <p>Mostra questo QR al partner</p>
-</div>
                 <span>Codice voucher</span>
                 <strong>{voucherResult.code}</strong>
               </div>
