@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./partner-detail.module.css";
+import { QRCodeCanvas } from "qrcode.react";
 
 const supabase = createClient();
 
@@ -378,6 +379,15 @@ Mostra questo codice al partner per utilizzare il voucher.
           {voucherResult ? (
             <div className={styles.voucherDownloadBox}>
               <div>
+                <div className={styles.voucherQrBox}>
+  <QRCodeCanvas
+    value={`voucher:${voucherResult.code}`}
+    size={180}
+    level="H"
+    includeMargin
+  />
+  <p>Mostra questo QR al partner</p>
+</div>
                 <span>Codice voucher</span>
                 <strong>{voucherResult.code}</strong>
               </div>
