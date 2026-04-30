@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 type Props = {
@@ -9,33 +9,60 @@ type Props = {
 };
 
 export default function VoucherQrScanner({ onScan, onError }: Props) {
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isRunningRef = useRef(false);
+
   useEffect(() => {
-    const scanner = new Html5Qrcode("voucher-qr-reader");
+    let cancelled = false;
 
-    scanner
-      .start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        async (decodedText) => {
-          onScan(decodedText);
+    const startScanner = async () => {
+      try {
+        const scanner = new Html5Qrcode("voucher-qr-reader");
+        scannerRef.current = scanner;
 
-          try {
-            await scanner.stop();
-          } catch {}
-        },
-        (errorMessage) => {
-          if (onError) onError(errorMessage);
-        }
-      )
-      .catch((err) => {
+        await scanner.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          async (decodedText) => {
+            if (cancelled) return;
+
+            onScan(decodedText);
+
+            try {
+              if (isRunningRef.current && scannerRef.current) {
+                await scannerRef.current.stop();
+                isRunningRef.current = false;
+              }
+            } catch {}
+          },
+          () => {}
+        );
+
+        isRunningRef.current = true;
+      } catch (err) {
         if (onError) onError(String(err));
-      });
+      }
+    };
+
+    startScanner();
 
     return () => {
-      scanner.stop().catch(() => {});
+      cancelled = true;
+
+      const scanner = scannerRef.current;
+
+      if (scanner && isRunningRef.current) {
+        scanner
+          .stop()
+          .then(() => {
+            isRunningRef.current = false;
+            scanner.clear();
+          })
+          .catch(() => {});
+      }
     };
   }, [onScan, onError]);
 
