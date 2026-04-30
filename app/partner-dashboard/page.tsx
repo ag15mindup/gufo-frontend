@@ -471,6 +471,13 @@ async function handleCancelTransaction(tx: Transaction) {
               📷 Scansiona cliente
             </Link>
 
+<Link
+  href="/partner-console"
+  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
+>
+  🎟️ Scansiona voucher
+</Link>
+
           <Link
   href="/partner-settings"
   className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}

@@ -803,7 +803,60 @@ async function handleCancelPayment() {
               Cerca prima un cliente per abilitare il pagamento.
             </p>
           )}
+        
         </form>
+      </section>
+
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Voucher</p>
+            <h3>Scansiona voucher cliente</h3>
+          </div>
+          <span className={styles.panelBadge}>Voucher QR</span>
+        </div>
+
+        <button
+          type="button"
+          className={styles.primaryBtnWide}
+          onClick={() => setShowVoucherScanner(true)}
+        >
+          🎟️ Scansiona voucher
+        </button>
+
+        {showVoucherScanner && (
+          <VoucherQrScanner
+            onScan={handleVoucherScan}
+            onError={() => {}}
+          />
+        )}
+
+        {voucherError && <div className={styles.errorBox}>{voucherError}</div>}
+
+        {voucherData && (
+          <div className={styles.infoBox}>
+            <h4>Voucher trovato</h4>
+            <p>Valore: {voucherData.amount} GUFO</p>
+            <p>Residuo: {voucherData.remaining_amount} GUFO</p>
+            <p>Stato: {voucherData.status}</p>
+
+            <input
+              type="number"
+              value={voucherAmountUsed}
+              onChange={(e) => setVoucherAmountUsed(e.target.value)}
+              className={styles.inputControl}
+              placeholder="Importo da scalare"
+            />
+
+            <button
+              type="button"
+              className={styles.secondaryBtnWide}
+              onClick={handleVoucherRedeem}
+            >
+              Usa voucher
+            </button>
+          </div>
+        )}
       </section>
 
       {error && <div className={styles.errorBox}>{error}</div>}
@@ -896,38 +949,7 @@ async function handleCancelPayment() {
   </button>
 </div>
 
-<button type="button" onClick={() => setShowVoucherScanner(true)}>
-  Scansiona voucher
-</button>
 
-{showVoucherScanner && (
-  <VoucherQrScanner
-    onScan={handleVoucherScan}
-    onError={() => {}}
-  />
-)}
-
-{voucherError && <p>{voucherError}</p>}
-
-{voucherData && (
-  <div>
-    <h3>Voucher trovato</h3>
-    <p>Valore: {voucherData.amount} GUFO</p>
-    <p>Residuo: {voucherData.remaining_amount} GUFO</p>
-    <p>Stato: {voucherData.status}</p>
-
-    <input
-      type="number"
-      value={voucherAmountUsed}
-      onChange={(e) => setVoucherAmountUsed(e.target.value)}
-      placeholder="Importo da scalare"
-    />
-
-    <button type="button" onClick={handleVoucherRedeem}>
-      Usa voucher
-    </button>
-  </div>
-)}
         </section>
       )}
       {cancelMessage && (
