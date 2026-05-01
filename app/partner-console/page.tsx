@@ -442,7 +442,9 @@ export default function PartnerConsolePage() {
         return;
       }
 
-      const voucherKey = scannedVoucherCode || voucherData.code || voucherData.id;
+      const voucherKey = cleanVoucherText(
+  scannedVoucherCode || voucherData.code || voucherData.id
+);
 
       if (!voucherKey) {
         setVoucherError("Codice voucher mancante");
