@@ -451,7 +451,12 @@ export default function PartnerConsolePage() {
         return;
       }
 
-      const amountUsed = Number(voucherAmountUsed);
+     const paymentAmount = Number(amount);
+let amountUsed = Number(voucherAmountUsed);
+
+if (amountUsed > paymentAmount) {
+  amountUsed = paymentAmount;
+}
 
       if (!Number.isFinite(amountUsed) || amountUsed <= 0) {
         setVoucherError("Importo non valido");
