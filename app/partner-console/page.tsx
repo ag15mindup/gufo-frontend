@@ -126,13 +126,10 @@ function formatDateTime(value?: string | null) {
 }
 
 function cleanVoucherText(decodedText: string) {
-  const raw = String(decodedText || "").trim();
-
-  if (raw.includes("GUFO_VOUCHER:")) {
-    return raw.split("GUFO_VOUCHER:").pop()?.trim() || "";
-  }
-
-  return raw.trim();
+  return String(decodedText || "")
+    .replace(/GUFO_VOUCHER:/gi, "")
+    .replace(/voucher:/gi, "")
+    .trim();
 }
 
 export default function PartnerConsolePage() {
@@ -396,9 +393,7 @@ export default function PartnerConsolePage() {
 
       const voucherCode = cleanVoucherText(decodedText);
 
-alert("QR letto: " + decodedText + "\nPulito: " + voucherCode);
-console.log("QR LETTO:", decodedText);
-console.log("QR PULITO:", voucherCode);
+
 
       if (!voucherCode) {
         setVoucherError("QR voucher non valido");
