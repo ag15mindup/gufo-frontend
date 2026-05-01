@@ -125,9 +125,18 @@ function formatDateTime(value?: string | null) {
   return date.toLocaleString("it-IT");
 }
 
+function cleanVoucherText(decodedText: string) {
+  const raw = String(decodedText || "").trim();
+
+  if (raw.includes("GUFO_VOUCHER:")) {
+    return raw.split("GUFO_VOUCHER:").pop()?.trim() || "";
+  }
+
+  return raw.trim();
+}
+
 export default function PartnerConsolePage() {
   const router = useRouter();
-  
 
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("");
@@ -140,22 +149,21 @@ export default function PartnerConsolePage() {
   const [amount, setAmount] = useState("50");
   const [cashbackPercent, setCashbackPercent] = useState("5");
 
-
-
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
   const [loadingPartner, setLoadingPartner] = useState(true);
-const [cancelLoading, setCancelLoading] = useState(false);
-const [cancelMessage, setCancelMessage] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelMessage, setCancelMessage] = useState("");
 
   const [result, setResult] = useState<PaymentApiResponse | null>(null);
   const [error, setError] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
 
   const [showVoucherScanner, setShowVoucherScanner] = useState(false);
-const [voucherData, setVoucherData] = useState<any>(null);
-const [voucherError, setVoucherError] = useState("");
-const [voucherAmountUsed, setVoucherAmountUsed] = useState("");
+  const [voucherData, setVoucherData] = useState<any>(null);
+  const [voucherError, setVoucherError] = useState("");
+  const [voucherAmountUsed, setVoucherAmountUsed] = useState("");
+  const [scannedVoucherCode, setScannedVoucherCode] = useState("");
 
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
@@ -241,19 +249,20 @@ const [voucherAmountUsed, setVoucherAmountUsed] = useState("");
 
         await loadPartnerMe(user.id);
 
+        const params = new URLSearchParams(window.location.search);
+        const scannedCode = params.get("customerCode");
+        const openVoucher = params.get("voucher");
 
+        if (scannedCode) {
+          const cleanCode = scannedCode.trim().toUpperCase();
+          setCustomerCode(cleanCode);
+          await refreshCustomer(cleanCode);
+        }
 
-const params = new URLSearchParams(window.location.search);
-const scannedCode = params.get("customerCode");
+        if (openVoucher === "1") {
+          setShowVoucherScanner(true);
+        }
 
-if (scannedCode) {
-  const cleanCode = scannedCode.trim().toUpperCase();
-
-  setCustomerCode(cleanCode);
-  await refreshCustomer(cleanCode);
-}
-
-setAuthChecked(true);
         setAuthChecked(true);
       } catch (err: any) {
         setError(err?.message || "Errore caricamento partner");
@@ -265,8 +274,6 @@ setAuthChecked(true);
 
     init();
   }, [router]);
-
-
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();
@@ -383,137 +390,154 @@ setAuthChecked(true);
     }
   }
 
-const handleVoucherScan = async (decodedText: string) => {
-  try {
-    setVoucherError("");
+  const handleVoucherScan = async (decodedText: string) => {
+    try {
+      setVoucherError("");
 
-    const voucherId = decodedText.replace("GUFO_VOUCHER:", "").trim();
+      const voucherCode = cleanVoucherText(decodedText);
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
+      if (!voucherCode) {
+        setVoucherError("QR voucher non valido");
+        return;
+      }
 
-    if (!token) {
-      setVoucherError("Sessione scaduta. Fai di nuovo login.");
-      return;
-    }
+      setScannedVoucherCode(voucherCode);
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vouchers/scan`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ voucherId }),
-    });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
 
-    const data = await res.json();
+      if (!token) {
+        setVoucherError("Sessione scaduta. Fai di nuovo login.");
+        return;
+      }
 
-    if (!res.ok || !data.success) {
-      setVoucherError(data.error || "Voucher non valido");
-      return;
-    }
-
-    setVoucherData(data.voucher);
-    setShowVoucherScanner(false);
-  } catch (err: any) {
-    setVoucherError(err.message || "Errore scansione voucher");
-  }
-};
-
-const handleVoucherRedeem = async () => {
-  try {
-    setVoucherError("");
-
-    if (!voucherData?.id) {
-      setVoucherError("Nessun voucher selezionato");
-      return;
-    }
-
-    const amountUsed = Number(voucherAmountUsed);
-
-    if (!Number.isFinite(amountUsed) || amountUsed <= 0) {
-      setVoucherError("Importo non valido");
-      return;
-    }
-
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-
-    if (!token) {
-      setVoucherError("Sessione scaduta. Fai di nuovo login.");
-      return;
-    }
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/vouchers/redeem`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        voucherId: voucherData.id,
-        amountUsed,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      setVoucherError(data.error || "Errore utilizzo voucher");
-      return;
-    }
-
-    setVoucherData(data.voucher);
-    setVoucherAmountUsed("");
-  } catch (err: any) {
-    setVoucherError(err.message || "Errore utilizzo voucher");
-  }
-};
-
-async function handleCancelPayment() {
-  if (!result?.payment_transaction) {
-    setCancelMessage("Nessun pagamento da annullare.");
-    return;
-  }
-
-  try {
-    setCancelLoading(true);
-    setCancelMessage("");
-    setError("");
-
-    const { response, data } = await safeJsonFetch(
-      `${API_URL}/partner/transaction/cancel`,
-      {
+      const res = await fetch(`${API_URL}/vouchers/scan`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ voucherId: voucherCode }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setVoucherError(data.error || "Voucher non valido");
+        return;
+      }
+
+      setVoucherData(data.voucher);
+      setShowVoucherScanner(false);
+    } catch (err: any) {
+      setVoucherError(err.message || "Errore scansione voucher");
+    }
+  };
+
+  const handleVoucherRedeem = async () => {
+    try {
+      setVoucherError("");
+
+      if (!voucherData) {
+        setVoucherError("Nessun voucher selezionato");
+        return;
+      }
+
+      const voucherKey = scannedVoucherCode || voucherData.code || voucherData.id;
+
+      if (!voucherKey) {
+        setVoucherError("Codice voucher mancante");
+        return;
+      }
+
+      const amountUsed = Number(voucherAmountUsed);
+
+      if (!Number.isFinite(amountUsed) || amountUsed <= 0) {
+        setVoucherError("Importo non valido");
+        return;
+      }
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
+      if (!token) {
+        setVoucherError("Sessione scaduta. Fai di nuovo login.");
+        return;
+      }
+
+      const res = await fetch(`${API_URL}/vouchers/redeem`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          partner_user_id: partnerUserId,
-          payment_transaction_id: getTransactionId(result.payment_transaction),
-          cashback_transaction_id: getTransactionId(result.cashback_transaction),
+          voucherId: voucherKey,
+          amountUsed,
         }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setVoucherError(data.error || "Errore utilizzo voucher");
+        return;
       }
-    );
 
-    if (!response.ok || data?.success === false) {
-      throw new Error(data?.error || "Errore annullamento pagamento");
+      setVoucherData({
+        ...voucherData,
+        ...data.voucher,
+      });
+      setVoucherAmountUsed("");
+    } catch (err: any) {
+      setVoucherError(err.message || "Errore utilizzo voucher");
+    }
+  };
+
+  async function handleCancelPayment() {
+    if (!result?.payment_transaction) {
+      setCancelMessage("Nessun pagamento da annullare.");
+      return;
     }
 
-    setCancelMessage("Pagamento annullato correttamente ✅");
+    try {
+      setCancelLoading(true);
+      setCancelMessage("");
+      setError("");
 
-    if (customer?.customer_code) {
-      await refreshCustomer(customer.customer_code);
+      const { response, data } = await safeJsonFetch(
+        `${API_URL}/partner/transaction/cancel`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            partner_user_id: partnerUserId,
+            payment_transaction_id: getTransactionId(result.payment_transaction),
+            cashback_transaction_id: getTransactionId(result.cashback_transaction),
+          }),
+        }
+      );
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || "Errore annullamento pagamento");
+      }
+
+      setCancelMessage("Pagamento annullato correttamente ✅");
+
+      if (customer?.customer_code) {
+        await refreshCustomer(customer.customer_code);
+      }
+
+      setResult(null);
+      setAmount("");
+    } catch (err: any) {
+      setCancelMessage(err?.message || "Errore durante annullamento");
+    } finally {
+      setCancelLoading(false);
     }
-
-    setResult(null);
-    setAmount("");
-  } catch (err: any) {
-    setCancelMessage(err?.message || "Errore durante annullamento");
-  } finally {
-    setCancelLoading(false);
   }
-}
 
   const previewAmount = useMemo(() => toNumberSafe(amount), [amount]);
 
@@ -619,94 +643,82 @@ async function handleCancelPayment() {
 
       <section className={styles.formsGrid}>
         <form onSubmit={handleSearchCustomer} className={styles.panel}>
-  <div className={styles.panelHeader}>
-    <div>
-      <p className={styles.sectionEyebrow}>Customer Lookup</p>
-      <h3>Cerca cliente</h3>
-    </div>
-    <span className={styles.panelBadge}>Lookup</span>
-  </div>
+          <div className={styles.panelHeader}>
+            <div>
+              <p className={styles.sectionEyebrow}>Customer Lookup</p>
+              <h3>Cerca cliente</h3>
+            </div>
+            <span className={styles.panelBadge}>Lookup</span>
+          </div>
 
-  {/* INPUT CODICE CLIENTE */}
-  <div className={styles.fieldGroup}>
-    <label className={styles.inputLabel}>Codice cliente</label>
-    <input
-      type="text"
-      value={customerCode}
-      onChange={(e) => setCustomerCode(e.target.value)}
-      className={styles.inputControl}
-      placeholder="Es. GUFO-915728"
-    />
-  </div>
+          <div className={styles.fieldGroup}>
+            <label className={styles.inputLabel}>Codice cliente</label>
+            <input
+              type="text"
+              value={customerCode}
+              onChange={(e) => setCustomerCode(e.target.value)}
+              className={styles.inputControl}
+              placeholder="Es. GUFO-915728"
+            />
+          </div>
 
+          <button
+            type="submit"
+            disabled={loadingCustomer}
+            className={styles.primaryBtnWide}
+          >
+            {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
+          </button>
 
-  {/* BOX SCANNER */}
-  
+          {customer && (
+            <div className={styles.infoBox}>
+              <div className={styles.infoHeader}>
+                <h4>Cliente trovato</h4>
+                <span>Ready</span>
+              </div>
 
-  {/* BOTTONE CERCA */}
-  <button
-    type="submit"
-    disabled={loadingCustomer}
-    className={styles.primaryBtnWide}
-  >
-    {loadingCustomer ? "Ricerca cliente..." : "Cerca cliente"}
-  </button>
+              <div className={styles.infoGrid}>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Customer code</p>
+                  <p className={styles.infoMiniValue}>{customer.customer_code}</p>
+                </div>
 
-  {customer && (
-    <div className={styles.infoBox}>
-      <div className={styles.infoHeader}>
-        <h4>Cliente trovato</h4>
-        <span>Ready</span>
-      </div>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Livello</p>
+                  <p className={styles.infoMiniValue}>{formatLevel(customer.level)}</p>
+                </div>
 
-      <div className={styles.infoGrid}>
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Customer code</p>
-          <p className={styles.infoMiniValue}>
-            {customer.customer_code}
-          </p>
-        </div>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Saldo GUFO</p>
+                  <p className={styles.infoMiniValue}>
+                    {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
+                  </p>
+                </div>
 
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Livello</p>
-          <p className={styles.infoMiniValue}>
-            {formatLevel(customer.level)}
-          </p>
-        </div>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Saldo €</p>
+                  <p className={styles.infoMiniValue}>
+                    € {toNumberSafe(customer.balance_eur).toFixed(2)}
+                  </p>
+                </div>
 
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Saldo GUFO</p>
-          <p className={styles.infoMiniValue}>
-            {toNumberSafe(customer.balance_gufo).toFixed(2)} GUFO
-          </p>
-        </div>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Spesa stagione</p>
+                  <p className={styles.infoMiniValue}>
+                    € {toNumberSafe(customer.season_spent).toFixed(2)}
+                  </p>
+                </div>
 
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Saldo €</p>
-          <p className={styles.infoMiniValue}>
-            € {toNumberSafe(customer.balance_eur).toFixed(2)}
-          </p>
-        </div>
-
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Spesa stagione</p>
-          <p className={styles.infoMiniValue}>
-            € {toNumberSafe(customer.season_spent).toFixed(2)}
-          </p>
-        </div>
-
-        <div className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Area</p>
-          <p className={styles.infoMiniValue}>
-            {customer.region ||
-              customer.reference_currency ||
-              "--"}
-          </p>
-        </div>
-      </div>
-    </div>
-  )}
-</form>
+                <div className={styles.infoMiniCard}>
+                  <p className={styles.infoMiniLabel}>Area</p>
+                  <p className={styles.infoMiniValue}>
+                    {customer.region || customer.reference_currency || "--"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </form>
 
         <form onSubmit={handlePayment} className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -728,25 +740,22 @@ async function handleCancelPayment() {
           </div>
 
           <div className={styles.fieldGroup}>
-  <label className={styles.inputLabel}>Cashback (%)</label>
-  <input
-    type="number"
-    step="0.01"
-    min="0"
-    max="30"
-    value={cashbackPercent}
-    onChange={(e) => setCashbackPercent(e.target.value)}
-    className={styles.inputControl}
-    placeholder="Es. 5"
-  />
+            <label className={styles.inputLabel}>Cashback (%)</label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              max="30"
+              value={cashbackPercent}
+              onChange={(e) => setCashbackPercent(e.target.value)}
+              className={styles.inputControl}
+              placeholder="Es. 5"
+            />
 
-  <Link
-    href="/partner-settings"
-    className={styles.cashbackSettingsBtn}
-  >
-    ⚙️ Impostazioni partner
-  </Link>
-</div>
+            <Link href="/partner-settings" className={styles.cashbackSettingsBtn}>
+              ⚙️ Impostazioni partner
+            </Link>
+          </div>
 
           <div className={styles.fieldGroup}>
             <label className={styles.inputLabel}>Importo (€)</label>
@@ -803,7 +812,6 @@ async function handleCancelPayment() {
               Cerca prima un cliente per abilitare il pagamento.
             </p>
           )}
-        
         </form>
       </section>
 
@@ -819,34 +827,62 @@ async function handleCancelPayment() {
         <button
           type="button"
           className={styles.primaryBtnWide}
-          onClick={() => setShowVoucherScanner(true)}
+          onClick={() => {
+            setVoucherError("");
+            setShowVoucherScanner(true);
+          }}
         >
           🎟️ Scansiona voucher
         </button>
 
         {showVoucherScanner && (
-          <VoucherQrScanner
-            onScan={handleVoucherScan}
-            onError={() => {}}
-          />
+          <VoucherQrScanner onScan={handleVoucherScan} onError={() => {}} />
         )}
 
         {voucherError && <div className={styles.errorBox}>{voucherError}</div>}
 
         {voucherData && (
           <div className={styles.infoBox}>
-            <h4>Voucher trovato</h4>
-            <p>Valore: {voucherData.amount} GUFO</p>
-            <p>Residuo: {voucherData.remaining_amount} GUFO</p>
-            <p>Stato: {voucherData.status}</p>
+            <div className={styles.infoHeader}>
+              <h4>Voucher trovato</h4>
+              <span>{voucherData.status || "active"}</span>
+            </div>
 
-            <input
-              type="number"
-              value={voucherAmountUsed}
-              onChange={(e) => setVoucherAmountUsed(e.target.value)}
-              className={styles.inputControl}
-              placeholder="Importo da scalare"
-            />
+            <div className={styles.infoGrid}>
+              <div className={styles.infoMiniCard}>
+                <p className={styles.infoMiniLabel}>Codice</p>
+                <p className={styles.infoMiniValue}>
+                  {scannedVoucherCode || voucherData.code || voucherData.id}
+                </p>
+              </div>
+
+              <div className={styles.infoMiniCard}>
+                <p className={styles.infoMiniLabel}>Valore</p>
+                <p className={styles.infoMiniValue}>
+                  {toNumberSafe(voucherData.amount).toFixed(2)} GUFO
+                </p>
+              </div>
+
+              <div className={styles.infoMiniCard}>
+                <p className={styles.infoMiniLabel}>Residuo</p>
+                <p className={styles.infoMiniValue}>
+                  {toNumberSafe(voucherData.remaining_amount).toFixed(2)} GUFO
+                </p>
+              </div>
+            </div>
+
+            <div className={styles.fieldGroup}>
+              <label className={styles.inputLabel}>Importo da scalare</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={voucherAmountUsed}
+                onChange={(e) => setVoucherAmountUsed(e.target.value)}
+                className={styles.inputControl}
+                placeholder="Es. 7.50"
+              />
+            </div>
 
             <button
               type="button"
@@ -871,8 +907,6 @@ async function handleCancelPayment() {
             <span className={styles.panelBadge}>Success</span>
           </div>
 
-
-
           <div className={styles.infoGrid}>
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Partner</p>
@@ -883,12 +917,16 @@ async function handleCancelPayment() {
 
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>ID pagamento</p>
-              <p className={styles.infoMiniValue}>{getTransactionId(paymentTx) || "-"}</p>
+              <p className={styles.infoMiniValue}>
+                {getTransactionId(paymentTx) || "-"}
+              </p>
             </div>
 
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>ID cashback</p>
-              <p className={styles.infoMiniValue}>{getTransactionId(cashbackTx) || "-"}</p>
+              <p className={styles.infoMiniValue}>
+                {getTransactionId(cashbackTx) || "-"}
+              </p>
             </div>
 
             <div className={styles.infoMiniCard}>
@@ -915,9 +953,7 @@ async function handleCancelPayment() {
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Nuovo saldo</p>
               <p className={styles.infoMiniValue}>
-                {toNumberSafe(
-                  result.new_balance ?? result.wallet?.balance_gufo
-                ).toFixed(2)}{" "}
+                {toNumberSafe(result.new_balance ?? result.wallet?.balance_gufo).toFixed(2)}{" "}
                 GUFO
               </p>
             </div>
@@ -931,32 +967,30 @@ async function handleCancelPayment() {
 
             <div className={styles.infoMiniCard}>
               <p className={styles.infoMiniLabel}>Data operazione</p>
-              <p className={styles.infoMiniValue}>{formatDateTime(paymentTx?.created_at)}</p>
+              <p className={styles.infoMiniValue}>
+                {formatDateTime(paymentTx?.created_at)}
+              </p>
             </div>
           </div>
+
           <div className={styles.resultActions}>
-  <Link href="/partner-scan" className={styles.newScanBtn}>
-    📷 Scansiona nuovo cliente
-  </Link>
+            <Link href="/partner-scan" className={styles.newScanBtn}>
+              📷 Scansiona nuovo cliente
+            </Link>
 
-  <button
-    type="button"
-    className={styles.cancelPaymentBtn}
-    onClick={handleCancelPayment}
-    disabled={cancelLoading}
-  >
-    {cancelLoading ? "Annullamento..." : "↩️ Annulla pagamento entro 5 min"}
-  </button>
-</div>
-
-
+            <button
+              type="button"
+              className={styles.cancelPaymentBtn}
+              onClick={handleCancelPayment}
+              disabled={cancelLoading}
+            >
+              {cancelLoading ? "Annullamento..." : "↩️ Annulla pagamento entro 5 min"}
+            </button>
+          </div>
         </section>
       )}
-      {cancelMessage && (
-  <div className={styles.cancelMessage}>
-    {cancelMessage}
-  </div>
-)}
+
+      {cancelMessage && <div className={styles.cancelMessage}>{cancelMessage}</div>}
     </div>
   );
 }
