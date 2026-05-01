@@ -490,6 +490,12 @@ export default function PartnerConsolePage() {
         ...data.voucher,
       });
       setVoucherAmountUsed("");
+
+const currentAmount = Number(amount);
+const newAmount = Math.max(0, currentAmount - amountUsed);
+
+setAmount(String(newAmount.toFixed(2)));
+
     } catch (err: any) {
       setVoucherError(err.message || "Errore utilizzo voucher");
     }
