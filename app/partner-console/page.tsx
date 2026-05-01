@@ -812,12 +812,17 @@ setAmount(String(newAmount.toFixed(2)));
           )}
 
           <button
-            type="submit"
-            disabled={loadingPayment || !customer || !partnerUserId}
-            className={styles.secondaryBtnWide}
-          >
-            {loadingPayment ? "Pagamento in corso..." : "Conferma pagamento"}
-          </button>
+  type="submit"
+  disabled={
+    loadingPayment ||
+    !customer ||
+    !partnerUserId ||
+    toNumberSafe(amount) <= 0
+  }
+  className={styles.secondaryBtnWide}
+>
+  {loadingPayment ? "Pagamento in corso..." : "Conferma pagamento"}
+</button>
 
           {!customer && (
             <p className={styles.helperText}>
