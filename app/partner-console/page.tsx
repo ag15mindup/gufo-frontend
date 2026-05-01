@@ -396,6 +396,10 @@ export default function PartnerConsolePage() {
 
       const voucherCode = cleanVoucherText(decodedText);
 
+alert("QR letto: " + decodedText + "\nPulito: " + voucherCode);
+console.log("QR LETTO:", decodedText);
+console.log("QR PULITO:", voucherCode);
+
       if (!voucherCode) {
         setVoucherError("QR voucher non valido");
         return;
