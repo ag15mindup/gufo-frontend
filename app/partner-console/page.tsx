@@ -821,8 +821,26 @@ setAmount(String(newAmount.toFixed(2)));
   }
   className={styles.secondaryBtnWide}
 >
-  {loadingPayment ? "Pagamento in corso..." : "Conferma pagamento"}
+  {toNumberSafe(amount) <= 0
+    ? "Pagamento coperto dal voucher"
+    : loadingPayment
+    ? "Pagamento in corso..."
+    : "Conferma pagamento"}
 </button>
+
+{toNumberSafe(amount) <= 0 && voucherData && (
+  <div className={styles.successBox}>
+    ✅ Pagamento effettuato tramite voucher
+  </div>
+)}
+
+{toNumberSafe(amount) <= 0 && voucherData && (
+  <div className={styles.infoBox}>
+    <p>Totale scontrino coperto dal voucher</p>
+    <p>Voucher usato: {voucherData.used_amount || "-"} GUFO</p>
+    <p>Residuo voucher: {voucherData.remaining_amount} GUFO</p>
+  </div>
+)}
 
           {!customer && (
             <p className={styles.helperText}>
