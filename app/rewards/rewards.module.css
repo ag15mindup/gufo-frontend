@@ -6,7 +6,7 @@
   overflow: hidden;
   background-image:
     linear-gradient(rgba(4, 10, 28, 0.38), rgba(4, 10, 28, 0.62)),
-    url("/dashboard-space.jpg");
+    url("/images/gufo-nebula.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
