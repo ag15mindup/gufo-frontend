@@ -9,10 +9,12 @@ type WalletResponse = {
   success: boolean;
   error?: string;
   partner?: {
-    id: number;
-    name: string;
-    category?: string | null;
-  };
+  id: number;
+  name: string;
+  category?: string | null;
+  iban?: string | null;
+  account_holder?: string | null;
+};
   wallet?: {
     balance_gufo: number;
     balance_eur: number;
@@ -44,6 +46,7 @@ export default function PartnerWalletPage() {
   const [loading, setLoading] = useState(true);
   const [converting, setConverting] = useState(false);
   const [requestingPayout, setRequestingPayout] = useState(false);
+  const [savingBankData, setSavingBankData] = useState(false);
 
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("Partner GUFO");
@@ -99,6 +102,8 @@ const [accountHolder, setAccountHolder] = useState("");
       }
 
       setPartnerName(data.partner?.name || "Partner GUFO");
+      setIban(data.partner?.iban || "");
+      setAccountHolder(data.partner?.account_holder || "");
       setBalanceGufo(Number(data.wallet?.balance_gufo || 0));
       setBalanceEur(Number(data.wallet?.balance_eur || 0));
       setFeePercent(Number(data.wallet?.fee_percent || 0.05));
@@ -207,13 +212,57 @@ async function requestPayout() {
     setBalanceGufo(Number(data.wallet?.balance_gufo || 0));
     setBalanceEur(Number(data.wallet?.balance_eur || 0));
     setPayoutAmount("");
-    setIban("");
-    setAccountHolder("");
     setMessage("Richiesta accredito inviata. Stato: in attesa.");
   } catch (err: any) {
     setError(err?.message || "Errore richiesta accredito");
   } finally {
     setRequestingPayout(false);
+  }
+}
+
+async function saveBankData() {
+  try {
+    setSavingBankData(true);
+    setError("");
+    setMessage("");
+
+    if (!partnerUserId) {
+      setError("Partner non riconosciuto.");
+      return;
+    }
+
+    if (!iban.trim()) {
+      setError("Inserisci IBAN.");
+      return;
+    }
+
+    if (!accountHolder.trim()) {
+      setError("Inserisci intestatario conto.");
+      return;
+    }
+
+    const result = await safeJsonFetch("/partner/settings", {
+      method: "POST",
+      body: JSON.stringify({
+        partner_user_id: partnerUserId,
+        name: partnerName,
+        iban,
+        account_holder: accountHolder,
+        cashback_percent: 2,
+      }),
+    });
+
+    const data = result.data as any;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Errore salvataggio dati bancari");
+    }
+
+    setMessage("Dati bancari salvati correttamente.");
+  } catch (err: any) {
+    setError(err?.message || "Errore salvataggio dati bancari");
+  } finally {
+    setSavingBankData(false);
   }
 }
 
@@ -359,6 +408,15 @@ async function requestPayout() {
     onChange={(e) => setAccountHolder(e.target.value)}
     placeholder="Nome e cognome / Ragione sociale"
   />
+
+<button
+  type="button"
+  className={styles.primaryBtn}
+  onClick={saveBankData}
+  disabled={savingBankData}
+>
+  {savingBankData ? "Salvataggio..." : "Salva dati bancari"}
+</button>
 
   <button
     type="button"
