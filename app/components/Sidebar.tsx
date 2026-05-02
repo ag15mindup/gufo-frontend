@@ -204,13 +204,15 @@ export default function Sidebar() {
     []
   );
 
-  const partnerRoutes = useMemo<HudRoute[]>(
-    () => [
-      { href: "/partner-console", title: "Partner Console", subtitle: "Console pagamenti", icon: <BeaconGlyph /> },
-      { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Analytics partner", icon: <ClusterGlyph /> },
-    ],
-    []
-  );
+ const partnerRoutes = useMemo<HudRoute[]>(
+  () => [
+    { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Analytics partner", icon: <ClusterGlyph /> },
+    { href: "/partner-console", title: "Partner Console", subtitle: "Console pagamenti", icon: <BeaconGlyph /> },
+    { href: "/partner-wallet", title: "Partner Wallet", subtitle: "Saldo e conversioni", icon: <OrbitGlyph /> },
+  ],
+  []
+);
+  
 
   const visibleRoutes = useMemo<HudRoute[]>(() => {
     return role === "partner" ? partnerRoutes : userRoutes;
