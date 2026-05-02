@@ -43,6 +43,7 @@ const supabase = createClient();
 export default function PartnerWalletPage() {
   const [loading, setLoading] = useState(true);
   const [converting, setConverting] = useState(false);
+  const [requestingPayout, setRequestingPayout] = useState(false);
 
   const [partnerUserId, setPartnerUserId] = useState("");
   const [partnerName, setPartnerName] = useState("Partner GUFO");
@@ -52,6 +53,10 @@ export default function PartnerWalletPage() {
   const [feePercent, setFeePercent] = useState(0.05);
 
   const [amountGufo, setAmountGufo] = useState("");
+const [payoutAmount, setPayoutAmount] = useState("");
+const [iban, setIban] = useState("");
+const [accountHolder, setAccountHolder] = useState("");
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -149,6 +154,68 @@ export default function PartnerWalletPage() {
       setConverting(false);
     }
   }
+
+async function requestPayout() {
+  try {
+    setRequestingPayout(true);
+    setError("");
+    setMessage("");
+
+    const amount = Number(payoutAmount || 0);
+
+    if (!partnerUserId) {
+      setError("Partner non riconosciuto.");
+      return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("Inserisci un importo valido.");
+      return;
+    }
+
+    if (amount > balanceEur) {
+      setError("Saldo euro insufficiente.");
+      return;
+    }
+
+    if (!iban.trim()) {
+      setError("Inserisci IBAN.");
+      return;
+    }
+
+    if (!accountHolder.trim()) {
+      setError("Inserisci intestatario conto.");
+      return;
+    }
+
+    const result = await safeJsonFetch("/partner/payout-request", {
+      method: "POST",
+      body: JSON.stringify({
+        partner_user_id: partnerUserId,
+        amount_eur: amount,
+        iban,
+        account_holder: accountHolder,
+      }),
+    });
+
+    const data = result.data as any;
+
+    if (!data?.success) {
+      throw new Error(data?.error || "Errore richiesta accredito");
+    }
+
+    setBalanceGufo(Number(data.wallet?.balance_gufo || 0));
+    setBalanceEur(Number(data.wallet?.balance_eur || 0));
+    setPayoutAmount("");
+    setIban("");
+    setAccountHolder("");
+    setMessage("Richiesta accredito inviata. Stato: in attesa.");
+  } catch (err: any) {
+    setError(err?.message || "Errore richiesta accredito");
+  } finally {
+    setRequestingPayout(false);
+  }
+}
 
   useEffect(() => {
     loadWallet();
@@ -256,6 +323,52 @@ export default function PartnerWalletPage() {
                 {converting ? "Conversione in corso..." : "Converti in euro"}
               </button>
             </div>
+
+<div className={styles.payoutBox}>
+  <div className={styles.panelHeader}>
+    <div>
+      <p className={styles.sectionEyebrow}>ACCREDITO</p>
+      <h3>Richiedi accredito su conto corrente</h3>
+    </div>
+    <span className={styles.panelBadge}>Manuale</span>
+  </div>
+
+  <label className={styles.inputLabel}>Importo euro da accreditare</label>
+  <input
+    className={styles.inputControl}
+    type="number"
+    min="0"
+    step="0.01"
+    value={payoutAmount}
+    onChange={(e) => setPayoutAmount(e.target.value)}
+    placeholder="Es. 50"
+  />
+
+  <label className={styles.inputLabel}>IBAN</label>
+  <input
+    className={styles.inputControl}
+    value={iban}
+    onChange={(e) => setIban(e.target.value)}
+    placeholder="IT00X0000000000000000000000"
+  />
+
+  <label className={styles.inputLabel}>Intestatario conto</label>
+  <input
+    className={styles.inputControl}
+    value={accountHolder}
+    onChange={(e) => setAccountHolder(e.target.value)}
+    placeholder="Nome e cognome / Ragione sociale"
+  />
+
+  <button
+    type="button"
+    className={styles.primaryBtn}
+    onClick={requestPayout}
+    disabled={requestingPayout}
+  >
+    {requestingPayout ? "Invio richiesta..." : "Richiedi accredito"}
+  </button>
+</div>
 
             <aside className={styles.sideColumn}>
               <div className={styles.sideCard}>

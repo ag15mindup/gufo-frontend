@@ -437,4 +437,9 @@
   .panelHeader h3 {
     font-size: 22px;
   }
+.payoutBox {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
 }
