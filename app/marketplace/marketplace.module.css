@@ -4,12 +4,13 @@
   padding: 32px;
   color: white;
   overflow: hidden;
+
   background:
-    radial-gradient(circle at 20% 10%, rgba(0, 212, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.20), transparent 30%),
-    linear-gradient(180deg, #050816, #090b22);
+    linear-gradient(rgba(5, 5, 12, 0.74), rgba(5, 5, 12, 0.94)),
+    url("/images/gufo-nebula.png") center / cover no-repeat fixed;
 }
 
+/* GLOW BACKGROUND */
 .bgGlowA,
 .bgGlowB {
   position: absolute;
@@ -18,7 +19,7 @@
   border-radius: 999px;
   filter: blur(90px);
   pointer-events: none;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .bgGlowA {
@@ -33,15 +34,10 @@
   background: #a855f7;
 }
 
-.hero,
-.grid,
-.stateBox,
-.errorBox {
+/* HERO */
+.hero {
   position: relative;
   z-index: 2;
-}
-
-.hero {
   max-width: 980px;
   margin: 0 auto 28px;
 }
@@ -79,6 +75,7 @@
   color: rgba(255, 255, 255, 0.72);
 }
 
+/* FILTERS */
 .filters {
   position: relative;
   z-index: 2;
@@ -109,6 +106,7 @@
   min-width: 170px;
 }
 
+/* GRID */
 .grid {
   max-width: 1180px;
   margin: 0 auto;
@@ -117,6 +115,7 @@
   gap: 18px;
 }
 
+/* CARD */
 .card {
   padding: 22px;
   border-radius: 28px;
@@ -170,6 +169,7 @@
   opacity: 0.9;
 }
 
+/* INFO */
 .meta {
   display: grid;
   gap: 8px;
@@ -184,17 +184,6 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  display: grid;
-  gap: 5px;
-}
-
-.infoBox strong {
-  font-size: 14px;
-}
-
-.infoBox span {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.68);
 }
 
 .cta {
@@ -208,24 +197,9 @@
   font-weight: 900;
   text-decoration: none;
   background: linear-gradient(135deg, #7c3aed, #2563eb);
-  box-shadow: 0 0 24px rgba(124, 58, 237, 0.22);
 }
 
-.stateBox,
-.errorBox {
-  max-width: 800px;
-  margin: 20px auto 0;
-  padding: 22px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.errorBox {
-  color: #ffdede;
-  background: rgba(120, 30, 50, 0.34);
-}
-
+/* RESPONSIVE */
 @media (max-width: 1050px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -249,29 +223,4 @@
     width: 100%;
     min-height: 70px;
   }
-.logoBox {
-  width: 100%;
-  height: 150px;
-  border-radius: 22px;
-  overflow: hidden;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.logoImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.logoFallback {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  font-size: 46px;
-  background: radial-gradient(circle at top, rgba(124, 58, 237, 0.35), rgba(6, 182, 212, 0.12));
-}
 }
