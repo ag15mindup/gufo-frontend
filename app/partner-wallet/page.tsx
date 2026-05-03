@@ -276,13 +276,20 @@ async function saveBankData() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-        <div className={styles.heroBadge}>PARTNER WALLET</div>
-        <p className={styles.eyebrow}>GUFO LIQUIDITY MODULE</p>
-        <h1 className={styles.title}>Wallet Partner</h1>
-        <p className={styles.subtitle}>
-          Gestisci i GUFO ricevuti dai voucher e convertili in euro con fee partner del 5%.
-        </p>
-      </section>
+  <div className={styles.heroBadge}>PARTNER WALLET</div>
+
+  <div className={styles.balanceHero}>
+    <p className={styles.balanceLabel}>Disponibile ora</p>
+    <h1 className={styles.balanceAmount}>€ {balanceEur.toFixed(2)}</h1>
+    <p className={styles.balanceSub}>
+      {balanceGufo.toFixed(2)} GUFO disponibili · Fee conversione {Math.round(feePercent * 100)}%
+    </p>
+  </div>
+
+  <p className={styles.subtitle}>
+    Gestisci incassi voucher, conversione GUFO e accredito su conto corrente.
+  </p>
+</section>
 
       {loading ? (
         <div className={styles.loadingBox}>Caricamento wallet partner...</div>
