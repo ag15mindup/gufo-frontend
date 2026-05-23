@@ -166,6 +166,8 @@ export default function PartnerConsolePage() {
   const [loadingClaims, setLoadingClaims] = useState(false);
   const [partnerCode, setPartnerCode] = useState("");
   const [showWalletScanner, setShowWalletScanner] = useState(false);
+  const [gufoRedeemLoading, setGufoRedeemLoading] = useState(false);
+  const [gufoRedeemResult, setGufoRedeemResult] = useState<any>(null);
 
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
@@ -507,6 +509,59 @@ function handleWalletQr(decodedText: string) {
       setLoadingPayment(false);
     }
   }
+
+async function handleRedeemGufo() {
+  try {
+    setError("");
+    setGufoRedeemResult(null);
+
+    if (!customer) {
+      setError("Cerca prima un cliente");
+      return;
+    }
+
+    const amountEuro = toNumberSafe(amount);
+    const gufoToUse = Math.min(
+      toNumberSafe(customer.balance_gufo),
+      amountEuro
+    );
+
+    if (amountEuro <= 0 || gufoToUse <= 0) {
+      setError("Importo o saldo GUFO non valido");
+      return;
+    }
+
+    setGufoRedeemLoading(true);
+
+    const { response, data } = await safeJsonFetch(
+      `${API_URL}/partner/redeem-gufo`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          partner_user_id: partnerUserId,
+          customer_code: customer.customer_code,
+          amount_euro: amountEuro,
+          gufo_to_use: gufoToUse,
+        }),
+      }
+    );
+
+    if (!response.ok || data?.success === false) {
+      throw new Error(data?.error || "Errore utilizzo GUFO");
+    }
+
+    setGufoRedeemResult(data);
+    await refreshCustomer(customer.customer_code);
+    setAmount(String(data.amount_to_pay_euro || 0));
+  } catch (err: any) {
+    setError(err.message || "Errore utilizzo GUFO");
+  } finally {
+    setGufoRedeemLoading(false);
+  }
+}
 
   const handleVoucherScan = async (decodedText: string) => {
     try {
@@ -1029,6 +1084,57 @@ setAmount(String(newAmount.toFixed(2)));
             </div>
           )}
 
+{customer && previewAmount > 0 && (
+  <div className={styles.previewBox}>
+    <h4 className={styles.previewTitle}>Utilizzo GUFO</h4>
+
+    <div className={styles.previewGrid}>
+      <div className={styles.previewRow}>
+        <span>Saldo GUFO cliente</span>
+        <strong>
+          {toNumberSafe(customer.balance_gufo).toFixed(2)}
+        </strong>
+      </div>
+
+      <div className={styles.previewRow}>
+        <span>GUFO utilizzabili</span>
+        <strong>
+          {Math.min(
+            toNumberSafe(customer.balance_gufo),
+            previewAmount
+          ).toFixed(2)}
+        </strong>
+      </div>
+
+      <div className={styles.previewRow}>
+        <span>Da pagare dopo GUFO</span>
+        <strong>
+          €
+          {Math.max(
+            0,
+            previewAmount -
+              Math.min(
+                toNumberSafe(customer.balance_gufo),
+                previewAmount
+              )
+          ).toFixed(2)}
+        </strong>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      className={styles.primaryBtnWide}
+      disabled={gufoRedeemLoading}
+      onClick={handleRedeemGufo}
+    >
+      {gufoRedeemLoading
+        ? "Utilizzo GUFO..."
+        : "🦉 Usa GUFO"}
+    </button>
+  </div>
+)}
+
           <button
   type="submit"
   disabled={
@@ -1147,6 +1253,21 @@ setAmount(String(newAmount.toFixed(2)));
           </div>
         )}
       </section>
+
+      {gufoRedeemResult?.success && (
+         <div className={styles.successBox}>
+         ✅ GUFO utilizzati
+
+         <br />
+
+        GUFO usati: {gufoRedeemResult.gufo_used}
+
+        <br />
+
+        Da pagare:
+        € {gufoRedeemResult.amount_to_pay_euro}
+       </div>
+       )}
 
       {error && <div className={styles.errorBox}>{error}</div>}
 
