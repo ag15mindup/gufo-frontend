@@ -1149,7 +1149,7 @@ setAmount(String(newAmount.toFixed(2)));
     ? "Pagamento coperto dal voucher"
     : loadingPayment
     ? "Pagamento in corso..."
-    : "Conferma pagamento"}
+    : "Conferma pagamento TEST GUFO"}
 </button>
 
 {toNumberSafe(amount) <= 0 && voucherData && (
