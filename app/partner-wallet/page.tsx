@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { safeJsonFetch } from "@/lib/api";
 import styles from "./partner-wallet.module.css";
+
 
 type WalletResponse = {
   success: boolean;
   error?: string;
   partner?: {
-  id: number;
-  name: string;
-  category?: string | null;
-  iban?: string | null;
-  account_holder?: string | null;
-};
+    id: number;
+    name: string;
+    category?: string | null;
+    iban?: string | null;
+    account_holder?: string | null;
+  };
   wallet?: {
     balance_gufo: number;
     balance_eur: number;
@@ -26,14 +27,6 @@ type ConvertResponse = {
   success: boolean;
   error?: string;
   message?: string;
-  conversion?: {
-    gufo_amount: number;
-    gross_amount: number;
-    fee_percent: number;
-    fee_amount: number;
-    net_amount: number;
-    currency: string;
-  };
   wallet?: {
     balance_gufo: number;
     balance_eur: number;
@@ -56,14 +49,25 @@ export default function PartnerWalletPage() {
   const [feePercent, setFeePercent] = useState(0.05);
 
   const [amountGufo, setAmountGufo] = useState("");
-const [payoutAmount, setPayoutAmount] = useState("");
-const [iban, setIban] = useState("");
-const [accountHolder, setAccountHolder] = useState("");
+  const [payoutAmount, setPayoutAmount] = useState("");
+  const [iban, setIban] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  const convertSectionRef = useRef<HTMLElement | null>(null);
+  const payoutSectionRef = useRef<HTMLElement | null>(null);
+
+  function scrollToSection(ref: React.RefObject<HTMLElement | null>) {
+  ref.current?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+
   const amountNumber = Number(amountGufo || 0);
+  const payoutNumber = Number(payoutAmount || 0);
 
   const preview = useMemo(() => {
     if (!Number.isFinite(amountNumber) || amountNumber <= 0) {
@@ -160,111 +164,109 @@ const [accountHolder, setAccountHolder] = useState("");
     }
   }
 
-async function requestPayout() {
-  try {
-    setRequestingPayout(true);
-    setError("");
-    setMessage("");
+  async function saveBankData() {
+    try {
+      setSavingBankData(true);
+      setError("");
+      setMessage("");
 
-    const amount = Number(payoutAmount || 0);
+      if (!partnerUserId) {
+        setError("Partner non riconosciuto.");
+        return;
+      }
 
-    if (!partnerUserId) {
-      setError("Partner non riconosciuto.");
-      return;
+      if (!iban.trim()) {
+        setError("Inserisci IBAN.");
+        return;
+      }
+
+      if (!accountHolder.trim()) {
+        setError("Inserisci intestatario conto.");
+        return;
+      }
+
+      const result = await safeJsonFetch("/partner/settings", {
+        method: "POST",
+        body: JSON.stringify({
+          partner_user_id: partnerUserId,
+          name: partnerName,
+          iban,
+          account_holder: accountHolder,
+          cashback_percent: 2,
+        }),
+      });
+
+      const data = result.data as any;
+
+      if (!data?.success) {
+        throw new Error(data?.error || "Errore salvataggio dati bancari");
+      }
+
+      setMessage("Dati bancari salvati correttamente.");
+    } catch (err: any) {
+      setError(err?.message || "Errore salvataggio dati bancari");
+    } finally {
+      setSavingBankData(false);
     }
-
-    if (!Number.isFinite(amount) || amount <= 0) {
-      setError("Inserisci un importo valido.");
-      return;
-    }
-
-    if (amount > balanceEur) {
-      setError("Saldo euro insufficiente.");
-      return;
-    }
-
-    if (!iban.trim()) {
-      setError("Inserisci IBAN.");
-      return;
-    }
-
-    if (!accountHolder.trim()) {
-      setError("Inserisci intestatario conto.");
-      return;
-    }
-
-    const result = await safeJsonFetch("/partner/payout-request", {
-      method: "POST",
-      body: JSON.stringify({
-        partner_user_id: partnerUserId,
-        amount_eur: amount,
-        iban,
-        account_holder: accountHolder,
-      }),
-    });
-
-    const data = result.data as any;
-
-    if (!data?.success) {
-      throw new Error(data?.error || "Errore richiesta accredito");
-    }
-
-    setBalanceGufo(Number(data.wallet?.balance_gufo || 0));
-    setBalanceEur(Number(data.wallet?.balance_eur || 0));
-    setPayoutAmount("");
-    setMessage("Richiesta accredito inviata. Stato: in attesa.");
-  } catch (err: any) {
-    setError(err?.message || "Errore richiesta accredito");
-  } finally {
-    setRequestingPayout(false);
   }
-}
 
-async function saveBankData() {
-  try {
-    setSavingBankData(true);
-    setError("");
-    setMessage("");
+  async function requestPayout() {
+    try {
+      setRequestingPayout(true);
+      setError("");
+      setMessage("");
 
-    if (!partnerUserId) {
-      setError("Partner non riconosciuto.");
-      return;
+      if (!partnerUserId) {
+        setError("Partner non riconosciuto.");
+        return;
+      }
+
+      if (!Number.isFinite(payoutNumber) || payoutNumber <= 0) {
+        setError("Inserisci un importo valido.");
+        return;
+      }
+
+      if (payoutNumber > balanceEur) {
+        setError("Saldo euro insufficiente.");
+        return;
+      }
+
+      if (!iban.trim()) {
+        setError("Inserisci IBAN.");
+        return;
+      }
+
+      if (!accountHolder.trim()) {
+        setError("Inserisci intestatario conto.");
+        return;
+      }
+
+      const result = await safeJsonFetch("/partner/payout-request", {
+        method: "POST",
+        body: JSON.stringify({
+          partner_user_id: partnerUserId,
+          amount_eur: payoutNumber,
+          iban,
+          account_holder: accountHolder,
+        }),
+      });
+
+      const data = result.data as any;
+
+      if (!data?.success) {
+        throw new Error(data?.error || "Errore richiesta accredito");
+      }
+
+      setBalanceGufo(Number(data.wallet?.balance_gufo || 0));
+      setBalanceEur(Number(data.wallet?.balance_eur || 0));
+      setPayoutAmount("");
+      setMessage("Richiesta accredito inviata. Stato: in attesa.");
+    } catch (err: any) {
+      setError(err?.message || "Errore richiesta accredito");
+    } finally {
+      setRequestingPayout(false);
     }
-
-    if (!iban.trim()) {
-      setError("Inserisci IBAN.");
-      return;
-    }
-
-    if (!accountHolder.trim()) {
-      setError("Inserisci intestatario conto.");
-      return;
-    }
-
-    const result = await safeJsonFetch("/partner/settings", {
-      method: "POST",
-      body: JSON.stringify({
-        partner_user_id: partnerUserId,
-        name: partnerName,
-        iban,
-        account_holder: accountHolder,
-        cashback_percent: 2,
-      }),
-    });
-
-    const data = result.data as any;
-
-    if (!data?.success) {
-      throw new Error(data?.error || "Errore salvataggio dati bancari");
-    }
-
-    setMessage("Dati bancari salvati correttamente.");
-  } catch (err: any) {
-    setError(err?.message || "Errore salvataggio dati bancari");
-  } finally {
-    setSavingBankData(false);
   }
-}
 
   useEffect(() => {
     loadWallet();
@@ -276,20 +278,17 @@ async function saveBankData() {
       <div className={styles.rainbowLine} />
 
       <section className={styles.hero}>
-  <div className={styles.heroBadge}>PARTNER WALLET</div>
+        <div>
+          <h1 className={styles.title}>Wallet Partner</h1>
+          <p className={styles.subtitle}>
+            Gestisci i tuoi GUFO e richiedi accrediti in euro.
+          </p>
+        </div>
 
-  <div className={styles.balanceHero}>
-    <p className={styles.balanceLabel}>Disponibile ora</p>
-    <h1 className={styles.balanceAmount}>€ {balanceEur.toFixed(2)}</h1>
-    <p className={styles.balanceSub}>
-      {balanceGufo.toFixed(2)} GUFO disponibili · Fee conversione {Math.round(feePercent * 100)}%
-    </p>
-  </div>
-
-  <p className={styles.subtitle}>
-    Gestisci incassi voucher, conversione GUFO e accredito su conto corrente.
-  </p>
-</section>
+        <div className={styles.partnerPill}>
+          <span>{partnerName}</span>
+        </div>
+      </section>
 
       {loading ? (
         <div className={styles.loadingBox}>Caricamento wallet partner...</div>
@@ -298,162 +297,174 @@ async function saveBankData() {
           {error ? <div className={styles.errorBox}>{error}</div> : null}
           {message ? <div className={styles.successBox}>{message}</div> : null}
 
-          <section className={styles.operatorCard}>
-            <div>
-              <span className={styles.operatorChip}>Partner attivo</span>
-              <p className={styles.operatorLabel}>Locale collegato</p>
-              <h2 className={styles.operatorValue}>{partnerName}</h2>
-              <p className={styles.operatorNote}>
-                I GUFO ricevuti dai voucher riscattati dai clienti finiscono qui.
-                Da questa pagina puoi convertirli in euro.
+          <section className={styles.balanceHero}>
+            <div className={styles.balanceLeft}>
+              <p className={styles.balanceLabel}>Saldo euro disponibile</p>
+              <h2 className={styles.balanceAmount}>€ {balanceEur.toFixed(2)}</h2>
+              <span className={styles.growthBadge}>Fee conversione {Math.round(feePercent * 100)}%</span>
+            </div>
+
+
+            <div className={styles.balanceDivider} />
+
+            <div className={styles.balanceRight}>
+              <p className={styles.balanceLabel}>GUFO disponibili</p>
+              <div className={styles.gufoRow}>
+                <span className={styles.gufoIcon}>G</span>
+                <strong>{balanceGufo.toFixed(2)} GUFO</strong>
+              </div>
+              <p className={styles.balanceSub}>
+                Valore stimato € {(balanceGufo * (1 - feePercent)).toFixed(2)}
               </p>
             </div>
 
-            <div className={styles.operatorCardRight}>
-              <div className={styles.operatorMiniCard}>
-                <span>Saldo GUFO</span>
-                <strong>{balanceGufo.toFixed(2)} GUFO</strong>
+            <div className={styles.balanceActions}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={() => scrollToSection(convertSectionRef)}   
+              >
+                Converti GUFO in euro
+              </button>
+
+              <button
+                type="button"
+                className={styles.accentBtn}
+                onClick={() => scrollToSection(payoutSectionRef)}
+              >
+                Richiedi accredito
+              </button>
+            </div>
+          </section>
+
+          <section ref={convertSectionRef} className={styles.panel}>
+              <div className={styles.panelHeader}>
+              <h3>Converti GUFO in euro</h3>
+              <p>Scegli quanti GUFO convertire in euro.</p>
+          </div>
+            
+
+            <div className={styles.convertGrid}>
+              <div className={styles.inputCard}>
+                <label className={styles.inputLabel}>Importo GUFO da convertire</label>
+                <input
+                  className={styles.inputControl}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={amountGufo}
+                  onChange={(e) => setAmountGufo(e.target.value)}
+                  placeholder="Es. 5"
+                />
+                <p className={styles.availableText}>Disponibili: {balanceGufo.toFixed(2)} GUFO</p>
               </div>
 
-              <div className={styles.operatorMiniCard}>
-                <span>Saldo euro netto</span>
-                <strong>€ {balanceEur.toFixed(2)}</strong>
+              <div className={styles.summaryCard}>
+                <h4>Riepilogo conversione</h4>
+               <div className={styles.summaryRow}>
+               <span>Importo lordo</span>
+               <strong>{amountGufo ? `${preview.gross.toFixed(2)} GUFO` : "—"}</strong>
+               </div>
+               <div className={styles.summaryRow}>
+              <span>Fee piattaforma ({Math.round(feePercent * 100)}%)</span>
+              <strong>{amountGufo ? `- ${preview.fee.toFixed(2)} GUFO` : "—"}</strong>
+              </div>
+              <div className={styles.summaryTotal}>
+              <span>Ricevi</span>
+              <strong>{amountGufo ? `€ ${preview.net.toFixed(2)}` : "—"}</strong>
+              </div>
+              </div>
+            </div>
+
+            <button
+  type="button"
+  className={styles.primaryBtn}
+  onClick={convertGufo}
+  disabled={converting || !amountNumber || amountNumber <= 0}
+>
+         {converting ? "Conversione in corso..." : "Converti ora"}
+         </button>
+          {!amountNumber || amountNumber <= 0 ? (
+        <p className={styles.hintText}>Inserisci un importo per continuare</p>
+        ) : null}
+          </section>
+
+          <section ref={payoutSectionRef} className={styles.panel}>
+           <div className={styles.panelHeader}>
+           <h3>Richiedi accredito su conto corrente</h3>
+           <p>Trasferisci il saldo euro sul tuo conto bancario.</p>
+           </div>   
+            
+
+            <div className={styles.payoutGrid}>
+              <div className={styles.bankCard}>
+                <label className={styles.inputLabel}>🏦 IBAN</label>
+                <input
+                  className={styles.inputControl}
+                  value={iban}
+                  onChange={(e) => setIban(e.target.value)}
+                  placeholder="IT00X0000000000000000000000"
+                />
+
+                <label className={styles.inputLabel}>Intestatario conto</label>
+                <input
+                  className={styles.inputControl}
+                  value={accountHolder}
+                  onChange={(e) => setAccountHolder(e.target.value)}
+                  placeholder="Nome e cognome / Ragione sociale"
+                />
+
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={saveBankData}
+                  disabled={savingBankData}
+                >
+                  {savingBankData ? "Salvataggio..." : "Salva dati bancari"}
+                </button>
               </div>
 
-              <div className={styles.operatorMiniCard}>
-                <span>Fee conversione</span>
-                <strong>{Math.round(feePercent * 100)}%</strong>
+              <div className={styles.bankCard}>
+                <label className={styles.inputLabel}>💶 Importo da accreditare</label>
+                <input
+                  className={styles.inputControl}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={payoutAmount}
+                  onChange={(e) => setPayoutAmount(e.target.value)}
+                  placeholder="Es. 0.95"
+                />
+
+                <p className={styles.availableText}>Disponibile: € {balanceEur.toFixed(2)}</p>
+
+                <button
+                  type="button"
+                  className={styles.accentBtn}
+                  onClick={requestPayout}
+                  disabled={requestingPayout || !payoutNumber || payoutNumber <= 0}
+                >
+                  {requestingPayout ? "Invio richiesta..." : "Richiedi accredito"}
+                </button>
               </div>
             </div>
           </section>
 
-          <section className={styles.mainGrid}>
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <p className={styles.sectionEyebrow}>CONVERSIONE</p>
-                  <h3>Converti GUFO in euro</h3>
-                </div>
-                <span className={styles.panelBadge}>
-                  Fee {Math.round(feePercent * 100)}%
-                </span>
-              </div>
+          <section className={styles.infoGrid}>
+          <div className={styles.infoCard}>
+          <h4>1. Ricevi GUFO</h4>
+          <p>I GUFO dei voucher riscattati dai clienti finiscono qui.</p>
+          </div>
 
-              <label className={styles.inputLabel}>
-                Importo GUFO da convertire
-              </label>
+          <div className={styles.infoCard}>
+          <h4>2. Converti</h4>
+          <p>Converti i GUFO in euro. Fee piattaforma: {Math.round(feePercent * 100)}%.</p>
+          </div>
 
-              <input
-                className={styles.inputControl}
-                type="number"
-                min="0"
-                step="0.01"
-                value={amountGufo}
-                onChange={(e) => setAmountGufo(e.target.value)}
-                placeholder="Es. 100"
-              />
-
-              <div className={styles.previewGrid}>
-                <div className={styles.previewCard}>
-                  <span>Lordo</span>
-                  <strong>{preview.gross.toFixed(2)} GUFO</strong>
-                </div>
-
-                <div className={styles.previewCard}>
-                  <span>Fee piattaforma</span>
-                  <strong>{preview.fee.toFixed(2)} GUFO</strong>
-                </div>
-
-                <div className={styles.previewCard}>
-                  <span>Netto partner</span>
-                  <strong>€ {preview.net.toFixed(2)}</strong>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                className={styles.primaryBtn}
-                onClick={convertGufo}
-                disabled={converting || !amountNumber || amountNumber <= 0}
-              >
-                {converting ? "Conversione in corso..." : "Converti in euro"}
-              </button>
-            </div>
-
-<div className={styles.payoutBox}>
-  <div className={styles.panelHeader}>
-    <div>
-      <p className={styles.sectionEyebrow}>ACCREDITO</p>
-      <h3>Richiedi accredito su conto corrente</h3>
-    </div>
-    <span className={styles.panelBadge}>Manuale</span>
-  </div>
-
-  <label className={styles.inputLabel}>Importo euro da accreditare</label>
-  <input
-    className={styles.inputControl}
-    type="number"
-    min="0"
-    step="0.01"
-    value={payoutAmount}
-    onChange={(e) => setPayoutAmount(e.target.value)}
-    placeholder="Es. 50"
-  />
-
-  <label className={styles.inputLabel}>IBAN</label>
-  <input
-    className={styles.inputControl}
-    value={iban}
-    onChange={(e) => setIban(e.target.value)}
-    placeholder="IT00X0000000000000000000000"
-  />
-
-  <label className={styles.inputLabel}>Intestatario conto</label>
-  <input
-    className={styles.inputControl}
-    value={accountHolder}
-    onChange={(e) => setAccountHolder(e.target.value)}
-    placeholder="Nome e cognome / Ragione sociale"
-  />
-
-<button
-  type="button"
-  className={styles.primaryBtn}
-  onClick={saveBankData}
-  disabled={savingBankData}
->
-  {savingBankData ? "Salvataggio..." : "Salva dati bancari"}
-</button>
-
-  <button
-    type="button"
-    className={styles.primaryBtn}
-    onClick={requestPayout}
-    disabled={requestingPayout}
-  >
-    {requestingPayout ? "Invio richiesta..." : "Richiedi accredito"}
-  </button>
-</div>
-
-            <aside className={styles.sideColumn}>
-              <div className={styles.sideCard}>
-                <p className={styles.sideLabel}>Regola economica</p>
-                <h4>Fee solo sulla conversione</h4>
-                <span>
-                  Il partner paga il 5% solo quando decide di convertire GUFO o
-                  voucher riscattati in euro.
-                </span>
-              </div>
-
-              <div className={styles.sideCard}>
-                <p className={styles.sideLabel}>Esempio</p>
-                <h4>100 GUFO → €95</h4>
-                <span>
-                  Su 100 GUFO convertiti, 5 GUFO sono fee piattaforma e 95€
-                  diventano saldo euro netto.
-                </span>
-              </div>
-            </aside>
+          <div className={styles.infoCard}>
+          <h4>3. Richiedi accredito</h4>
+          <p>Trasferisci il saldo euro sul conto corrente indicato.</p>
+          </div>
           </section>
         </>
       )}

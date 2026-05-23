@@ -76,22 +76,14 @@ function getTransactionType(tx: any) {
 
 function formatTransactionType(type?: string) {
   const value = String(type || "-").toLowerCase();
-
   switch (value) {
-    case "cashback":
-      return "Cashback";
-    case "payment":
-      return "Pagamento";
-    case "bonus":
-      return "Bonus";
-    case "buy":
-      return "Acquisto";
-    case "acquisto":
-      return "Acquisto";
-    case "withdraw":
-      return "Prelievo";
-    default:
-      return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
+    case "cashback": return "Cashback";
+    case "payment": return "Pagamento";
+    case "bonus": return "Bonus";
+    case "buy": return "Acquisto";
+    case "acquisto": return "Acquisto";
+    case "withdraw": return "Prelievo";
+    default: return value === "-" ? "-" : value.charAt(0).toUpperCase() + value.slice(1);
   }
 }
 
@@ -109,12 +101,8 @@ function getTransactionMerchant(tx: any) {
 
 function getTransactionAmount(tx: any) {
   return toNumberSafe(
-    tx?.amount_euro ??
-      tx?.amount ??
-      tx?.importo ??
-      tx?.raw?.amount_euro ??
-      tx?.raw?.amount ??
-      tx?.raw?.importo
+    tx?.amount_euro ?? tx?.amount ?? tx?.importo ??
+    tx?.raw?.amount_euro ?? tx?.raw?.amount ?? tx?.raw?.importo
   );
 }
 
@@ -133,26 +121,19 @@ function formatDateTime(value?: string | null) {
 
 function getTypeTone(type: string, stylesObj: any) {
   const normalized = String(type).toLowerCase();
-
   if (normalized.includes("cashback")) return stylesObj.greenBadge;
   if (normalized.includes("bonus")) return stylesObj.purpleBadge;
   if (normalized.includes("payment")) return stylesObj.blueBadge;
   if (normalized.includes("withdraw")) return stylesObj.orangeBadge;
-  if (normalized.includes("buy") || normalized.includes("acquisto")) {
-    return stylesObj.cyanBadge;
-  }
-
+  if (normalized.includes("buy") || normalized.includes("acquisto")) return stylesObj.cyanBadge;
   return "";
 }
 
 function isToday(dateValue?: string | null) {
   if (!dateValue) return false;
-
   const date = new Date(dateValue);
   if (Number.isNaN(date.getTime())) return false;
-
   const now = new Date();
-
   return (
     date.getDate() === now.getDate() &&
     date.getMonth() === now.getMonth() &&
@@ -162,11 +143,8 @@ function isToday(dateValue?: string | null) {
 
 function getCustomerId(tx: any) {
   return (
-    tx?.user_id ??
-    tx?.raw?.user_id ??
-    tx?.customer_id ??
-    tx?.raw?.customer_id ??
-    null
+    tx?.user_id ?? tx?.raw?.user_id ??
+    tx?.customer_id ?? tx?.raw?.customer_id ?? null
   );
 }
 
@@ -179,8 +157,9 @@ export default function PartnerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
-const [cancelLoadingId, setCancelLoadingId] = useState<string | null>(null);
-const [cancelMessage, setCancelMessage] = useState("");
+  const [cancelLoadingId, setCancelLoadingId] = useState<string | null>(null);
+  const [cancelMessage, setCancelMessage] = useState("");
+
   async function loadPartnerStats(userId: string) {
     try {
       setLoading(true);
@@ -189,9 +168,6 @@ const [cancelMessage, setCancelMessage] = useState("");
       const result = await safeJsonFetch(
         `${API_URL}/partner/stats/me?user_id=${encodeURIComponent(userId)}`
       );
-
-      console.log("API_URL:", API_URL);
-      console.log("RESULT:", result);
 
       const response = result?.response;
       const payload = result?.data as PartnerStatsResponse | undefined;
@@ -207,12 +183,7 @@ const [cancelMessage, setCancelMessage] = useState("");
       setData(payload);
       setTransactions(rawTransactions);
     } catch (err: any) {
-      console.error("Partner stats error:", err);
-
-      setError(
-        err?.message || err?.error || err?.toString?.() || "Errore sconosciuto"
-      );
-
+      setError(err?.message || err?.error || err?.toString?.() || "Errore sconosciuto");
       setData(null);
       setTransactions([]);
     } finally {
@@ -226,9 +197,7 @@ const [cancelMessage, setCancelMessage] = useState("");
         setLoading(true);
         setError("");
 
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
+        const { data: { user } } = await supabase.auth.getUser();
 
         if (!user) {
           router.push("/login");
@@ -269,65 +238,56 @@ const [cancelMessage, setCancelMessage] = useState("");
   }, [router]);
 
   function canCancelTransaction(tx: Transaction) {
-  const type = String(getTransactionType(tx)).toLowerCase();
-  const status = String(tx?.raw?.status || "").toLowerCase();
-
-  if (type !== "payment") return false;
-  if (status && status !== "completed") return false;
-  if (!tx.created_at) return false;
-
-  const createdAt = new Date(tx.created_at);
-  if (Number.isNaN(createdAt.getTime())) return false;
-
-  const diffMinutes = (Date.now() - createdAt.getTime()) / 1000 / 60;
-
-  return diffMinutes <= 5;
-}
-
-async function handleCancelTransaction(tx: Transaction) {
-  const paymentId = getTransactionId(tx);
-
-  if (!paymentId) {
-    setCancelMessage("ID pagamento non trovato.");
-    return;
+    const type = String(getTransactionType(tx)).toLowerCase();
+    const status = String(tx?.raw?.status || "").toLowerCase();
+    if (type !== "payment") return false;
+    if (status && status !== "completed") return false;
+    if (!tx.created_at) return false;
+    const createdAt = new Date(tx.created_at);
+    if (Number.isNaN(createdAt.getTime())) return false;
+    const diffMinutes = (Date.now() - createdAt.getTime()) / 1000 / 60;
+    return diffMinutes <= 5;
   }
 
-  try {
-    setCancelLoadingId(String(paymentId));
-    setCancelMessage("");
-    setError("");
-
-    const { response, data } = await safeJsonFetch(
-      `${API_URL}/partner/transaction/cancel`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          partner_user_id: partnerUserId,
-          payment_transaction_id: paymentId,
-        }),
-      }
-    );
-
-    if (!response.ok || data?.success === false) {
-      throw new Error(data?.error || "Errore annullamento pagamento");
+  async function handleCancelTransaction(tx: Transaction) {
+    const paymentId = getTransactionId(tx);
+    if (!paymentId) {
+      setCancelMessage("ID pagamento non trovato.");
+      return;
     }
+    try {
+      setCancelLoadingId(String(paymentId));
+      setCancelMessage("");
+      setError("");
 
-    setCancelMessage("Pagamento annullato correttamente ✅");
-    await loadPartnerStats(partnerUserId);
-  } catch (err: any) {
-    setCancelMessage(err?.message || "Errore durante annullamento");
-  } finally {
-    setCancelLoadingId(null);
+      const { response, data } = await safeJsonFetch(
+        `${API_URL}/partner/transaction/cancel`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            partner_user_id: partnerUserId,
+            payment_transaction_id: paymentId,
+          }),
+        }
+      );
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || "Errore annullamento pagamento");
+      }
+
+      setCancelMessage("Pagamento annullato correttamente ✅");
+      await loadPartnerStats(partnerUserId);
+    } catch (err: any) {
+      setCancelMessage(err?.message || "Errore durante annullamento");
+    } finally {
+      setCancelLoadingId(null);
+    }
   }
-}
 
   const avgTicket = useMemo(() => {
     const totalTransactions = toNumberSafe(data?.total_transactions);
     const totalAmount = toNumberSafe(data?.total_amount);
-
     if (totalTransactions <= 0) return 0;
     return totalAmount / totalTransactions;
   }, [data]);
@@ -343,34 +303,25 @@ async function handleCancelTransaction(tx: Transaction) {
 
   const todayCustomers = useMemo(() => {
     const ids = new Set<string>();
-
     paymentTransactions.forEach((tx) => {
       if (isToday(tx?.created_at)) {
         const customerId = getCustomerId(tx);
         if (customerId) ids.add(String(customerId));
       }
     });
-
     return ids.size;
   }, [paymentTransactions]);
 
   const returnedCustomers = useMemo(() => {
     const counts = new Map<string, number>();
-
     paymentTransactions.forEach((tx) => {
       const customerId = getCustomerId(tx);
       if (!customerId) return;
-
       const key = String(customerId);
       counts.set(key, (counts.get(key) || 0) + 1);
     });
-
     let returned = 0;
-
-    counts.forEach((count) => {
-      if (count >= 2) returned += 1;
-    });
-
+    counts.forEach((count) => { if (count >= 2) returned += 1; });
     return returned;
   }, [paymentTransactions]);
 
@@ -390,17 +341,14 @@ async function handleCancelTransaction(tx: Transaction) {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
-
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
-            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
-            <h1 className={styles.title}>Partner dashboard</h1>
-            <p className={styles.subtitle}>Controllo accesso partner...</p>
+            <h1 className={styles.title}>Partner Dashboard</h1>
+            <p className={styles.subtitle}>Verifica accesso in corso...</p>
           </div>
         </section>
-
-        <div className={styles.loadingBox}>Verifica autorizzazione...</div>
+        <div className={styles.loadingBox}>Caricamento...</div>
       </div>
     );
   }
@@ -410,16 +358,13 @@ async function handleCancelTransaction(tx: Transaction) {
       <div className={styles.page}>
         <div className={styles.bgOverlay} />
         <div className={styles.rainbowLine} />
-
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
-            <p className={styles.eyebrow}>GUFO Partner Analytics</p>
-            <h1 className={styles.title}>Partner dashboard</h1>
+            <h1 className={styles.title}>Partner Dashboard</h1>
             <p className={styles.subtitle}>Si è verificato un problema.</p>
           </div>
         </section>
-
         <div className={styles.errorBox}>{error}</div>
       </div>
     );
@@ -430,128 +375,98 @@ async function handleCancelTransaction(tx: Transaction) {
       <div className={styles.bgOverlay} />
       <div className={styles.rainbowLine} />
 
+      {/* HERO */}
       <section className={styles.hero}>
         <div className={styles.heroCopy}>
           <div className={styles.heroBadge}>GUFO PARTNER ANALYTICS</div>
-          <p className={styles.eyebrow}>GUFO Partner Analytics</p>
-          <h1 className={styles.title}>Controllo partner</h1>
+          <h1 className={styles.title}>Partner Dashboard</h1>
           <p className={styles.subtitle}>
-            Dashboard automatica del partner loggato con volumi, clienti attivi,
-            GUFO distribuiti e attività recente.
-          </p>
-          <p className={styles.heroDescription}>
-            Il partner viene collegato automaticamente all’utente autenticato.
+            Volumi, clienti attivi, GUFO distribuiti e attività recente del tuo punto vendita.
           </p>
         </div>
       </section>
 
+      {/* ACTION BAR */}
       <section className={styles.actionBar}>
         <div className={styles.actionCard}>
           <div className={styles.actionLeft}>
             <span className={styles.actionBadge}>Azioni rapide</span>
-            <h3 className={styles.actionTitle}>Controllo operativo partner</h3>
+            <h3 className={styles.actionTitle}>Controllo operativo</h3>
             <p className={styles.actionSubtitle}>
-              Registra pagamenti, scansiona clienti e gestisci cashback in tempo
-              reale.
+              Registra pagamenti, scansiona clienti e gestisci cashback in tempo reale.
             </p>
           </div>
 
           <div className={styles.actionButtons}>
-            <Link
-              href="/partner-console"
-              className={`${styles.actionBtn} ${styles.primaryAction} ${styles.actionLink}`}
-            >
+            <Link href="/partner-console" className={`${styles.actionBtn} ${styles.primaryAction} ${styles.actionLink}`}>
               💳 Registra pagamento
             </Link>
-
-            <Link
-              href="/partner-scan"
-              className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
-            >
+            <Link href="/partner-scan" className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}>
               📷 Scansiona cliente
             </Link>
-
-<Link
-  href="/partner-console"
-  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
->
-  🎟️ Scansiona voucher
-</Link>
-
-          <Link
-  href="/partner-settings"
-  className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}
->
-  ⚙️ Impostazioni partner
-</Link>
+            <Link href="/partner-console" className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}>
+              🎟️ Scansiona voucher
+            </Link>
+            <Link href="/partner-settings" className={`${styles.actionBtn} ${styles.secondaryAction} ${styles.actionLink}`}>
+              ⚙️ Impostazioni
+            </Link>
           </div>
         </div>
       </section>
 
+      {/* OPERATOR CARD */}
       <section className={styles.operatorCard}>
         <div className={styles.operatorCardLeft}>
           <div className={styles.operatorTopRow}>
             <span className={styles.operatorChip}>Dati recenti</span>
-            <span className={styles.operatorStatus}>Partner attivo</span>
+            <span className={styles.operatorStatus}>● Partner attivo</span>
           </div>
-
           <p className={styles.operatorLabel}>Merchant riconosciuto</p>
           <h2 className={styles.operatorValue}>{data?.partner_name || "--"}</h2>
           <p className={styles.operatorNote}>
-            Il partner viene collegato automaticamente all’utente autenticato.
+            Collegato automaticamente all'utente autenticato.
           </p>
         </div>
 
         <div className={styles.operatorCardRight}>
           <div className={styles.operatorMiniCard}>
-            <span>Partner ID</span>
-            <strong>{toNumberSafe(data?.partner_id)}</strong>
-          </div>
-
-          <div className={styles.operatorMiniCard}>
             <span>Cashback base</span>
-            <strong>
-              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
-            </strong>
+            <strong>{toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%</strong>
           </div>
-
           <div className={styles.operatorMiniCard}>
             <span>Ultima attività</span>
             <strong>{latestDate ? formatDateTime(latestDate) : "-"}</strong>
           </div>
+          <div className={styles.operatorMiniCard}>
+            <span>Ultimo incasso</span>
+            <strong>€ {latestRevenue.toFixed(2)}</strong>
+          </div>
         </div>
       </section>
 
+      {/* METRICS */}
       <section className={styles.metricsGrid}>
         <div className={`${styles.metricCard} ${styles.metricCardPrimary}`}>
           <p className={styles.metricLabel}>Pagamenti registrati</p>
-          <h3 className={styles.metricValue}>
-            {toNumberSafe(data?.total_transactions)}
-          </h3>
+          <h3 className={styles.metricValue}>{toNumberSafe(data?.total_transactions)}</h3>
           <span className={styles.metricHint}>Operazioni gestite dal partner</span>
         </div>
 
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Volume totale</p>
-          <h3 className={styles.metricValue}>
-            € {toNumberSafe(data?.total_amount).toFixed(2)}
-          </h3>
+          <h3 className={styles.metricValue}>€ {toNumberSafe(data?.total_amount).toFixed(2)}</h3>
           <span className={styles.metricHint}>Importo complessivo registrato</span>
         </div>
 
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>GUFO distribuiti</p>
-          <h3 className={styles.metricValue}>
-            {toNumberSafe(data?.total_gufo_distributed).toFixed(2)}
-          </h3>
+          <h3 className={styles.metricValue}>{toNumberSafe(data?.total_gufo_distributed).toFixed(2)}</h3>
           <span className={styles.metricHint}>Reward accreditate ai clienti</span>
         </div>
 
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Clienti unici</p>
-          <h3 className={styles.metricValue}>
-            {toNumberSafe(data?.total_customers)}
-          </h3>
+          <h3 className={styles.metricValue}>{toNumberSafe(data?.total_customers)}</h3>
           <span className={styles.metricHint}>Persone servite dal partner</span>
         </div>
 
@@ -564,7 +479,7 @@ async function handleCancelTransaction(tx: Transaction) {
         <div className={styles.metricCard}>
           <p className={styles.metricLabel}>Clienti tornati</p>
           <h3 className={styles.metricValue}>{returnedCustomers}</h3>
-          <span className={styles.metricHint}>Clienti con almeno 2 pagamenti</span>
+          <span className={styles.metricHint}>Con almeno 2 pagamenti</span>
         </div>
 
         <div className={styles.metricCard}>
@@ -578,14 +493,9 @@ async function handleCancelTransaction(tx: Transaction) {
           <h3 className={styles.metricValue}>{todayCustomers}</h3>
           <span className={styles.metricHint}>Utenti serviti nella giornata</span>
         </div>
-
-        <div className={styles.metricCard}>
-          <p className={styles.metricLabel}>Ultimo incasso</p>
-          <h3 className={styles.metricValue}>€ {latestRevenue.toFixed(2)}</h3>
-          <span className={styles.metricHint}>Ultima transazione payment</span>
-        </div>
       </section>
 
+      {/* MAIN GRID */}
       <section className={styles.mainGrid}>
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -593,10 +503,12 @@ async function handleCancelTransaction(tx: Transaction) {
               <p className={styles.sectionEyebrow}>Recent activity</p>
               <h3>Ultime operazioni</h3>
             </div>
-{cancelMessage && (
-  <div className={styles.cancelMessage}>{cancelMessage}</div>
-)}
-            <span className={styles.panelBadge}>{transactions.length} record</span>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "10px" }}>
+              {cancelMessage && (
+                <div className={styles.cancelMessage}>{cancelMessage}</div>
+              )}
+              <span className={styles.panelBadge}>{transactions.length} record</span>
+            </div>
           </div>
 
           {transactions.length === 0 ? (
@@ -621,46 +533,33 @@ async function handleCancelTransaction(tx: Transaction) {
                       <th>Azione</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     {transactions.map((tx, index) => (
                       <tr key={tx.id || tx.transaction_id || tx.Transaction_id || index}>
                         <td>{getTransactionId(tx) || "-"}</td>
-
-                        <td className={styles.partnerCell}>
-                          {getTransactionMerchant(tx)}
-                        </td>
-
+                        <td className={styles.partnerCell}>{getTransactionMerchant(tx)}</td>
                         <td>
-                          <span
-                            className={`${styles.badge} ${getTypeTone(
-                              getTransactionType(tx),
-                              styles
-                            )}`}
-                          >
+                          <span className={`${styles.badge} ${getTypeTone(getTransactionType(tx), styles)}`}>
                             {formatTransactionType(getTransactionType(tx))}
                           </span>
                         </td>
-
                         <td>€ {getTransactionAmount(tx).toFixed(2)}</td>
                         <td>{getTransactionGufo(tx).toFixed(2)}</td>
                         <td>{formatDateTime(tx.created_at)}</td>
                         <td>
-  {canCancelTransaction(tx) ? (
-    <button
-      type="button"
-      className={styles.cancelTxBtn}
-      onClick={() => handleCancelTransaction(tx)}
-      disabled={cancelLoadingId === String(getTransactionId(tx))}
-    >
-      {cancelLoadingId === String(getTransactionId(tx))
-        ? "Annullamento..."
-        : "Annulla"}
-    </button>
-  ) : (
-    <span className={styles.cancelUnavailable}>-</span>
-  )}
-</td>
+                          {canCancelTransaction(tx) ? (
+                            <button
+                              type="button"
+                              className={styles.cancelTxBtn}
+                              onClick={() => handleCancelTransaction(tx)}
+                              disabled={cancelLoadingId === String(getTransactionId(tx))}
+                            >
+                              {cancelLoadingId === String(getTransactionId(tx)) ? "Annullamento..." : "Annulla"}
+                            </button>
+                          ) : (
+                            <span className={styles.cancelUnavailable}>-</span>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -675,48 +574,38 @@ async function handleCancelTransaction(tx: Transaction) {
                   >
                     <div className={styles.mobileTxTop}>
                       <strong>{getTransactionMerchant(tx)}</strong>
-
-                      <span
-                        className={`${styles.badge} ${getTypeTone(
-                          getTransactionType(tx),
-                          styles
-                        )}`}
-                      >
+                      <span className={`${styles.badge} ${getTypeTone(getTransactionType(tx), styles)}`}>
                         {formatTransactionType(getTransactionType(tx))}
                       </span>
                     </div>
-
                     <div className={styles.mobileTxRow}>
                       <span>Operazione</span>
                       <span>{getTransactionId(tx) || "-"}</span>
                     </div>
-
                     <div className={styles.mobileTxRow}>
                       <span>Importo</span>
                       <span>€ {getTransactionAmount(tx).toFixed(2)}</span>
                     </div>
-
                     <div className={styles.mobileTxRow}>
                       <span>GUFO</span>
                       <span>{getTransactionGufo(tx).toFixed(2)}</span>
                     </div>
-
                     <div className={styles.mobileTxRow}>
                       <span>Data</span>
                       <span>{formatDateTime(tx.created_at)}</span>
-                      {canCancelTransaction(tx) && (
-  <button
-    type="button"
-    className={styles.cancelTxBtn}
-    onClick={() => handleCancelTransaction(tx)}
-    disabled={cancelLoadingId === String(getTransactionId(tx))}
-  >
-    {cancelLoadingId === String(getTransactionId(tx))
-      ? "Annullamento..."
-      : "↩️ Annulla pagamento"}
-  </button>
-)}
                     </div>
+                    {canCancelTransaction(tx) && (
+                      <div className={styles.mobileTxRow}>
+                        <button
+                          type="button"
+                          className={styles.cancelTxBtn}
+                          onClick={() => handleCancelTransaction(tx)}
+                          disabled={cancelLoadingId === String(getTransactionId(tx))}
+                        >
+                          {cancelLoadingId === String(getTransactionId(tx)) ? "Annullamento..." : "↩️ Annulla pagamento"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -733,9 +622,7 @@ async function handleCancelTransaction(tx: Transaction) {
 
           <div className={styles.sideCard}>
             <p className={styles.sideLabel}>Cashback base</p>
-            <h4>
-              {toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%
-            </h4>
+            <h4>{toNumberSafe(data?.current_default_cashback_percent).toFixed(2)}%</h4>
             <span>Valore di riferimento del partner</span>
           </div>
 
@@ -754,13 +641,7 @@ async function handleCancelTransaction(tx: Transaction) {
           <div className={styles.sideCard}>
             <p className={styles.sideLabel}>Tasso di ritorno</p>
             <h4>{returnRate.toFixed(1)}%</h4>
-            <span>Quanto il cashback aiuta a far tornare i clienti</span>
-          </div>
-
-          <div className={styles.sideCard}>
-            <p className={styles.sideLabel}>Utente partner</p>
-            <h4>{partnerUserId ? "Connesso" : "Non connesso"}</h4>
-            <span>Riconoscimento automatico via login</span>
+            <span>Quanto il cashback aiuta a fidelizzare</span>
           </div>
         </aside>
       </section>

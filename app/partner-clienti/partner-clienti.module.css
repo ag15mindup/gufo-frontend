@@ -1,0 +1,553 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  color: #f8fbff;
+  background:
+    radial-gradient(circle at top left, rgba(0, 255, 255, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(170, 80, 255, 0.18), transparent 34%),
+    radial-gradient(circle at bottom, rgba(255, 0, 160, 0.12), transparent 35%),
+    #050712;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+  padding: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 45px rgba(0, 255, 255, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.hero h1 {
+  margin: 8px 0 12px;
+  font-size: clamp(34px, 5vw, 58px);
+  line-height: 0.95;
+}
+
+.hero p {
+  max-width: 720px;
+  color: rgba(248, 251, 255, 0.72);
+  font-size: 16px;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #5ee7ff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.heroStats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.heroStats div {
+  padding: 20px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(94, 231, 255, 0.14), rgba(255, 0, 180, 0.09));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.heroStats strong {
+  display: block;
+  font-size: 30px;
+}
+
+.heroStats span {
+  color: rgba(248, 251, 255, 0.7);
+}
+
+.segmentSection,
+.clientsPanel,
+.aiPanel {
+  margin-top: 24px;
+  padding: 24px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  backdrop-filter: blur(18px);
+}
+
+.sectionHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.sectionHead h2 {
+  margin: 6px 0 0;
+  font-size: 26px;
+}
+
+.sectionHead p {
+  max-width: 520px;
+  color: rgba(248, 251, 255, 0.66);
+}
+
+.segmentGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.segmentCard {
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+  padding: 20px;
+  text-align: left;
+  color: #f8fbff;
+  border-radius: 24px;
+  cursor: pointer;
+  background:
+    radial-gradient(circle at top left, rgba(94, 231, 255, 0.13), transparent 40%),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.segmentCard::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 180deg,
+    transparent,
+    rgba(94, 231, 255, 0.2),
+    rgba(255, 0, 180, 0.18),
+    transparent
+  );
+  opacity: 0;
+  animation: rotateGlow 8s linear infinite;
+  transition: opacity 0.25s ease;
+}
+
+.segmentCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.segmentCard:hover,
+.segmentCard.active {
+  transform: translateY(-4px);
+  border-color: rgba(94, 231, 255, 0.45);
+  box-shadow: 0 0 34px rgba(94, 231, 255, 0.13);
+}
+
+.segmentCard:hover::before,
+.segmentCard.active::before {
+  opacity: 1;
+}
+
+.segmentCard span {
+  display: inline-flex;
+  margin-bottom: 16px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: #5ee7ff;
+  background: rgba(94, 231, 255, 0.1);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.segmentCard h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.segmentCard p {
+  min-height: 38px;
+  margin: 0 0 18px;
+  color: rgba(248, 251, 255, 0.66);
+}
+
+.segmentCard small {
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1.45fr 0.8fr;
+  gap: 24px;
+}
+
+.recommendationCard {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(94, 231, 255, 0.12), transparent 42%),
+    rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(94, 231, 255, 0.16);
+}
+
+.recommendationCard strong {
+  color: #5ee7ff;
+}
+
+.recommendationCard p {
+  margin: 8px 0 0;
+  color: rgba(248, 251, 255, 0.68);
+}
+
+.recommendationCard button {
+  border: none;
+  border-radius: 16px;
+  padding: 13px 16px;
+  color: #041018;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5ee7ff, #b46cff, #ff4fd8);
+  white-space: nowrap;
+}
+
+.filterToolbar {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.filterToolbar label {
+  display: grid;
+  gap: 8px;
+  color: rgba(248, 251, 255, 0.78);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.filterToolbar input,
+.filterToolbar select {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  outline: none;
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.clientsList {
+  display: grid;
+  gap: 14px;
+}
+
+.clientCard {
+  display: grid;
+  grid-template-columns: 0.8fr 1.4fr;
+  gap: 16px;
+  align-items: center;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.clientCard h3 {
+  margin: 0 0 6px;
+}
+
+.clientCard p {
+  margin: 0;
+  color: rgba(248, 251, 255, 0.65);
+}
+
+.clientCard small {
+  display: inline-flex;
+  margin-top: 10px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #5ee7ff;
+  background: rgba(94, 231, 255, 0.1);
+  font-weight: 800;
+}
+
+.clientStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.clientStats span {
+  padding: 10px;
+  border-radius: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(248, 251, 255, 0.78);
+  font-size: 13px;
+}
+
+.aiPanel {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+  background:
+    radial-gradient(circle at top, rgba(255, 0, 180, 0.16), transparent 42%),
+    rgba(255, 255, 255, 0.06);
+}
+
+.aiPanel h2 {
+  margin: 8px 0 12px;
+  font-size: 28px;
+}
+
+.aiText {
+  color: rgba(248, 251, 255, 0.7);
+}
+
+.aiSuggestion,
+.premiumBox,
+.historyBox {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.aiSuggestion strong,
+.premiumBox strong,
+.historyBox strong {
+  color: #5ee7ff;
+}
+
+.aiSuggestion p,
+.premiumBox p {
+  color: rgba(248, 251, 255, 0.68);
+}
+
+.historyBox ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: rgba(248, 251, 255, 0.68);
+}
+
+.historyBox li {
+  margin-bottom: 8px;
+}
+
+.actionGrid {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.actionGrid button {
+  padding: 14px 16px;
+  border: none;
+  border-radius: 16px;
+  color: #041018;
+  font-weight: 900;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5ee7ff, #b46cff, #ff4fd8);
+  box-shadow: 0 0 22px rgba(94, 231, 255, 0.18);
+}
+
+.formCard {
+  position: relative;
+  overflow: hidden;
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(94, 231, 255, 0.14), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(255, 0, 180, 0.12), transparent 40%),
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(94, 231, 255, 0.16);
+  box-shadow:
+    0 0 28px rgba(94, 231, 255, 0.08),
+    inset 0 0 24px rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(18px);
+  animation: formFade 0.35s ease;
+}
+
+.formCard::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(
+    from 180deg,
+    transparent,
+    rgba(94, 231, 255, 0.14),
+    rgba(180, 108, 255, 0.14),
+    rgba(255, 79, 216, 0.14),
+    transparent
+  );
+  animation: rotateGlow 10s linear infinite;
+  opacity: 0.7;
+}
+
+.formCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.formCard h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #ffffff;
+}
+
+.formCard p {
+  margin: 0 0 18px;
+  color: rgba(248, 251, 255, 0.68);
+  line-height: 1.5;
+}
+
+.formCard label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  color: rgba(248, 251, 255, 0.82);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.formCard input,
+.formCard select,
+.formCard textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  outline: none;
+  color: #f8fbff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.formCard textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.logicBox {
+  margin: 14px 0;
+  padding: 15px;
+  border-radius: 18px;
+  background: rgba(94, 231, 255, 0.08);
+  border: 1px solid rgba(94, 231, 255, 0.16);
+}
+
+.logicBox strong {
+  color: #5ee7ff;
+}
+
+.logicBox p {
+  margin: 8px 0 0;
+  color: rgba(248, 251, 255, 0.66);
+  font-size: 13px;
+}
+
+.logicList {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: rgba(248, 251, 255, 0.72);
+}
+
+.logicList li {
+  margin-bottom: 6px;
+}
+
+.confirmButton {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px 18px;
+  border: none;
+  border-radius: 18px;
+  color: #041018;
+  font-weight: 900;
+  font-size: 14px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5ee7ff, #78c7ff, #b46cff, #ff4fd8);
+  box-shadow:
+    0 0 24px rgba(94, 231, 255, 0.18),
+    0 0 36px rgba(180, 108, 255, 0.12);
+}
+
+@keyframes rotateGlow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes formFade {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 1050px) {
+  .hero,
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .segmentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterToolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .aiPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 18px;
+  }
+
+  .segmentGrid,
+  .clientCard,
+  .clientStats {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHead,
+  .recommendationCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .recommendationCard button {
+    width: 100%;
+  }
+}
+.successBox {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  color: #dffcff;
+  font-weight: 800;
+  background: rgba(94, 231, 255, 0.1);
+  border: 1px solid rgba(94, 231, 255, 0.24);
+  box-shadow: 0 0 22px rgba(94, 231, 255, 0.1);
+  animation: formFade 0.3s ease;
+}

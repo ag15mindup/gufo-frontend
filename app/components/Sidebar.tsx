@@ -204,14 +204,42 @@ export default function Sidebar() {
     []
   );
 
+
  const partnerRoutes = useMemo<HudRoute[]>(
   () => [
-    { href: "/partner-dashboard", title: "Partner Dashboard", subtitle: "Analytics partner", icon: <ClusterGlyph /> },
-    { href: "/partner-console", title: "Partner Console", subtitle: "Console pagamenti", icon: <BeaconGlyph /> },
-    { href: "/partner-wallet", title: "Partner Wallet", subtitle: "Saldo e conversioni", icon: <OrbitGlyph /> },
-  ],
-  []
-);
+    {
+      href: "/partner-dashboard",
+      title: "Partner Dashboard",
+      subtitle: "Analytics partner",
+      icon: <ClusterGlyph />,
+    },
+    {
+      href: "/partner-console",
+      title: "Partner Console",
+      subtitle: "Console pagamenti",
+      icon: <BeaconGlyph />,
+    },
+    {
+      href: "/partner-clienti",
+      title: "Clienti",
+      subtitle: "AI analytics clienti",
+      icon: <PersonaGlyph />,
+    },
+    {
+      href: "/partner-wallet",
+      title: "Partner Wallet",
+      subtitle: "Saldo e conversioni",
+      icon: <OrbitGlyph />,
+    },
+    {
+      href: "/partner-settings",
+      title: "Impostazioni",
+      subtitle: "Profilo e cashback",
+      icon: <LedgerGlyph />,
+    },
+    ],
+    []
+    );
   
 
   const visibleRoutes = useMemo<HudRoute[]>(() => {

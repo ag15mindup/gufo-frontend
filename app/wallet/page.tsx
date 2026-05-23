@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { QRCodeSVG } from "qrcode.react";
 import { createClient } from "@/lib/supabase/client";
 import MissionCard from "@/app/components/Missioncard";
 import styles from "./wallet.module.css";
@@ -197,6 +198,8 @@ export default function WalletPage() {
   const [userInitial, setUserInitial] = useState("U");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showWalletQr, setShowWalletQr] = useState(false);
+  const [customerCode, setCustomerCode] = useState("");
 
   const loadWalletPage = useCallback(async () => {
     try {
@@ -240,6 +243,14 @@ export default function WalletPage() {
       setUserEmail(user.email || "");
       setUserName(fallbackName);
       setUserInitial(fallbackName.trim().charAt(0).toUpperCase() || "U");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("customer_code")
+        .eq("id", user.id)
+        .single();
+
+      setCustomerCode(profile?.customer_code || "");
 
       const [walletPayload, transactionsPayload] = await Promise.all([
         fetchJsonWithAuth<any>(`${API_URL}/wallet`, token),
@@ -296,21 +307,29 @@ export default function WalletPage() {
   }, []);
 
   useEffect(() => {
-  loadWalletPage();
-
-  const handler = () => {
     loadWalletPage();
-  };
 
-  window.addEventListener("wallet-update", handler);
+    const handler = () => {
+      loadWalletPage();
+    };
 
-  return () => {
-    window.removeEventListener("wallet-update", handler);
-  };
-}, [loadWalletPage]);
+    window.addEventListener("wallet-update", handler);
+
+    return () => {
+      window.removeEventListener("wallet-update", handler);
+    };
+  }, [loadWalletPage]);
+
   const recentTransactions = useMemo(() => {
     return walletData.transactions.slice(0, 8);
   }, [walletData.transactions]);
+
+  const walletQrPayload = JSON.stringify({
+    type: "GUFO_WALLET_PAYMENT",
+    customer_code: customerCode,
+    user_email: userEmail,
+    timestamp: Date.now(),
+  });
 
   if (loading) {
     return (
@@ -362,6 +381,7 @@ export default function WalletPage() {
           <div className={styles.heroBadge}>GUFO PREMIUM WALLET</div>
           <p className={styles.eyebrow}>GUFO Wallet</p>
           <h1 className={styles.title}>I tuoi GUFO</h1>
+
           <p className={styles.subtitle}>
             {userEmail ? userEmail : "Portafoglio digitale attivo"}
           </p>
@@ -383,13 +403,45 @@ export default function WalletPage() {
             </button>
 
             <button
-              onClick={() => router.push("/customer-code")}
+              onClick={() => setShowWalletQr(!showWalletQr)}
               className={styles.ghostButton}
               type="button"
             >
-              Il mio codice
+              Usa GUFO
             </button>
           </div>
+
+          {showWalletQr && (
+            <div
+              style={{
+                marginTop: "20px",
+                padding: "20px",
+                borderRadius: "24px",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                textAlign: "center",
+                maxWidth: "320px",
+              }}
+            >
+              <QRCodeSVG
+                value={walletQrPayload}
+                size={220}
+                bgColor="#ffffff"
+                fgColor="#000000"
+              />
+
+              <p
+                style={{
+                  marginTop: "12px",
+                  color: "#fff",
+                }}
+              >
+                Mostra questo QR al partner per usare i tuoi GUFO
+              </p>
+
+              <strong>{customerCode || "Codice non disponibile"}</strong>
+            </div>
+          )}
 
           {error ? <div className={styles.inlineError}>{error}</div> : null}
         </div>
@@ -475,6 +527,7 @@ export default function WalletPage() {
                   <th>GUFO</th>
                 </tr>
               </thead>
+
               <tbody>
                 {recentTransactions.length === 0 ? (
                   <tr>

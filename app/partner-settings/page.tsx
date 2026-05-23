@@ -17,6 +17,7 @@ type ProfileRow = {
 };
 
 type PartnerForm = {
+  partner_code: string;
   name: string;
   category: string;
   description: string;
@@ -39,6 +40,7 @@ export default function PartnerSettingsPage() {
 
   const [partnerUserId, setPartnerUserId] = useState("");
   const [form, setForm] = useState<PartnerForm>({
+    partner_code: "",
     name: "",
     category: "",
     description: "",
@@ -53,7 +55,6 @@ export default function PartnerSettingsPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -78,6 +79,7 @@ export default function PartnerSettingsPage() {
     setPartnerUserId(userId);
 
     setForm({
+      partner_code: String(partner?.partner_code || ""),
       name: String(partner?.name || ""),
       category: String(partner?.category || ""),
       description: String(partner?.description || ""),
@@ -226,6 +228,16 @@ export default function PartnerSettingsPage() {
           predefinito usato nella Partner Console.
         </p>
 
+        <div style={partnerCodeBoxStyle}>
+          <span style={partnerCodeLabelStyle}>Codice locale</span>
+          <strong style={partnerCodeValueStyle}>
+            {form.partner_code || "--"}
+          </strong>
+          <p style={partnerCodeTextStyle}>
+            Identificativo del locale per campagne, supporto e integrazioni GUFO.
+          </p>
+        </div>
+
         {error && <div style={errorStyle}>{error}</div>}
         {message && <div style={successStyle}>{message}</div>}
 
@@ -268,7 +280,9 @@ export default function PartnerSettingsPage() {
                   <button
                     key={value}
                     type="button"
-                    onClick={() => updateField("cashback_percent", String(value))}
+                    onClick={() =>
+                      updateField("cashback_percent", String(value))
+                    }
                     style={quickBtnStyle}
                   >
                     {value}%
@@ -352,6 +366,48 @@ export default function PartnerSettingsPage() {
             {saving ? "Salvataggio..." : "Salva impostazioni locale"}
           </button>
         </form>
+
+        <div style={previewBoxStyle}>
+          <p style={eyebrowStyle}>ANTEPRIMA LOCALE</p>
+
+          <div style={previewHeaderStyle}>
+            {form.logo_url ? (
+              <img
+                src={form.logo_url}
+                alt={form.name || "Logo locale"}
+                style={previewLogoStyle}
+              />
+            ) : (
+              <div style={previewLogoFallbackStyle}>🏪</div>
+            )}
+
+            <div>
+              <h2 style={previewTitleStyle}>{form.name || "Nome locale"}</h2>
+              <p style={previewMetaStyle}>
+                {form.category || "Categoria"} · {form.city || "Città"}
+              </p>
+            </div>
+          </div>
+
+          <p style={previewDescriptionStyle}>
+            {form.description ||
+              "Qui comparirà la descrizione pubblica del locale nel marketplace GUFO."}
+          </p>
+
+          <div style={previewBadgesStyle}>
+            <span style={previewBadgeStyle}>
+              Cashback {toNumberSafe(form.cashback_percent).toFixed(2)}%
+            </span>
+
+            {form.partner_code && (
+              <span style={previewBadgeStyle}>Codice {form.partner_code}</span>
+            )}
+
+            {form.address && (
+              <span style={previewBadgeStyle}>📍 {form.address}</span>
+            )}
+          </div>
+        </div>
       </section>
     </main>
   );
@@ -502,4 +558,99 @@ const successStyle: React.CSSProperties = {
   background: "rgba(34,197,94,0.14)",
   border: "1px solid rgba(34,197,94,0.35)",
   color: "#bbf7d0",
+};
+
+const partnerCodeBoxStyle: React.CSSProperties = {
+  marginTop: "18px",
+  padding: "18px",
+  borderRadius: "20px",
+  background: "rgba(255,255,255,0.08)",
+  border: "1px solid rgba(255,255,255,0.16)",
+};
+
+const partnerCodeLabelStyle: React.CSSProperties = {
+  display: "block",
+  color: "#a78bfa",
+  fontWeight: 900,
+  fontSize: "12px",
+  letterSpacing: "0.12em",
+  textTransform: "uppercase",
+};
+
+const partnerCodeValueStyle: React.CSSProperties = {
+  display: "block",
+  marginTop: "8px",
+  fontSize: "30px",
+  letterSpacing: "0.16em",
+};
+
+const partnerCodeTextStyle: React.CSSProperties = {
+  margin: "8px 0 0",
+  color: "rgba(255,255,255,0.68)",
+};
+
+const previewBoxStyle: React.CSSProperties = {
+  marginTop: "28px",
+  padding: "22px",
+  borderRadius: "26px",
+  background:
+    "linear-gradient(135deg, rgba(45,212,191,0.14), rgba(236,72,153,0.14), rgba(124,58,237,0.16))",
+  border: "1px solid rgba(255,255,255,0.16)",
+};
+
+const previewHeaderStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "16px",
+  marginTop: "14px",
+};
+
+const previewLogoStyle: React.CSSProperties = {
+  width: "72px",
+  height: "72px",
+  borderRadius: "22px",
+  objectFit: "cover",
+  border: "1px solid rgba(255,255,255,0.18)",
+};
+
+const previewLogoFallbackStyle: React.CSSProperties = {
+  width: "72px",
+  height: "72px",
+  borderRadius: "22px",
+  display: "grid",
+  placeItems: "center",
+  fontSize: "32px",
+  background: "rgba(255,255,255,0.1)",
+  border: "1px solid rgba(255,255,255,0.18)",
+};
+
+const previewTitleStyle: React.CSSProperties = {
+  margin: 0,
+  fontSize: "28px",
+};
+
+const previewMetaStyle: React.CSSProperties = {
+  margin: "6px 0 0",
+  color: "rgba(255,255,255,0.68)",
+};
+
+const previewDescriptionStyle: React.CSSProperties = {
+  marginTop: "18px",
+  color: "rgba(255,255,255,0.78)",
+  lineHeight: 1.6,
+};
+
+const previewBadgesStyle: React.CSSProperties = {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "10px",
+  marginTop: "18px",
+};
+
+const previewBadgeStyle: React.CSSProperties = {
+  padding: "9px 12px",
+  borderRadius: "999px",
+  background: "rgba(255,255,255,0.1)",
+  border: "1px solid rgba(255,255,255,0.16)",
+  fontWeight: 900,
 };

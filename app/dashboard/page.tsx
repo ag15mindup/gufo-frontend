@@ -257,6 +257,73 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [receiptClaims, setReceiptClaims] = useState<any[]>([]);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+async function loadReceiptClaims() {
+  try {
+    setReceiptLoading(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    if (!token) return;
+
+    const res = await fetch(`${API_URL}/receipt-claims/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setReceiptClaims(data.claims || []);
+    }
+  } catch (err) {
+    console.error("Errore cashback recenti:", err);
+  } finally {
+    setReceiptLoading(false);
+  }
+}
+
+async function loadNotifications() {
+  try {
+    setNotificationsLoading(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    if (!token) return;
+
+    const res = await fetch(`${API_URL}/notifications/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    const data = await res.json();
+
+console.log("NOTIFICATIONS RESPONSE", data);
+console.log("NOTIFICATIONS COUNT", data.notifications?.length);
+
+setNotifications(data.notifications || []);
+  } catch (err) {
+    console.error("Errore notifiche:", err);
+  } finally {
+    setNotificationsLoading(false);
+  }
+}
 
   useEffect(() => {
     let active = true;
@@ -376,6 +443,8 @@ export default function DashboardPage() {
     }
 
     loadDashboard();
+    loadNotifications();
+    loadReceiptClaims();
 
     return () => {
       active = false;
@@ -575,9 +644,84 @@ export default function DashboardPage() {
           </div>
         </section>
 
+<section className={styles.transactionsPanel}>
+  <div className={styles.panelHeader}>
+    <h3>🔔 Notifiche</h3>
+  </div>
+
+  {notificationsLoading ? (
+    <div className={styles.emptyRow}>
+      Caricamento notifiche...
+    </div>
+  ) : notifications.length === 0 ? (
+    <div className={styles.emptyRow}>
+      Nessuna notifica disponibile
+    </div>
+  ) : (
+    <div className={styles.mobileTransactions}>
+      {notifications.slice(0, 5).map((notification) => (
+        <div
+          key={notification.id}
+          className={styles.mobileTransactionCard}
+        >
+          <div className={styles.mobileTransactionTop}>
+            <strong className={styles.mobileMerchant}>
+              {notification.title}
+            </strong>
+          </div>
+
+          <div className={styles.mobileMetaItem}>
+            <span>Messaggio</span>
+            <strong>{notification.message}</strong>
+          </div>
+
+          <div className={styles.mobileMetaItem}>
+            <span>Data</span>
+            <strong>{formatDate(notification.created_at)}</strong>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
        <section id="missions" className={styles.missionSection}>
           <DashboardMissions />
         </section>
+
+        <section className={styles.transactionsPanel}>
+  <div className={styles.panelHeader}>
+    <h3>🔔 Notifiche</h3>
+  </div>
+
+  {notificationsLoading ? (
+    <div className={styles.emptyRow}>Caricamento notifiche...</div>
+  ) : notifications.length === 0 ? (
+    <div className={styles.emptyRow}>Nessuna notifica disponibile</div>
+  ) : (
+    <div className={styles.mobileTransactions}>
+      {notifications.slice(0, 5).map((notification) => (
+        <div key={notification.id} className={styles.mobileTransactionCard}>
+          <div className={styles.mobileTransactionTop}>
+            <strong className={styles.mobileMerchant}>
+              {notification.title}
+            </strong>
+          </div>
+
+          <div className={styles.mobileMetaItem}>
+            <span>Messaggio</span>
+            <strong>{notification.message}</strong>
+          </div>
+
+          <div className={styles.mobileMetaItem}>
+            <span>Data</span>
+            <strong>{formatDate(notification.created_at)}</strong>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
 
         <section className={styles.contentGrid}>
           <div className={styles.transactionsPanel}>
@@ -666,6 +810,83 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
+
+<div className={styles.transactionsPanel}>
+  <div className={styles.panelHeader}>
+    <h3>Cashback recenti</h3>
+  </div>
+
+  {receiptLoading ? (
+    <div className={styles.emptyRow}>
+      Caricamento cashback...
+    </div>
+  ) : receiptClaims.length === 0 ? (
+    <div className={styles.emptyRow}>
+      Nessuno scontrino inviato.
+    </div>
+  ) : (
+    <div className={styles.mobileTransactions}>
+      {receiptClaims.map((claim) => {
+        const cashbackPercent = Number(
+          claim.partners?.cashback_percent || 0
+        );
+
+        const estimatedGufo = Number(
+          (
+            (Number(claim.amount_euro || 0) *
+              cashbackPercent) /
+            100
+          ).toFixed(2)
+        );
+
+        const statusLabel =
+          claim.status === "approved_auto"
+            ? "✅ Auto approvato"
+            : claim.status === "pending_review"
+            ? "⚠️ In verifica"
+            : claim.status === "rejected"
+            ? "❌ Rifiutato"
+            : claim.status;
+
+        return (
+          <div
+            key={claim.id}
+            className={styles.mobileTransactionCard}
+          >
+            <div className={styles.mobileTransactionTop}>
+              <strong className={styles.mobileMerchant}>
+                {claim.partners?.name || "Partner GUFO"}
+              </strong>
+
+              <span className={styles.badge}>
+                {statusLabel}
+              </span>
+            </div>
+
+            <div className={styles.mobileMetaItem}>
+              <span>Importo</span>
+              <strong>
+                € {Number(claim.amount_euro || 0).toFixed(2)}
+              </strong>
+            </div>
+
+            <div className={styles.mobileMetaItem}>
+              <span>GUFO</span>
+              <strong>
+                +{estimatedGufo.toFixed(2)}
+              </strong>
+            </div>
+
+            <div className={styles.mobileMetaItem}>
+              <span>Data</span>
+              <strong>{formatDate(claim.created_at)}</strong>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
 
           <aside className={styles.summaryPanel}>
             <div className={styles.panelHeader}>

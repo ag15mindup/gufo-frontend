@@ -45,12 +45,13 @@ type TransactionItem = {
 type PartnerMeResponse = {
   success?: boolean;
   partner?: {
-    id?: number;
-    name?: string;
-    category?: string | null;
-    cashback_percent?: number | string | null;
-    user_id?: string;
-  };
+  id?: number;
+  name?: string;
+  category?: string | null;
+  cashback_percent?: number | string | null;
+  user_id?: string;
+  partner_code?: string | null;
+};
   error?: string;
 };
 
@@ -161,6 +162,10 @@ export default function PartnerConsolePage() {
   const [voucherError, setVoucherError] = useState("");
   const [voucherAmountUsed, setVoucherAmountUsed] = useState("");
   const [scannedVoucherCode, setScannedVoucherCode] = useState("");
+  const [pendingClaims, setPendingClaims] = useState<any[]>([]);
+  const [loadingClaims, setLoadingClaims] = useState(false);
+  const [partnerCode, setPartnerCode] = useState("");
+  const [showWalletScanner, setShowWalletScanner] = useState(false);
 
   async function loadPartnerMe(userId: string) {
     const { response, data } = await safeJsonFetch(
@@ -181,6 +186,7 @@ export default function PartnerConsolePage() {
     setPartnerUserId(userId);
     setPartnerId(partner.id ?? null);
     setPartnerName(String(partner.name || ""));
+    setPartnerCode(String(partner.partner_code || ""));
     setPartnerCategory(String(partner.category || ""));
     setCashbackPercent(String(toNumberSafe(partner.cashback_percent) || 0));
   }
@@ -189,6 +195,8 @@ export default function PartnerConsolePage() {
     const refreshed = await safeJsonFetch(
       `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`
     );
+
+
 
     if (refreshed.response.ok) {
       const payload = refreshed.data?.customer ?? refreshed.data;
@@ -211,6 +219,90 @@ export default function PartnerConsolePage() {
       });
     }
   }
+
+
+async function loadPendingClaims() {
+  try {
+    console.log("CHIAMO PENDING CLAIMS");
+
+    setLoadingClaims(true);
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    console.log("TOKEN PRESENTE:", !!token);
+
+    if (!token) return;
+
+    const res = await fetch(
+      `${API_URL}/receipt-claims/partner/pending`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      }
+    );
+
+    const data = await res.json();
+
+    console.log("RISPOSTA PENDING CLAIMS:", data);
+
+    if (data.success) {
+      setPendingClaims(data.claims || []);
+    } else {
+      setError(data.error || "Errore caricamento verifiche cashback");
+    }
+  } catch (err) {
+    console.error("Errore pending claims:", err);
+  } finally {
+    setLoadingClaims(false);
+  }
+}
+
+
+async function handleReviewClaim(
+  claimId: string,
+  action: "approve" | "reject"
+) {
+  try {
+    setError("");
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const token = session?.access_token;
+
+    if (!token) {
+      setError("Sessione scaduta");
+      return;
+    }
+
+    const res = await fetch(
+      `${API_URL}/receipt-claims/${claimId}/${action}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      throw new Error(data.error || "Errore verifica cashback");
+    }
+
+    await loadPendingClaims();
+  } catch (err: any) {
+    setError(err.message || "Errore verifica cashback");
+  }
+}
 
   useEffect(() => {
     async function init() {
@@ -245,6 +337,7 @@ export default function PartnerConsolePage() {
         }
 
         await loadPartnerMe(user.id);
+        await loadPendingClaims();
 
         const params = new URLSearchParams(window.location.search);
         const scannedCode = params.get("customerCode");
@@ -271,6 +364,34 @@ export default function PartnerConsolePage() {
 
     init();
   }, [router]);
+
+function handleWalletQr(decodedText: string) {
+  try {
+    const data = JSON.parse(decodedText);
+
+    if (data.type !== "GUFO_WALLET_PAYMENT") {
+      setError("QR Wallet non valido");
+      return;
+    }
+
+    const code = String(data.customer_code || "")
+      .trim()
+      .toUpperCase();
+
+    if (!code) {
+      setError("Customer code mancante");
+      return;
+    }
+
+    setCustomerCode(code);
+
+    refreshCustomer(code);
+
+    setShowWalletScanner(false);
+  } catch {
+    setError("QR Wallet non valido");
+  }
+}
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();
@@ -636,6 +757,11 @@ setAmount(String(newAmount.toFixed(2)));
             <strong>{partnerId ?? "--"}</strong>
           </div>
 
+        <div className={styles.operatorMiniCard}>
+         <span>Codice locale</span>
+         <strong>{partnerCode || "--"}</strong>
+        </div>
+
           <div className={styles.operatorMiniCard}>
             <span>Categoria</span>
             <strong>{partnerCategory || "--"}</strong>
@@ -653,6 +779,82 @@ setAmount(String(newAmount.toFixed(2)));
         </div>
       </section>
 
+<section className={styles.panel}>
+  <div className={styles.panelHeader}>
+    <div>
+      <p className={styles.sectionEyebrow}>Cashback Review</p>
+      <h3>Verifiche cashback</h3>
+    </div>
+
+    <span className={styles.panelBadge}>{pendingClaims.length}</span>
+  </div>
+
+  {loadingClaims ? (
+    <div className={styles.infoBox}>Caricamento verifiche...</div>
+  ) : pendingClaims.length === 0 ? (
+    <div className={styles.infoBox}>
+      Nessun cashback sospetto da verificare ✅
+    </div>
+  ) : (
+    <div className={styles.infoGrid}>
+      {pendingClaims.map((claim) => (
+        <div key={claim.id} className={styles.infoMiniCard}>
+          <p className={styles.infoMiniLabel}>Cliente</p>
+
+          <p className={styles.infoMiniValue}>
+      {claim.user_id || "Utente"}
+         </p>
+
+          <p className={styles.infoMiniLabel}>Importo</p>
+          <p className={styles.infoMiniValue}>
+            € {Number(claim.amount_euro || 0).toFixed(2)}
+          </p>
+
+          <p className={styles.infoMiniLabel}>Rischio</p>
+          <p className={styles.infoMiniValue}>
+            {claim.risk_flag || "-"}
+          </p>
+
+          <p className={styles.infoMiniLabel}>Data</p>
+          <p className={styles.infoMiniValue}>
+            {formatDateTime(claim.created_at)}
+          </p>
+
+          {claim.receipt_image_url && (
+            <a
+              href={claim.receipt_image_url}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.cashbackSettingsBtn}
+            >
+              📄 Apri scontrino
+            </a>
+          )}
+
+<div className={styles.resultActions}>
+  <button
+    type="button"
+    className={styles.primaryBtnWide}
+    onClick={() => handleReviewClaim(claim.id, "approve")}
+  >
+    ✅ Approva
+  </button>
+
+  <button
+    type="button"
+    className={styles.cancelPaymentBtn}
+    onClick={() => handleReviewClaim(claim.id, "reject")}
+  >
+    ❌ Rifiuta
+  </button>
+</div>
+
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
       <section className={styles.formsGrid}>
         <form onSubmit={handleSearchCustomer} className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -662,6 +864,22 @@ setAmount(String(newAmount.toFixed(2)));
             </div>
             <span className={styles.panelBadge}>Lookup</span>
           </div>
+
+       <button
+         type="button"
+         className={styles.primaryBtnWide}
+         onClick={() => setShowWalletScanner(true)}
+>
+        📷 Scansiona QR Wallet
+      </button>
+
+      
+      {showWalletScanner && (
+      <VoucherQrScanner
+       onScan={handleWalletQr}
+       onError={() => {}}
+       />
+       )}
 
           <div className={styles.fieldGroup}>
             <label className={styles.inputLabel}>Codice cliente</label>
