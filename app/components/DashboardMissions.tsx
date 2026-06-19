@@ -212,7 +212,7 @@ export default function DashboardMissions() {
         ? payload.missions
         : [];
 
-      const normalized = rawMissions.map(normalizeMission).slice(0, 5);
+      const normalized = rawMissions.map(normalizeMission);
       setMissions(normalized);
     } catch (err) {
       console.error("Errore missioni dashboard:", err);
@@ -305,9 +305,11 @@ export default function DashboardMissions() {
   }, []);
 
   const completedCount = useMemo(() => {
-    return missions.filter((mission) => mission.completed).length;
-  }, [missions]);
-
+  return missions.filter((mission) => {
+    const { current, target } = getMissionProgress(mission);
+    return current >= target;
+  }).length;
+}, [missions]);
   return (
     <section className={styles.wrap}>
       <div className={styles.backGlowA} />
@@ -371,13 +373,20 @@ export default function DashboardMissions() {
       ) : (
         <div className={styles.grid}>
           {missions.map((mission) => {
-            const { current, target, percentage } = getMissionProgress(mission);
-            const completed = Boolean(mission.completed);
-            const rewardGiven = getMissionRewardGiven(mission);
-            const rewardChipText = getRewardChipText(mission);
-            const claimed = Boolean(mission.reward_claimed);
-            const missionId = mission.mission_id ?? mission.id;
-            const canClaim = completed && !claimed;
+           const { current, target, percentage } = getMissionProgress(mission);
+
+const completed = current >= target;
+
+// Se la missione NON è completata, ignoriamo reward_claimed vecchi/sporchi
+const claimed = completed && Boolean(mission.reward_claimed);
+
+const rewardGiven = completed ? getMissionRewardGiven(mission) : 0;
+const rewardChipText = completed
+  ? getRewardChipText({ ...mission, reward_given: rewardGiven })
+  : `Fino a ${getMissionRewardCap(mission)} GUFO`;
+
+const missionId = mission.mission_id ?? mission.id;
+const canClaim = completed && !claimed;
 
             return (
               <article key={String(mission.id)} className={styles.card}>

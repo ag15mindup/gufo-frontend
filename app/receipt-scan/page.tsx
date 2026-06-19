@@ -3,26 +3,24 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Tesseract from "tesseract.js";
 
 const supabase = createClient();
 
-const API_URL = "http://localhost:3001";
+// Niente piu' hardcoded: usa la env var (fallback in locale).
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const RECEIPT_BUCKET = "receipt-claims";
+
+type ResultKind = "success" | "pending" | "error";
 
 function ReceiptScanContent() {
   const searchParams = useSearchParams();
   const partnerId = searchParams.get("partnerId");
 
   const [partner, setPartner] = useState<any>(null);
-  const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [ocrLoading, setOcrLoading] = useState(false);
-
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
-  const [amountConfirmed, setAmountConfirmed] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<{ kind: ResultKind; text: string } | null>(null);
 
   useEffect(() => {
     if (partnerId) loadPartner();
@@ -30,112 +28,48 @@ function ReceiptScanContent() {
 
   async function loadPartner() {
     try {
-      const res = await fetch(`${API_URL}/partners/${partnerId}`, {
-        cache: "no-store",
-      });
-
+      const res = await fetch(`${API_URL}/partners/${partnerId}`, { cache: "no-store" });
       const data = await res.json();
-
-      if (data.success) {
-        setPartner(data.partner);
-      }
+      if (data.success) setPartner(data.partner);
     } catch (err) {
       console.error("Errore caricamento partner:", err);
     }
   }
 
-  async function uploadReceiptImage(file: File) {
-    const fileExt = file.name.split(".").pop() || "jpg";
-    const fileName = `${partnerId}-${Date.now()}.${fileExt}`;
-
-    const { data, error } = await supabase.storage
-      .from("receipt-claims")
-      .upload(fileName, file);
-
-    if (error) throw error;
-
-    const { data: publicUrlData } = supabase.storage
-      .from("receipt-claims")
-      .getPublicUrl(data.path);
-
-    return publicUrlData.publicUrl;
-  }
-
-  async function extractAmountFromReceipt(file: File) {
-    try {
-      setOcrLoading(true);
-      setAmountConfirmed(false);
-      setError("");
-      setMessage("");
-
-      const {
-        data: { text },
-      } = await Tesseract.recognize(file, "ita");
-
-      console.log("OCR TEXT:", text);
-
-      const normalizedText = text.replace(/,/g, ".");
-      const matches = normalizedText.match(/\d+\.\d{2}/g);
-
-      if (!matches || matches.length === 0) {
-        setError("Non sono riuscito a leggere l'importo. Inseriscilo manualmente.");
-        return;
-      }
-
-      const amounts = matches.map(Number).filter((n) => n > 0 && n < 1000);
-
-      if (amounts.length === 0) {
-        setError("Importo non rilevato. Inseriscilo manualmente.");
-        return;
-      }
-
-      const detectedAmount = Math.max(...amounts);
-      setAmount(detectedAmount.toFixed(2));
-      setMessage("Importo rilevato automaticamente. Controllalo e conferma.");
-    } catch (err) {
-      console.error("Errore OCR:", err);
-      setError("Errore lettura scontrino. Puoi inserire l'importo manualmente.");
-    } finally {
-      setOcrLoading(false);
-    }
+  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setReceiptFile(file);
+    setResult(null);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
   }
 
   async function submitClaim() {
     try {
-      console.log("CLICK INVIA SCONTRINO");
-      console.log("partnerId:", partnerId);
-      console.log("amount:", amount);
-      console.log("amountConfirmed:", amountConfirmed);
-      console.log("receiptFile:", receiptFile);
-
       setLoading(true);
-      setError("");
-      setMessage("");
+      setResult(null);
 
       if (!partnerId) throw new Error("Partner non valido");
-      if (!amount || Number(amount) <= 0) throw new Error("Inserisci un importo valido");
-      if (!amountConfirmed) throw new Error("Devi confermare che l'importo è corretto");
+      if (!receiptFile) throw new Error("Carica la foto dello scontrino");
 
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
       const token = session?.access_token;
+      if (!token || !session) throw new Error("Devi essere loggato");
 
-      if (!token) throw new Error("Devi essere loggato");
+      // 1) carica la foto nel bucket PRIVATO e prendi il path (non l'URL pubblico)
+      const fileExt = receiptFile.name.split(".").pop() || "jpg";
+      const filePath = `${session.user.id}/${Date.now()}.${fileExt}`;
 
-      let receiptImageUrl = "test-receipt";
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from(RECEIPT_BUCKET)
+        .upload(filePath, receiptFile, { upsert: false });
 
-      if (receiptFile) {
-        receiptImageUrl = await uploadReceiptImage(receiptFile);
-      }
+      if (uploadError) throw new Error("Errore caricamento foto: " + uploadError.message);
 
-      console.log("INVIO AL BACKEND:", {
-        partner_id: Number(partnerId),
-        amount_euro: Number(amount),
-        receipt_image_url: receiptImageUrl,
-      });
-
+      // 2) manda al backend SOLO partner_id + receipt_path.
+      //    L'importo lo legge il server dalla foto: non lo inviamo piu'.
       const res = await fetch(`${API_URL}/receipt-claims`, {
         method: "POST",
         headers: {
@@ -144,31 +78,51 @@ function ReceiptScanContent() {
         },
         body: JSON.stringify({
           partner_id: Number(partnerId),
-          amount_euro: Number(amount),
-          receipt_image_url: receiptImageUrl,
+          receipt_path: uploaded.path,
         }),
       });
 
       const data = await res.json();
 
-      console.log("RISPOSTA BACKEND:", data);
-
+      // 3) interpreta l'esito deciso dal server
+      if (res.status === 409) {
+        setResult({ kind: "error", text: data.error || "Scontrino gia' registrato." });
+        return;
+      }
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Errore invio scontrino");
       }
 
-      setMessage(data.message || "Scontrino inviato correttamente.");
-      setAmount("");
-      setReceiptFile(null);
-      setAmountConfirmed(false);
+      if (data.status === "approved_auto") {
+        setResult({ kind: "success", text: data.message });
+      } else if (data.status === "rejected") {
+        setResult({ kind: "error", text: data.message || "Scontrino non valido." });
+      } else {
+        // pending_review
+        setResult({
+          kind: "pending",
+          text: data.message || "Scontrino ricevuto. Verra' verificato a breve.",
+        });
+      }
+
+      // pulizia in caso di esito non rifiutato
+      if (data.status !== "rejected") {
+        setReceiptFile(null);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
     } catch (err: any) {
-      setError(err.message || "Errore sconosciuto");
+      setResult({ kind: "error", text: err.message || "Errore sconosciuto" });
     } finally {
       setLoading(false);
     }
   }
 
-  const isDisabled = loading || ocrLoading || !amountConfirmed;
+  const resultStyles: Record<ResultKind, string> = {
+    success: "bg-green-500/10 border-green-500/20 text-green-300",
+    pending: "bg-cyan-500/10 border-cyan-500/20 text-cyan-200",
+    error: "bg-red-500/10 border-red-500/20 text-red-300",
+  };
 
   return (
     <main className="min-h-screen bg-black text-white p-6">
@@ -176,11 +130,10 @@ function ReceiptScanContent() {
         <div className="rounded-3xl border border-cyan-500/20 bg-white/5 p-8 backdrop-blur-xl">
           <div className="mb-8">
             <div className="text-cyan-300 text-sm mb-2">Cashback GUFO</div>
-
             <h1 className="text-4xl font-bold mb-3">Carica scontrino</h1>
-
             <p className="text-white/70">
-              Carica lo scontrino, controlla l’importo rilevato e conferma.
+              Scatta o carica la foto dello scontrino. Al resto pensa il sistema:
+              legge l&apos;importo e applica il cashback.
             </p>
           </div>
 
@@ -195,93 +148,39 @@ function ReceiptScanContent() {
 
           <div className="space-y-5">
             <div>
-              <label className="block mb-2 text-sm text-white/70">
-                Foto scontrino
-              </label>
-
+              <label className="block mb-2 text-sm text-white/70">Foto scontrino</label>
               <input
                 type="file"
                 accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0] || null;
-                  setReceiptFile(file);
-                  setAmountConfirmed(false);
-
-                  if (file) {
-                    await extractAmountFromReceipt(file);
-                  }
-                }}
+                capture="environment"
+                onChange={onFileChange}
                 className="w-full"
               />
             </div>
 
-            {ocrLoading && (
-              <div className="text-cyan-300 text-sm">
-                Lettura automatica scontrino...
+            {previewUrl && (
+              <div className="rounded-2xl overflow-hidden border border-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={previewUrl} alt="Anteprima scontrino" className="w-full object-contain max-h-80" />
               </div>
             )}
-
-            <div>
-              <label className="block mb-2 text-sm text-white/70">
-                Importo scontrino
-              </label>
-
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={amount}
-                onChange={(e) => {
-                  setAmount(e.target.value);
-                  setAmountConfirmed(false);
-                }}
-                placeholder="Es. 12.50"
-                className="w-full rounded-2xl bg-black/40 border border-white/10 px-4 py-4 outline-none"
-              />
-            </div>
-
-            <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-white/80">
-              <input
-                type="checkbox"
-                checked={amountConfirmed}
-                onChange={(e) => setAmountConfirmed(e.target.checked)}
-                className="mt-1"
-              />
-              <span>
-                Confermo che l’importo dello scontrino è corretto. Il cashback
-                può essere approvato automaticamente solo se supera i controlli
-                anti-frode.
-              </span>
-            </label>
 
             <button
               type="button"
               onClick={submitClaim}
-              disabled={isDisabled}
+              disabled={loading || !receiptFile}
               className={`w-full rounded-2xl font-bold py-4 transition ${
-                isDisabled
+                loading || !receiptFile
                   ? "bg-white/20 text-white/40 cursor-not-allowed"
                   : "bg-cyan-500 text-black hover:scale-[1.01]"
               }`}
             >
-              {loading
-                ? "Invio scontrino..."
-                : ocrLoading
-                ? "Lettura scontrino..."
-                : !amountConfirmed
-                ? "Conferma l'importo per continuare"
-                : "Invia scontrino"}
+              {loading ? "Invio in corso..." : "Invia scontrino"}
             </button>
 
-            {message && (
-              <div className="rounded-2xl bg-green-500/10 border border-green-500/20 p-4 text-green-300">
-                {message}
-              </div>
-            )}
-
-            {error && (
-              <div className="rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-red-300">
-                {error}
+            {result && (
+              <div className={`rounded-2xl border p-4 ${resultStyles[result.kind]}`}>
+                {result.text}
               </div>
             )}
           </div>
@@ -293,7 +192,9 @@ function ReceiptScanContent() {
 
 export default function ReceiptScanPage() {
   return (
-    <Suspense fallback={<main className="min-h-screen bg-black text-white p-6">Caricamento...</main>}>
+    <Suspense
+      fallback={<main className="min-h-screen bg-black text-white p-6">Caricamento...</main>}
+    >
       <ReceiptScanContent />
     </Suspense>
   );

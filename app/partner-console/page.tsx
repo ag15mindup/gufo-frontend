@@ -45,13 +45,13 @@ type TransactionItem = {
 type PartnerMeResponse = {
   success?: boolean;
   partner?: {
-  id?: number;
-  name?: string;
-  category?: string | null;
-  cashback_percent?: number | string | null;
-  user_id?: string;
-  partner_code?: string | null;
-};
+    id?: number;
+    name?: string;
+    category?: string | null;
+    cashback_percent?: number | string | null;
+    user_id?: string;
+    partner_code?: string | null;
+  };
   error?: string;
 };
 
@@ -76,8 +76,6 @@ type PaymentApiResponse = {
     category?: string | null;
   };
 };
-
-const DEFAULT_CUSTOMER_CODE = "GUFO-915728";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://gufo-backend1.onrender.com";
@@ -133,6 +131,31 @@ function cleanVoucherText(decodedText: string) {
     .trim();
 }
 
+// FIX: mostriamo solo un identificativo abbreviato del cliente,
+// non l'UUID completo
+function shortUserId(userId?: string | null) {
+  if (!userId) return "Utente";
+  return `Utente ${String(userId).slice(0, 8)}…`;
+}
+
+// FIX: helper unico per il token di sessione.
+// Tutte le chiamate al backend ora viaggiano autenticate.
+async function getAuthToken(): Promise<string | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session?.access_token || null;
+}
+
+async function authHeaders(extra: Record<string, string> = {}) {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Sessione scaduta. Fai di nuovo login.");
+  return {
+    Authorization: `Bearer ${token}`,
+    ...extra,
+  };
+}
+
 export default function PartnerConsolePage() {
   const router = useRouter();
 
@@ -141,11 +164,13 @@ export default function PartnerConsolePage() {
   const [partnerId, setPartnerId] = useState<number | null>(null);
   const [partnerCategory, setPartnerCategory] = useState("");
 
-  const [customerCode, setCustomerCode] = useState(DEFAULT_CUSTOMER_CODE);
+  // FIX: rimosso DEFAULT_CUSTOMER_CODE hardcoded (era un codice cliente reale)
+  const [customerCode, setCustomerCode] = useState("");
   const [customer, setCustomer] = useState<CustomerResponse | null>(null);
 
-  const [amount, setAmount] = useState("50");
-  const [cashbackPercent, setCashbackPercent] = useState("5");
+  // FIX: niente importi precompilati: ogni pagamento parte da campo vuoto
+  const [amount, setAmount] = useState("");
+  const [cashbackPercent, setCashbackPercent] = useState("");
 
   const [loadingCustomer, setLoadingCustomer] = useState(false);
   const [loadingPayment, setLoadingPayment] = useState(false);
@@ -170,9 +195,13 @@ export default function PartnerConsolePage() {
   const [gufoRedeemResult, setGufoRedeemResult] = useState<any>(null);
 
   async function loadPartnerMe(userId: string) {
-    const { response, data } = await safeJsonFetch(
-      `${API_URL}/partner/me?user_id=${encodeURIComponent(userId)}`
-    );
+    // FIX: chiamata autenticata. Il backend deve derivare il partner
+    // dal token (req.user.id), non dal query param.
+    const headers = await authHeaders();
+
+    const { response, data } = await safeJsonFetch(`${API_URL}/partner/me`, {
+      headers,
+    });
 
     if (!response.ok || data?.success === false) {
       throw new Error(data?.error || "Partner non trovato");
@@ -194,117 +223,100 @@ export default function PartnerConsolePage() {
   }
 
   async function refreshCustomer(code: string) {
-    const refreshed = await safeJsonFetch(
-      `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`
-    );
+    try {
+      const headers = await authHeaders();
 
+      const refreshed = await safeJsonFetch(
+        `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`,
+        { headers }
+      );
 
+      if (refreshed.response.ok) {
+        const payload = refreshed.data?.customer ?? refreshed.data;
 
-    if (refreshed.response.ok) {
-      const payload = refreshed.data?.customer ?? refreshed.data;
-
-      setCustomer({
-        id: String(payload.id),
-        customer_code: String(payload.customer_code || code),
-        balance_gufo: toNumberSafe(payload.balance_gufo),
-        balance_eur: toNumberSafe(payload.balance_eur),
-        level: String(payload.level || "bronze"),
-        cashback_percent:
-          payload.cashback_percent === null || payload.cashback_percent === undefined
-            ? null
-            : toNumberSafe(payload.cashback_percent),
-        season_spent: toNumberSafe(payload.season_spent),
-        region: payload.region ? String(payload.region) : undefined,
-        reference_currency: payload.reference_currency
-          ? String(payload.reference_currency)
-          : undefined,
-      });
+        setCustomer({
+          id: String(payload.id),
+          customer_code: String(payload.customer_code || code),
+          balance_gufo: toNumberSafe(payload.balance_gufo),
+          balance_eur: toNumberSafe(payload.balance_eur),
+          level: String(payload.level || "bronze"),
+          cashback_percent:
+            payload.cashback_percent === null ||
+            payload.cashback_percent === undefined
+              ? null
+              : toNumberSafe(payload.cashback_percent),
+          season_spent: toNumberSafe(payload.season_spent),
+          region: payload.region ? String(payload.region) : undefined,
+          reference_currency: payload.reference_currency
+            ? String(payload.reference_currency)
+            : undefined,
+        });
+      }
+    } catch (err) {
+      console.error("refreshCustomer error:", err);
     }
   }
 
+  async function loadPendingClaims() {
+    try {
+      setLoadingClaims(true);
 
-async function loadPendingClaims() {
-  try {
-    console.log("CHIAMO PENDING CLAIMS");
+      const token = await getAuthToken();
+      if (!token) return;
 
-    setLoadingClaims(true);
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const token = session?.access_token;
-
-    console.log("TOKEN PRESENTE:", !!token);
-
-    if (!token) return;
-
-    const res = await fetch(
-      `${API_URL}/receipt-claims/partner/pending`,
-      {
+      const res = await fetch(`${API_URL}/receipt-claims/partner/pending`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setPendingClaims(data.claims || []);
+      } else {
+        setError(data.error || "Errore caricamento verifiche cashback");
       }
-    );
-
-    const data = await res.json();
-
-    console.log("RISPOSTA PENDING CLAIMS:", data);
-
-    if (data.success) {
-      setPendingClaims(data.claims || []);
-    } else {
-      setError(data.error || "Errore caricamento verifiche cashback");
+    } catch (err) {
+      console.error("Errore pending claims:", err);
+    } finally {
+      setLoadingClaims(false);
     }
-  } catch (err) {
-    console.error("Errore pending claims:", err);
-  } finally {
-    setLoadingClaims(false);
   }
-}
 
+  async function handleReviewClaim(
+    claimId: string,
+    action: "approve" | "reject"
+  ) {
+    try {
+      setError("");
 
-async function handleReviewClaim(
-  claimId: string,
-  action: "approve" | "reject"
-) {
-  try {
-    setError("");
+      const token = await getAuthToken();
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      if (!token) {
+        setError("Sessione scaduta");
+        return;
+      }
 
-    const token = session?.access_token;
-
-    if (!token) {
-      setError("Sessione scaduta");
-      return;
-    }
-
-    const res = await fetch(
-      `${API_URL}/receipt-claims/${claimId}/${action}`,
-      {
+      const res = await fetch(`${API_URL}/receipt-claims/${claimId}/${action}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Errore verifica cashback");
       }
-    );
 
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || "Errore verifica cashback");
+      await loadPendingClaims();
+    } catch (err: any) {
+      setError(err.message || "Errore verifica cashback");
     }
-
-    await loadPendingClaims();
-  } catch (err: any) {
-    setError(err.message || "Errore verifica cashback");
   }
-}
 
   useEffect(() => {
     async function init() {
@@ -367,33 +379,33 @@ async function handleReviewClaim(
     init();
   }, [router]);
 
-function handleWalletQr(decodedText: string) {
-  try {
-    const data = JSON.parse(decodedText);
+  function handleWalletQr(decodedText: string) {
+    try {
+      const data = JSON.parse(decodedText);
 
-    if (data.type !== "GUFO_WALLET_PAYMENT") {
+      if (data.type !== "GUFO_WALLET_PAYMENT") {
+        setError("QR Wallet non valido");
+        return;
+      }
+
+      const code = String(data.customer_code || "")
+        .trim()
+        .toUpperCase();
+
+      if (!code) {
+        setError("Customer code mancante");
+        return;
+      }
+
+      setCustomerCode(code);
+
+      refreshCustomer(code);
+
+      setShowWalletScanner(false);
+    } catch {
       setError("QR Wallet non valido");
-      return;
     }
-
-    const code = String(data.customer_code || "")
-      .trim()
-      .toUpperCase();
-
-    if (!code) {
-      setError("Customer code mancante");
-      return;
-    }
-
-    setCustomerCode(code);
-
-    refreshCustomer(code);
-
-    setShowWalletScanner(false);
-  } catch {
-    setError("QR Wallet non valido");
   }
-}
 
   async function handleSearchCustomer(e: React.FormEvent) {
     e.preventDefault();
@@ -412,8 +424,11 @@ function handleWalletQr(decodedText: string) {
     try {
       setLoadingCustomer(true);
 
+      const headers = await authHeaders();
+
       const { response, data } = await safeJsonFetch(
-        `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`
+        `${API_URL}/partner/customer?code=${encodeURIComponent(code)}`,
+        { headers }
       );
 
       if (!response.ok || data?.success === false) {
@@ -429,7 +444,8 @@ function handleWalletQr(decodedText: string) {
         balance_eur: toNumberSafe(payload.balance_eur),
         level: String(payload.level || "bronze"),
         cashback_percent:
-          payload.cashback_percent === null || payload.cashback_percent === undefined
+          payload.cashback_percent === null ||
+          payload.cashback_percent === undefined
             ? null
             : toNumberSafe(payload.cashback_percent),
         season_spent: toNumberSafe(payload.season_spent),
@@ -480,15 +496,18 @@ function handleWalletQr(decodedText: string) {
     try {
       setLoadingPayment(true);
 
+      // FIX: richiesta autenticata con Bearer token.
+      // Il backend DEVE derivare il partner dal token e ignorare
+      // qualunque partner_user_id nel body (rimuovilo dal payload
+      // appena la route backend è aggiornata).
+      const headers = await authHeaders({ "Content-Type": "application/json" });
+
       const { response, data } = await safeJsonFetch(
         `${API_URL}/partner/transaction/me`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify({
-            partner_user_id: partnerUserId,
             customer_code: customer.customer_code,
             amount_euro: finalAmount,
             cashback_percent: finalCashbackPercent,
@@ -510,66 +529,61 @@ function handleWalletQr(decodedText: string) {
     }
   }
 
-async function handleRedeemGufo() {
-  try {
-    setError("");
-    setGufoRedeemResult(null);
+  async function handleRedeemGufo() {
+    try {
+      setError("");
+      setGufoRedeemResult(null);
 
-    if (!customer) {
-      setError("Cerca prima un cliente");
-      return;
-    }
-
-    const amountEuro = toNumberSafe(amount);
-    const gufoToUse = Math.min(
-      toNumberSafe(customer.balance_gufo),
-      amountEuro
-    );
-
-    if (amountEuro <= 0 || gufoToUse <= 0) {
-      setError("Importo o saldo GUFO non valido");
-      return;
-    }
-
-    setGufoRedeemLoading(true);
-
-    const { response, data } = await safeJsonFetch(
-      `${API_URL}/partner/redeem-gufo`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          partner_user_id: partnerUserId,
-          customer_code: customer.customer_code,
-          amount_euro: amountEuro,
-          gufo_to_use: gufoToUse,
-        }),
+      if (!customer) {
+        setError("Cerca prima un cliente");
+        return;
       }
-    );
 
-    if (!response.ok || data?.success === false) {
-      throw new Error(data?.error || "Errore utilizzo GUFO");
+      const amountEuro = toNumberSafe(amount);
+      const gufoToUse = Math.min(toNumberSafe(customer.balance_gufo), amountEuro);
+
+      if (amountEuro <= 0 || gufoToUse <= 0) {
+        setError("Importo o saldo GUFO non valido");
+        return;
+      }
+
+      setGufoRedeemLoading(true);
+
+      // FIX: richiesta autenticata (vedi nota in handlePayment)
+      const headers = await authHeaders({ "Content-Type": "application/json" });
+
+      const { response, data } = await safeJsonFetch(
+        `${API_URL}/partner/redeem-gufo`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            customer_code: customer.customer_code,
+            amount_euro: amountEuro,
+            gufo_to_use: gufoToUse,
+          }),
+        }
+      );
+
+      if (!response.ok || data?.success === false) {
+        throw new Error(data?.error || "Errore utilizzo GUFO");
+      }
+
+      setGufoRedeemResult(data);
+      await refreshCustomer(customer.customer_code);
+      setAmount(String(data.amount_to_pay_euro || 0));
+    } catch (err: any) {
+      setError(err.message || "Errore utilizzo GUFO");
+    } finally {
+      setGufoRedeemLoading(false);
     }
-
-    setGufoRedeemResult(data);
-    await refreshCustomer(customer.customer_code);
-    setAmount(String(data.amount_to_pay_euro || 0));
-  } catch (err: any) {
-    setError(err.message || "Errore utilizzo GUFO");
-  } finally {
-    setGufoRedeemLoading(false);
   }
-}
 
   const handleVoucherScan = async (decodedText: string) => {
     try {
       setVoucherError("");
 
       const voucherCode = cleanVoucherText(decodedText);
-
-
 
       if (!voucherCode) {
         setVoucherError("QR voucher non valido");
@@ -578,8 +592,7 @@ async function handleRedeemGufo() {
 
       setScannedVoucherCode(voucherCode);
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
+      const token = await getAuthToken();
 
       if (!token) {
         setVoucherError("Sessione scaduta. Fai di nuovo login.");
@@ -619,28 +632,27 @@ async function handleRedeemGufo() {
       }
 
       const voucherKey = cleanVoucherText(
-  scannedVoucherCode || voucherData.code || voucherData.id
-);
+        scannedVoucherCode || voucherData.code || voucherData.id
+      );
 
       if (!voucherKey) {
         setVoucherError("Codice voucher mancante");
         return;
       }
 
-     const paymentAmount = Number(amount);
-let amountUsed = Number(voucherAmountUsed);
+      const paymentAmount = Number(amount);
+      let amountUsed = Number(voucherAmountUsed);
 
-if (amountUsed > paymentAmount) {
-  amountUsed = paymentAmount;
-}
+      if (amountUsed > paymentAmount) {
+        amountUsed = paymentAmount;
+      }
 
       if (!Number.isFinite(amountUsed) || amountUsed <= 0) {
         setVoucherError("Importo non valido");
         return;
       }
 
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
+      const token = await getAuthToken();
 
       if (!token) {
         setVoucherError("Sessione scaduta. Fai di nuovo login.");
@@ -672,11 +684,10 @@ if (amountUsed > paymentAmount) {
       });
       setVoucherAmountUsed("");
 
-const currentAmount = Number(amount);
-const newAmount = Math.max(0, currentAmount - amountUsed);
+      const currentAmount = Number(amount);
+      const newAmount = Math.max(0, currentAmount - amountUsed);
 
-setAmount(String(newAmount.toFixed(2)));
-
+      setAmount(String(newAmount.toFixed(2)));
     } catch (err: any) {
       setVoucherError(err.message || "Errore utilizzo voucher");
     }
@@ -693,15 +704,15 @@ setAmount(String(newAmount.toFixed(2)));
       setCancelMessage("");
       setError("");
 
+      // FIX: richiesta autenticata (vedi nota in handlePayment)
+      const headers = await authHeaders({ "Content-Type": "application/json" });
+
       const { response, data } = await safeJsonFetch(
         `${API_URL}/partner/transaction/cancel`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers,
           body: JSON.stringify({
-            partner_user_id: partnerUserId,
             payment_transaction_id: getTransactionId(result.payment_transaction),
             cashback_transaction_id: getTransactionId(result.cashback_transaction),
           }),
@@ -812,10 +823,10 @@ setAmount(String(newAmount.toFixed(2)));
             <strong>{partnerId ?? "--"}</strong>
           </div>
 
-        <div className={styles.operatorMiniCard}>
-         <span>Codice locale</span>
-         <strong>{partnerCode || "--"}</strong>
-        </div>
+          <div className={styles.operatorMiniCard}>
+            <span>Codice locale</span>
+            <strong>{partnerCode || "--"}</strong>
+          </div>
 
           <div className={styles.operatorMiniCard}>
             <span>Categoria</span>
@@ -834,81 +845,112 @@ setAmount(String(newAmount.toFixed(2)));
         </div>
       </section>
 
-<section className={styles.panel}>
-  <div className={styles.panelHeader}>
-    <div>
-      <p className={styles.sectionEyebrow}>Cashback Review</p>
-      <h3>Verifiche cashback</h3>
-    </div>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <p className={styles.sectionEyebrow}>Cashback Review</p>
+            <h3>Verifiche cashback</h3>
+          </div>
 
-    <span className={styles.panelBadge}>{pendingClaims.length}</span>
-  </div>
-
-  {loadingClaims ? (
-    <div className={styles.infoBox}>Caricamento verifiche...</div>
-  ) : pendingClaims.length === 0 ? (
-    <div className={styles.infoBox}>
-      Nessun cashback sospetto da verificare ✅
-    </div>
-  ) : (
-    <div className={styles.infoGrid}>
-      {pendingClaims.map((claim) => (
-        <div key={claim.id} className={styles.infoMiniCard}>
-          <p className={styles.infoMiniLabel}>Cliente</p>
-
-          <p className={styles.infoMiniValue}>
-      {claim.user_id || "Utente"}
-         </p>
-
-          <p className={styles.infoMiniLabel}>Importo</p>
-          <p className={styles.infoMiniValue}>
-            € {Number(claim.amount_euro || 0).toFixed(2)}
-          </p>
-
-          <p className={styles.infoMiniLabel}>Rischio</p>
-          <p className={styles.infoMiniValue}>
-            {claim.risk_flag || "-"}
-          </p>
-
-          <p className={styles.infoMiniLabel}>Data</p>
-          <p className={styles.infoMiniValue}>
-            {formatDateTime(claim.created_at)}
-          </p>
-
-          {claim.receipt_image_url && (
-            <a
-              href={claim.receipt_image_url}
-              target="_blank"
-              rel="noreferrer"
-              className={styles.cashbackSettingsBtn}
-            >
-              📄 Apri scontrino
-            </a>
-          )}
-
-<div className={styles.resultActions}>
-  <button
-    type="button"
-    className={styles.primaryBtnWide}
-    onClick={() => handleReviewClaim(claim.id, "approve")}
-  >
-    ✅ Approva
-  </button>
-
-  <button
-    type="button"
-    className={styles.cancelPaymentBtn}
-    onClick={() => handleReviewClaim(claim.id, "reject")}
-  >
-    ❌ Rifiuta
-  </button>
-</div>
-
+          <span className={styles.panelBadge}>{pendingClaims.length}</span>
         </div>
-      ))}
-    </div>
-  )}
-</section>
+
+        {loadingClaims ? (
+          <div className={styles.infoBox}>Caricamento verifiche...</div>
+        ) : pendingClaims.length === 0 ? (
+          <div className={styles.infoBox}>
+            Nessun cashback sospetto da verificare ✅
+          </div>
+        ) : (
+          <div className={styles.infoGrid}>
+            {pendingClaims.map((claim) => (
+              <div key={claim.id} className={styles.infoMiniCard}>
+                <p className={styles.infoMiniLabel}>Cliente</p>
+
+                <p className={styles.infoMiniValue}>
+                  {shortUserId(claim.user_id)}
+                </p>
+
+                <p className={styles.infoMiniLabel}>Importo</p>
+                <p className={styles.infoMiniValue}>
+                  € {Number(claim.amount_euro || 0).toFixed(2)}
+                </p>
+
+                <p className={styles.infoMiniLabel}>Confidence OCR</p>
+                <p className={styles.infoMiniValue}>
+                  {Number(claim.ocr_confidence || 0).toFixed(0)}%
+                </p>
+
+                {/* FIX: fallback sui campi ocr_* (prima mostrava sempre "-") */}
+                <p className={styles.infoMiniLabel}>Documento</p>
+                <p className={styles.infoMiniValue}>
+                  {claim.doc_number || claim.ocr_document || "-"}
+                </p>
+
+                <p className={styles.infoMiniLabel}>Data scontrino</p>
+                <p className={styles.infoMiniValue}>
+                  {claim.doc_date || claim.ocr_date || "-"}
+                </p>
+
+                <p className={styles.infoMiniLabel}>GUFO previsti</p>
+                <p className={styles.infoMiniValue}>
+                  {Number(claim.gufo_amount || 0).toFixed(2)}
+                </p>
+
+                <p className={styles.infoMiniLabel}>Rischio</p>
+                <p className={styles.infoMiniValue}>
+                  {claim.risk_flag || claim.review_reason || claim.risk_level || "-"}
+                </p>
+
+                <p className={styles.infoMiniLabel}>Data</p>
+                <p className={styles.infoMiniValue}>
+                  {formatDateTime(claim.created_at)}
+                </p>
+
+                {/* receipt_image_url è ora un signed URL generato dal backend */}
+                {claim.receipt_image_url && (
+                  <img
+                    src={claim.receipt_image_url}
+                    alt="Scontrino"
+                    style={{
+                      width: "100%",
+                      borderRadius: "12px",
+                      marginBottom: "12px",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                    }}
+                  />
+                )}
+
+                <div className={styles.resultActions}>
+                  <button
+                    type="button"
+                    className={styles.primaryBtnWide}
+                    onClick={() => {
+                      if (confirm("Approvare questo cashback?")) {
+                        handleReviewClaim(claim.id, "approve");
+                      }
+                    }}
+                  >
+                    ✅ Approva
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.cancelPaymentBtn}
+                    onClick={() => {
+                      if (confirm("Rifiutare questo cashback?")) {
+                        handleReviewClaim(claim.id, "reject");
+                      }
+                    }}
+                  >
+                    ❌ Rifiuta
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
 
       <section className={styles.formsGrid}>
         <form onSubmit={handleSearchCustomer} className={styles.panel}>
@@ -920,21 +962,17 @@ setAmount(String(newAmount.toFixed(2)));
             <span className={styles.panelBadge}>Lookup</span>
           </div>
 
-       <button
-         type="button"
-         className={styles.primaryBtnWide}
-         onClick={() => setShowWalletScanner(true)}
->
-        📷 Scansiona QR Wallet
-      </button>
+          <button
+            type="button"
+            className={styles.primaryBtnWide}
+            onClick={() => setShowWalletScanner(true)}
+          >
+            📷 Scansiona QR Wallet
+          </button>
 
-      
-      {showWalletScanner && (
-      <VoucherQrScanner
-       onScan={handleWalletQr}
-       onError={() => {}}
-       />
-       )}
+          {showWalletScanner && (
+            <VoucherQrScanner onScan={handleWalletQr} onError={() => {}} />
+          )}
 
           <div className={styles.fieldGroup}>
             <label className={styles.inputLabel}>Codice cliente</label>
@@ -943,7 +981,7 @@ setAmount(String(newAmount.toFixed(2)));
               value={customerCode}
               onChange={(e) => setCustomerCode(e.target.value)}
               className={styles.inputControl}
-              placeholder="Es. GUFO-915728"
+              placeholder="Es. GUFO-123456"
             />
           </div>
 
@@ -1084,87 +1122,83 @@ setAmount(String(newAmount.toFixed(2)));
             </div>
           )}
 
-{customer && previewAmount > 0 && (
-  <div className={styles.previewBox}>
-    <h4 className={styles.previewTitle}>Utilizzo GUFO</h4>
+          {customer && previewAmount > 0 && (
+            <div className={styles.previewBox}>
+              <h4 className={styles.previewTitle}>Utilizzo GUFO</h4>
 
-    <div className={styles.previewGrid}>
-      <div className={styles.previewRow}>
-        <span>Saldo GUFO cliente</span>
-        <strong>
-          {toNumberSafe(customer.balance_gufo).toFixed(2)}
-        </strong>
-      </div>
+              <div className={styles.previewGrid}>
+                <div className={styles.previewRow}>
+                  <span>Saldo GUFO cliente</span>
+                  <strong>{toNumberSafe(customer.balance_gufo).toFixed(2)}</strong>
+                </div>
 
-      <div className={styles.previewRow}>
-        <span>GUFO utilizzabili</span>
-        <strong>
-          {Math.min(
-            toNumberSafe(customer.balance_gufo),
-            previewAmount
-          ).toFixed(2)}
-        </strong>
-      </div>
+                <div className={styles.previewRow}>
+                  <span>GUFO utilizzabili</span>
+                  <strong>
+                    {Math.min(
+                      toNumberSafe(customer.balance_gufo),
+                      previewAmount
+                    ).toFixed(2)}
+                  </strong>
+                </div>
 
-      <div className={styles.previewRow}>
-        <span>Da pagare dopo GUFO</span>
-        <strong>
-          €
-          {Math.max(
-            0,
-            previewAmount -
-              Math.min(
-                toNumberSafe(customer.balance_gufo),
-                previewAmount
-              )
-          ).toFixed(2)}
-        </strong>
-      </div>
-    </div>
+                <div className={styles.previewRow}>
+                  <span>Da pagare dopo GUFO</span>
+                  <strong>
+                    €
+                    {Math.max(
+                      0,
+                      previewAmount -
+                        Math.min(
+                          toNumberSafe(customer.balance_gufo),
+                          previewAmount
+                        )
+                    ).toFixed(2)}
+                  </strong>
+                </div>
+              </div>
 
-    <button
-      type="button"
-      className={styles.primaryBtnWide}
-      disabled={gufoRedeemLoading}
-      onClick={handleRedeemGufo}
-    >
-      {gufoRedeemLoading
-        ? "Utilizzo GUFO..."
-        : "🦉 Usa GUFO"}
-    </button>
-  </div>
-)}
+              <button
+                type="button"
+                className={styles.primaryBtnWide}
+                disabled={gufoRedeemLoading}
+                onClick={handleRedeemGufo}
+              >
+                {gufoRedeemLoading ? "Utilizzo GUFO..." : "🦉 Usa GUFO"}
+              </button>
+            </div>
+          )}
 
           <button
-  type="submit"
-  disabled={
-    loadingPayment ||
-    !customer ||
-    !partnerUserId ||
-    toNumberSafe(amount) <= 0
-  }
-  className={styles.secondaryBtnWide}
->
-  {toNumberSafe(amount) <= 0
-    ? "Pagamento coperto dal voucher"
-    : loadingPayment
-    ? "Pagamento in corso..."
-    : "Conferma pagamento"}
-</button>
+            type="submit"
+            disabled={
+              loadingPayment ||
+              !customer ||
+              !partnerUserId ||
+              toNumberSafe(amount) <= 0
+            }
+            className={styles.secondaryBtnWide}
+          >
+            {toNumberSafe(amount) <= 0
+              ? "Pagamento coperto dal voucher"
+              : loadingPayment
+              ? "Pagamento in corso..."
+              : "Conferma pagamento"}
+          </button>
 
-{toNumberSafe(amount) <= 0 && voucherData && (
-  <div className={styles.successBox}>
-    ✅ Pagamento effettuato tramite voucher
-  </div>
-)}
+          {toNumberSafe(amount) <= 0 && voucherData && (
+            <div className={styles.successBox}>
+              ✅ Pagamento effettuato tramite voucher
+            </div>
+          )}
 
-{toNumberSafe(amount) <= 0 && voucherData && (
-  <div className={styles.infoBox}>
-    <p>Totale scontrino coperto dal voucher</p>
-    <p>Voucher usato: {voucherData.used_amount || "-"} GUFO</p>
-    <p>Residuo voucher: {voucherData.remaining_amount} GUFO</p>
-  </div>
-)}
+          {toNumberSafe(amount) <= 0 && voucherData && (
+            <div className={styles.infoBox}>
+              <p>Totale scontrino coperto dal voucher</p>
+              <p>Voucher usato: {voucherData.used_amount || "-"} GUFO</p>
+              <p>Residuo voucher: {voucherData.remaining_amount} GUFO</p>
+            </div>
+          )}
 
           {!customer && (
             <p className={styles.helperText}>
@@ -1255,19 +1289,14 @@ setAmount(String(newAmount.toFixed(2)));
       </section>
 
       {gufoRedeemResult?.success && (
-         <div className={styles.successBox}>
-         ✅ GUFO utilizzati
-
-         <br />
-
-        GUFO usati: {gufoRedeemResult.gufo_used}
-
-        <br />
-
-        Da pagare:
-        € {gufoRedeemResult.amount_to_pay_euro}
-       </div>
-       )}
+        <div className={styles.successBox}>
+          ✅ GUFO utilizzati
+          <br />
+          GUFO usati: {gufoRedeemResult.gufo_used}
+          <br />
+          Da pagare: € {gufoRedeemResult.amount_to_pay_euro}
+        </div>
+      )}
 
       {error && <div className={styles.errorBox}>{error}</div>}
 
